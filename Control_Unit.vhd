@@ -43,6 +43,8 @@ BEGIN
 					END IF;
 				
 				WHEN ReadState =>
+					--PORT MAP Status Read
+					
 					-- Envia dados pro TM_Buffer
 					-- No TM_Buffer compara endereço com todos endereços salvos
 					

@@ -28,6 +28,7 @@ BEGIN
 			
 		ELSIF (Mode = "11") THEN
 			Status <= ConflictFlag(TrID);
+			--Esse Status poderia ficar fora do process, de forma que ele sempre vai atualizar o Retorno automaticamente?
 			
 		END IF;
 	END PROCESS;

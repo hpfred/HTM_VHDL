@@ -64,4 +64,25 @@ BEGIN
 	--Quando ele tiver informado ao processador a falha do commit tem que lembrar de zerar o indicador externo de abort
 	--Ele também irá infromar ao processador o sucesso do commit após ter feito a atualização completa da memória principal
 	
+	
+	PROCESS (Clock)
+	BEGIN
+		
+		IF (Status = "Read" OR Status = "Write") THEN
+			--PORT MAP Conflict_Buffer TrID Ret		--Verifica se transação zumbi
+			--Esse retorno só vai atualizar no pulso de clock, então preciso ver de mudar o funcionamento
+			IF (Ret = '0') THEN		--Queria fazer a lógica inversa, com Ret = 1 dar break, pra não precisar colocar tudo dentro de if e if, mas percebi que não dá (a principio)
+				--FindNonValid: FOR i IN (X DOWNTO 0) LOOP
+				FindNonValid: FOR i IN (0 TO X) LOOP
+					IF (MemStorage(i) = '0') THEN
+						EXIT FindNonValid;
+					END IF;
+				END LOOP FindNonValid;
+
+				
+			END IF;
+		END IF;
+		
+	END PROCESS;
+	
 END SharedData;
