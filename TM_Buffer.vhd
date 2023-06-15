@@ -61,9 +61,4 @@ BEGIN
 	--Quando ele tiver informado ao processador a falha do commit tem que lembrar de zerar o indicador externo de abort
 	--Ele também irá infromar ao processador o sucesso do commit após ter feito a atualização completa da memória principal
 	
-	--??
-	--A fila de endereços guarda os endereços de todas transações, mas ele tem uma fila diferente pra cada transação?
-	--Se sim (oq agora estou imaginando q sim, mas o artigo n tava claro, dizia para todas transações mas me parecia q seria a msm fila), isso complica ainda mais a implementação, 
-	--pq tenho q definir n só o tamanho arbitrário máximo da fila, também tenho q definir o limite arbitrário de máximo de transações (além dos tamanhos máximos arbitrários que já tive que definir antes como o tamanho máximo do buffer e número máximo de processadores/cores)
-	
 END SharedData;

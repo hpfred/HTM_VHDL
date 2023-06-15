@@ -9,7 +9,7 @@ ENTITY Control_Unit IS
 		MemAddress:		IN STD_LOGIC_VECTOR (7 DOWNTO 0);	--Endereço de 8 bits (Limite de 256 endereços)
 		Data:				IN STD_LOGIC_VECTOR (7 DOWNTO 0);	--8 bits de Dado
 		ProcID:			IN STD_LOGIC_VECTOR (1 DOWNTO 0);	--Limite de 4 Cores/Processadores
-		TransactionID	IN STD_LOGIC_VECTOR (3 DOWNTO 0);	--Limite de 16 transações (4 por processador parece um limite válido)
+		TransactionID:	IN STD_LOGIC_VECTOR (3 DOWNTO 0);	--Limite de 16 transações (4 por processador parece um limite válido)
 		
 		TransactionStatus:	OUT STD_LOGIC_VECTOR (X DOWNTO 0);		--X status do HTM_Core que informam o processador e/ou outros módulos(?)
 																						--(OnRead, OnWrite, OnAbort, OnCommit, CommitFail, CommitSucc)?
