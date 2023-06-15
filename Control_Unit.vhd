@@ -5,15 +5,16 @@ USE IEEE.STD_LOGIC_UNSIGNED.ALL;
 ENTITY Control_Unit IS
 	PORT
 	(
-		Action:			IN STD_LOGIC_VECTOR ();
-		MemAddress:		IN ;
-		Data:				IN ;
-		ProcID:			IN ;
-		TransactionID	IN ;
+		Action:			IN STD_LOGIC_VECTOR (1 DOWNTO 0);	--3 ações possíveis de receber do processador (Read, Write, Commit)
+		MemAddress:		IN STD_LOGIC_VECTOR (7 DOWNTO 0);	--Endereço de 8 bits (Limite de 256 endereços)
+		Data:				IN STD_LOGIC_VECTOR (7 DOWNTO 0);	--8 bits de Dado
+		ProcID:			IN STD_LOGIC_VECTOR (1 DOWNTO 0);	--Limite de 4 Cores/Processadores
+		TransactionID	IN STD_LOGIC_VECTOR (3 DOWNTO 0);	--Limite de 16 transações (4 por processador parece um limite válido)
 		
-		TransactionStatus:	OUT ;
+		TransactionStatus:	OUT STD_LOGIC_VECTOR (X DOWNTO 0);		--X status do HTM_Core que informam o processador e/ou outros módulos(?)
+																						--(OnRead, OnWrite, OnAbort, OnCommit, CommitFail, CommitSucc)?
 		
-		Reset:	IN STD_LOGIC;
+		Reset:	IN STD_LOGIC;		--Não sei se precisa de Reset nesse use-case pra ser honesto
 		Clock:	IN STD_LOGIC
 	);
 END ENTITY Control_Unit;	
@@ -37,8 +38,12 @@ BEGIN
 				WHEN IdleState =>
 					IF (ReadCmd) THEN
 						NextStateIs <= ReadState;
-					--ELSIF () THEN
-					--etc etc
+					ELSIF (WriteCmd) THEN
+						NextStateIs <= WriteState;
+					ELSIF (AbortCmd) THEN
+						NextStateIs <= AbortState;
+					ELSIF (CommitCmd) THEN
+						NextStateIs <= CommitState;
 					END IF;
 				
 				-- TM_Buffer é um array de vetores de estrutura tipo: 0 00000000 [00 00 00 00] 00000000

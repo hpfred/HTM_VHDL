@@ -6,6 +6,8 @@ ENTITY TM_Buffer IS
 	PORT
 	(
 		tipos: IN ;
+		
+		Clock:	IN STD_LOGIC
 	);
 END ENTITY TM_Buffer;
 
