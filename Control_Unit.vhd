@@ -11,10 +11,8 @@ ENTITY Control_Unit IS
 		ProcID:			IN STD_LOGIC_VECTOR (1 DOWNTO 0);	--Limite de 4 Cores/Processadores
 		TransactionID:	IN STD_LOGIC_VECTOR (3 DOWNTO 0);	--Limite de 16 transações (4 por processador parece um limite válido)
 		
-		TransactionStatus:	OUT STD_LOGIC_VECTOR (X DOWNTO 0);		--X status do HTM_Core que informam o processador e/ou outros módulos(?)
-																						--(OnRead, OnWrite, OnAbort, OnCommit, CommitFail, CommitSucc)?
+		TransactionStatus:	OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--6 status do HTM_Core que informam o processador -(OnRead, OnWrite, OnAbort, OnCommit, CommitFail, CommitSucc)? -Talvez seja interessante só o resultado de Commit?
 		
-		Reset:	IN STD_LOGIC;		--Não sei se precisa de Reset nesse use-case pra ser honesto
 		Clock:	IN STD_LOGIC
 	);
 END ENTITY Control_Unit;	
@@ -26,15 +24,13 @@ SIGNAL CurrStateIs, NextStateIs: STATE_TYPE;
 
 BEGIN
 
-	PROCESS (Reset, Clock)
+	PROCESS (Clock)
 	BEGIN
-		IF (Reset = '1') THEN
-			CurrStateIs <= IdleState;
-		ELSIF (Clock'EVENT AND Clock = '1') THEN
+		IF (Clock'EVENT AND Clock = '1') THEN
 			CurrStateIs <= NextStateIs;
-		--Tenho que verificar: O Case precisa estar dentro desse IF?
+		--Tenho que verificar: O Case precisa estar dentro desse IF? -Problema que posso ter é que ele vai repetir duas vezes, ao invés de só na borda de subida
 		
-			CASE estado_atual IS
+			CASE CurrStateIs IS
 				WHEN IdleState =>
 					IF (ReadCmd) THEN
 						NextStateIs <= ReadState;
@@ -45,13 +41,6 @@ BEGIN
 					ELSIF (CommitCmd) THEN
 						NextStateIs <= CommitState;
 					END IF;
-				
-				-- TM_Buffer é um array de vetores de estrutura tipo: 0 00000000 [00 00 00 00] 00000000
-				-- 																	| |			|				 |
-				-- 																	| |			|				 Data
-				-- 																	| |			Read_Write (Fixo somente 4 processadores)
-				-- 																	| Addres
-				-- 																	Valid
 				
 				WHEN ReadState =>
 					-- Envia dados pro TM_Buffer
@@ -67,6 +56,8 @@ BEGIN
 				WHEN AbortState =>
 				
 				WHEN CommitState =>
+					--Abort false >> MemoryUpdateState
+					--Abort true >> Idle & CommitFail
 				
 				WHEN MemoryUpdateState =>
 				

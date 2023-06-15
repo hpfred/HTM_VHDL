@@ -1,3 +1,9 @@
+-- TM_Buffer é um array de vetores de estrutura tipo: 0 00000000 [00 00 00 00] 00000000
+-- 																	| |			|				 |
+-- 																	| |			|				 Data
+-- 																	| |			Read_Write (Fixo somente 4 processadores)
+-- 																	| Address
+-- 																	Valid
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 USE IEEE.STD_LOGIC_UNSIGNED.ALL;
@@ -5,22 +11,18 @@ USE IEEE.STD_LOGIC_UNSIGNED.ALL;
 ENTITY TM_Buffer IS
 	PORT
 	(
-		tipos: IN ;
+		MemAddress:		IN STD_LOGIC_VECTOR (7 DOWNTO 0);
+		Data:				IN STD_LOGIC_VECTOR (7 DOWNTO 0);
+		ProcID:			IN STD_LOGIC_VECTOR (1 DOWNTO 0);
+		TransactionID:	IN STD_LOGIC_VECTOR (3 DOWNTO 0);
+		Status:			IN STD_LOGIC_VECTOR (2 DOWNTO 0);		--Qual o estado atual da FSM > 000: Idle, 001: Read, 010: Write, 011: Abort, 100: Commit, 101: MemUpdate
 		
 		Clock:	IN STD_LOGIC
 	);
 END ENTITY TM_Buffer;
 
-				-- TM_Buffer é um array de vetores de estrutura tipo: 0 00000000 [00 00 00 00] 00000000
-				-- 																	| |			|				 |
-				-- 																	| |			|				 Data
-				-- 																	| |			Read_Write (Fixo somente 4 processadores)
-				-- 																	| Address
-				-- 																	Valid
-
 --X aqui tá representando o tamanho do buffer (quanto ao numero de endereços de memória diferentes podem ser armazenados nele)
 ARCHITECTURE  SharedData OF TM_Buffer IS
---TYPE ALL_DATA IS ARRAY (X DOWNTO 0, 25 DOWNTO 0) OF STD_LOGIC;
 TYPE DATA_LINE IS ARRAY (25 DOWNTO 0) OF STD_LOGIC;
 TYPE ALL_DATA IS ARRAY (X DOWNTO 0) OF DATA_LINE;
 SIGNAL MemStorage: ALL_DATA; --Inicializa tudo zerado
@@ -29,7 +31,7 @@ TYPE RW_SET IS ARRAY (3 DOWNTO 0) OF STD_LOGIC_VECTOR (1 DOWNTO 0);
 SIGNAL ReadWriteSet: RW_SET;
 
 SIGNAL BufferAddress: STD_LOGIC_VECTOR (X DOWNTO 0);
-SIGNAL ProcID: STD_LOGIC_VECTOR (1 DOWNTO 0); --Integer?
+SIGNAL ProcID: STD_LOGIC_VECTOR (1 DOWNTO 0);
 
 BEGIN
 	--Não sei se acessar endereço do array dessa forma funciona (até já tava assumindo que não), mas to colocando assim pra estruturar a lógica de como vou fazer este módulo
@@ -42,6 +44,7 @@ BEGIN
 	MemStorage(BufferAddress, 8 DOWNTO 0) <= Data;
 	
 	--Ok, se ele recebe as informações todas aqui oq vai ser feito?
+-- Tenho que ver de talvez o primeiro passo ser verificar com o Conflict Buffer se a Transação é zumbi
 	--Primeiro faz um varrimento do Buffer Address de 0 até o fim, ou até encontrar o primeiro Valid Flag 0
 	--Nesse primeiro varrimento ele compara o endereço recebido com os endereços de armazenados, se ele encontrar um caso de igualdade isso será um Hit, se concluir sem Hit será um Miss (posteriormente terei que tratar de causar erro/abort para Miss em memória cheia)
 	--No acontecimento de Miss, ele pega o valor onde parou por encontrar Valid Flag 0 e preenche (validflag=1, address=addres, (procid, read or write)=1, data=data)

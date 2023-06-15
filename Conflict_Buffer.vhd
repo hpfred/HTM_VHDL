@@ -2,14 +2,33 @@ LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 USE IEEE.STD_LOGIC_UNSIGNED.ALL;
 
-ENTITY Memes IS
+ENTITY Conflict_Buffer IS
 	PORT
 	(
-		tipos: IN ;
+		TrID:		IN STD_LOGIC_VECTOR (3 DOWNTO 0);
+		Mode:		IN STD_LOGIC_VECTOR (1 DOWNTO 0);		--00: Idle, 01: Set, 10: Reset, 11: Return
+		
+		Status:	OUT STD_LOGIC;
+		
+		Clock:	IN STD_LOGIC
 	);
-END ENTITY Memes;
+END ENTITY Conflict_Buffer;
 
-ARCHITECTURE  Carinhas OF Memes IS
+ARCHITECTURE  Flags OF Conflict_Buffer IS
+SIGNAL ConflictFlag: STD_LOGIC_VECTOR (3 DOWNTO 0);
+
 BEGIN
-
-END Carinhas;
+	PROCESS (Clock)
+	BEGIN
+		IF (Mode = "01") THEN
+			ConflictFlag(TrID) <= '1';
+			
+		ELSIF (Mode = "10") THEN
+			ConflictFlag(TrID) <= '0';
+			
+		ELSIF (Mode = "11") THEN
+			Status <= ConflictFlag(TrID);
+			
+		END IF;
+	END PROCESS;
+END Flags;
