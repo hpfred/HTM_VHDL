@@ -35,7 +35,7 @@ BEGIN
 		
 			CASE estado_atual IS
 				WHEN IdleState =>
-					IF (Read = '1') THEN
+					IF (ReadCmd) THEN
 						NextStateIs <= ReadState;
 					--ELSIF () THEN
 					--etc etc
@@ -48,10 +48,10 @@ BEGIN
 				-- 																	| Addres
 				-- 																	Valid
 				
-				-- Ao invés de ter um módulo Inter Conflict Flag eu poderia fazer uma flag no próprio TM buffer?
-				-- Não
-				
 				WHEN ReadState =>
+					-- Envia dados pro TM_Buffer
+					-- No TM_Buffer compara endereço com todos endereços salvos
+					
 				--Verifica se endereço já existe no TM buffer
 				--Se não existe procura primeiro array com valid flag zerado e preenche
 				--Se sim ele atualiza os valores
