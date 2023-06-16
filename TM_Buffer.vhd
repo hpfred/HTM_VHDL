@@ -35,7 +35,7 @@ SIGNAL BufferAddress: STD_LOGIC_VECTOR (X DOWNTO 0);
 SIGNAL ProcID: STD_LOGIC_VECTOR (1 DOWNTO 0);
 SIGNAL FrstNonValid: INTEGER;
 SIGNAL CurrAddr: INTEGER;
-SIGNAL HitFlag: STD_LOGIC;
+SIGNAL HitFlag, AbortFlag: STD_LOGIC := '0';
 
 BEGIN
 	
@@ -68,7 +68,7 @@ BEGIN
 	PROCESS (Clock)
 	BEGIN
 		
-		IF (Status = "Read" OR Status = "Write") THEN
+		IF (Status = "Read" OR Status = "Write") THEN		--Aqui tenho que mudar pra como o Status realmente vem
 			--PORT MAP Conflict_Buffer TrID Ret
 			--Esse retorno só vai atualizar no pulso de clock, então preciso ver de mudar o funcionamento
 			IF (Ret = '0') THEN
@@ -112,32 +112,44 @@ BEGIN
 						FOR i IN (0 TO 3) LOOP
 							IF (ReadWriteSet(i,1) = '1' AND ProcID /= i) THEN
 								--Marca flag de conflito do Processador ProcID
-								--Marca flag abort
+								AbortFlag <= '1';
 							END IF;
 						END LOOP;
 						
-						--IF (Abort Flag false)
-						--Atualiza no Buffer (e guarda na fila?)
+						IF (AbortFlag = '0') THEN
+							--Atualiza no Buffer (e guarda na fila?)
+							--Essa parte do RWSet especificamente eu acho que já dava pra ter atualizado antes até, pq vai ser atualizado em todas situações (até no abort dele mesmo, pq dps o AbortState é quem vai esvaziar isso)
+							ReadWriteSet <= MemBuffer(CurrAddr, , 15 DOWNTO 8);
+							ReadWriteSet(ProcID, 0) <=  (Status = '010');
+							ReadWriteSet(ProcID, 1) <=  (Status = '011');
+							MemBuffer(CurrAddr, 15 DOWNTO 8) <= ReadWriteSet;
+							
+							--Guarda na fila?
+						END IF;
 						
 					ELSIF (Status = '011') THEN
 						FOR i IN (0 TO 3) LOOP
 							IF (ReadWriteSet(i) /= '00' AND ProcID /= i) THEN
 								--Marca flag de conflito do Processador i
-								--Marca flag abort
+								AbortFlag <= '1';
 							END IF;
 						END LOOP;
 						
 						--Atualiza no Buffer (e guarda na fila?)
+						ReadWriteSet <= MemBuffer(CurrAddr, , 15 DOWNTO 8);
+						ReadWriteSet(ProcID, 0) <=  (Status = '010');		--Se eu quisesse fazer direto precisaria fazer algo tipo 15-(ProcID*2)
+						ReadWriteSet(ProcID, 1) <=  (Status = '011');		--																	  e	15-(ProcID*2)-1
+						MemBuffer(CurrAddr, 15 DOWNTO 8) <= ReadWriteSet;
+						MemBuffer(CurrAddr, 7 DOWNTO 0) <= Data;
+						
+						--Guarda na fila?
 						
 					END IF;
-					
-					---No Buffer Hit não posso me esquecer de depois atualizar a linha do buffer
-					--SE não for abort de leitura
-					
 				END IF;
-
-				
 			END IF;
+			
+		--ELSIF (Status = "Abort") THEN
+		--ELSIF (Status = "MemUpdate") THEN
 		END IF;
 		
 	END PROCESS;

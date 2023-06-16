@@ -47,14 +47,24 @@ BEGIN
 					--IF RetStat HIT/MISS >> IdleState
 				
 				WHEN WriteState =>
+					--Mesma coisa que read
 				
 				WHEN AbortState =>
+					--Informa o TM Buffer que está em status de abort, e o endereço de memória
+					--No TM buffer ele vai consultar o conflict buffer daquele endereço quais processadores estão em conflito e executar a sequencia de abort (limpando/atualizando o buffer)
+					--Ao fim retorna ao Idle State
 				
 				WHEN CommitState =>
+					--Verifica no Conflict Buffer o status de abort do processador
+					--Eu to agora é voltando um pouco a questionar a diferenciação da transações e processadores nessa implementação, mas vou ver melhor mais tarde, quando tudo estiver mais avançado
 					--Abort false >> MemoryUpdateState
 					--Abort true >> Idle & CommitFail
 				
 				WHEN MemoryUpdateState =>
+					--Informa o TM buffer que está em status de atualizar, e passa qual a transação
+					--No TM buffer ele vai chamando da fila (da transação especifica) um por um, achando o endereço retornado no buffer e passando o dado guardado à memória principal
+					--e simultaneamente limpando/atualizando o buffer
+					--E no fim ele retorna um Status de Commit bem sucedido
 				
 			END CASE;
 		END IF;
