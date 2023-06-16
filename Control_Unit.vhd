@@ -44,14 +44,7 @@ BEGIN
 				
 				WHEN ReadState =>
 					--PORT MAP Status Read
-					
-					-- Envia dados pro TM_Buffer
-					-- No TM_Buffer compara endereço com todos endereços salvos
-					
-				--Verifica se endereço já existe no TM buffer
-				--Se não existe procura primeiro array com valid flag zerado e preenche
-				--Se sim ele atualiza os valores
-				--Ao acontecer um 'cache' hit (já existe), ele precisa verificar conflito
+					--IF RetStat HIT/MISS >> IdleState
 				
 				WHEN WriteState =>
 				

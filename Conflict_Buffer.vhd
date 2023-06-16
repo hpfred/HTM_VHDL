@@ -18,7 +18,7 @@ ARCHITECTURE  Flags OF Conflict_Buffer IS
 SIGNAL ConflictFlag: STD_LOGIC_VECTOR (3 DOWNTO 0);
 
 BEGIN
-	PROCESS (Clock)
+	PROCESS (Clock) --Mode e TrID ao invés de Clock?
 	BEGIN
 		IF (Mode = "01") THEN
 			ConflictFlag(TrID) <= '1';
