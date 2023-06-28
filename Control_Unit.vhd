@@ -24,11 +24,13 @@ SIGNAL CurrStateIs, NextStateIs: STATE_TYPE;
 
 BEGIN
 
-	PROCESS (Clock)
+	PROCESS (Clock, Reset)
 	BEGIN
-		IF (Clock'EVENT AND Clock = '1') THEN
+		IF (Reset = '1') THEN
+			--Adicionar de volta um sinal de reset --Adicionar agora o comportamento do reset
+		
+		ELSIF (Clock'EVENT AND Clock = '1') THEN
 			CurrStateIs <= NextStateIs;
-		--Tenho que verificar: O Case precisa estar dentro desse IF? -Problema que posso ter é que ele vai repetir duas vezes, ao invés de só na borda de subida
 		
 			CASE CurrStateIs IS
 				WHEN IdleState =>

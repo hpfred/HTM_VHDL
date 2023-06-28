@@ -29,13 +29,13 @@ TYPE ALL_DATA IS ARRAY (X DOWNTO 0) OF DATA_LINE;
 SIGNAL MemBuffer: ALL_DATA;		--Inicializa tudo zerado
 
 TYPE RW_SET IS ARRAY (3 DOWNTO 0) OF STD_LOGIC_VECTOR (1 DOWNTO 0);
-SIGNAL ReadWriteSet: RW_SET;
+--SIGNAL ReadWriteSet: RW_SET;
 
 SIGNAL BufferAddress: STD_LOGIC_VECTOR (X DOWNTO 0);
 SIGNAL ProcID: STD_LOGIC_VECTOR (1 DOWNTO 0);
-SIGNAL FrstNonValid: INTEGER;
-SIGNAL CurrAddr: INTEGER;
-SIGNAL HitFlag, AbortFlag: STD_LOGIC := '0';
+--SIGNAL FrstNonValid: INTEGER;
+--SIGNAL CurrAddr: INTEGER;
+--SIGNAL HitFlag, AbortFlag: STD_LOGIC := '0';
 
 BEGIN
 	
@@ -66,31 +66,37 @@ BEGIN
 	
 	--Y = (X+1)*(X+1)
 	PROCESS (Clock)
+		VARIABLE ReadWriteSet: RW_SET;
+		VARIABLE FrstNonValid: INTEGER := 2147483647;
+		VARIABLE CurrAddr: INTEGER;
+		VARIABLE HitFlag, AbortFlag: STD_LOGIC := '0';
 	BEGIN
 		
-		IF (Status = "Read" OR Status = "Write") THEN		--Aqui tenho que mudar pra como o Status realmente vem
+		IF (Status = '010' OR Status = '011') THEN		--Se Status é Read ou Write
 			--PORT MAP Conflict_Buffer TrID Ret
 			--Esse retorno só vai atualizar no pulso de clock, então preciso ver de mudar o funcionamento
+			--Uma das soluções que eu poderia fazer é o status retornado n ser somente a flag de conflito, e sim ser o id da transação com o primeiro bit sendo o flag, assim garantindo que a execução só prossiga quando o request for respondido apropriadamente
 			IF (Ret = '0') THEN
 				FOR CurrAddr IN (0 TO Y) LOOP
-					IF (MemBuffer(i, 24) = '0') THEN
-						FrstNonValid <= CurrAddr;		--Meu medo é aqui ele se comportar como passagem de ponteiro e não de valor, e por isso cada atualização do CurrAddr mudar tbm FrstNonValid
-						HitFlag <= '0';
+					IF (MemBuffer(i, 24) = '0' AND FrstNonValid > CurrAddr) THEN
+						FrstNonValid := CurrAddr;
+						HitFlag := '0';
 					END IF;
 					
 					IF (MemBuffer(i, (23 DOWNTO 16)) = MemAddress) THEN
-						HitFlag <= '1';
+						HitFlag := '1';
 						EXIT;
 					END IF;
 				END LOOP;
 				--IF (CurrAddr = Y) THEN OVERFLOW.MISS
+				--Estou desconsiderando no momento a possibilidade de overflow
 				
 				IF (HitFlag = '0') THEN		--Buffer Miss
 					MemBuffer(CurrAddr, 24) <= '1';
 					MemBuffer(CurrAddr, 23 DOWNTO 16) <= MemAddress;
-					ReadWriteSet <= MemBuffer(CurrAddr, , 15 DOWNTO 8);
-					ReadWriteSet(ProcID, 0) <=  (Status = '010');		--Se eu quisesse fazer direto precisaria fazer algo tipo 15-(ProcID*2)
-					ReadWriteSet(ProcID, 1) <=  (Status = '011');		--																	  e	15-(ProcID*2)-1
+					ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
+					ReadWriteSet(ProcID, 0) :=  (Status = '010');		--Se eu quisesse fazer direto precisaria fazer algo tipo 15-(ProcID*2)		--Repensando eu não acho que isso vai funcionar, mas vou ter que confirmar depois
+					ReadWriteSet(ProcID, 1) :=  (Status = '011');		--																	  e	15-(ProcID*2)-1
 					MemBuffer(CurrAddr, 15 DOWNTO 8) <= ReadWriteSet;
 					MemBuffer(CurrAddr, 7 DOWNTO 0) <= Data;
 					
@@ -104,41 +110,45 @@ BEGIN
 					--Tem que ignorar o RWSet do Processador Atacante
 					--Atk 00
 					--Def 00 00 00
-					ReadWriteSet <= MemBuffer(CurrAddr, , 15 DOWNTO 8);
+					ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
 					--Atk = (Status = '010') e (Status = '011')
 					--Def = RWSet - RWSet(ProcID)
 					
-					IF (Status = '010') THEN
+					IF (Status = '010') THEN	--Read
 						FOR i IN (0 TO 3) LOOP
 							IF (ReadWriteSet(i,1) = '1' AND ProcID /= i) THEN
 								--Marca flag de conflito do Processador ProcID
-								AbortFlag <= '1';
+								AbortFlag := '1';
 							END IF;
 						END LOOP;
 						
 						IF (AbortFlag = '0') THEN
 							--Atualiza no Buffer (e guarda na fila?)
 							--Essa parte do RWSet especificamente eu acho que já dava pra ter atualizado antes até, pq vai ser atualizado em todas situações (até no abort dele mesmo, pq dps o AbortState é quem vai esvaziar isso)
-							ReadWriteSet <= MemBuffer(CurrAddr, , 15 DOWNTO 8);
-							ReadWriteSet(ProcID, 0) <=  (Status = '010');
-							ReadWriteSet(ProcID, 1) <=  (Status = '011');
+							ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
+							ReadWriteSet(ProcID, 0) :=  (Status = '010');
+							ReadWriteSet(ProcID, 1) :=  (Status = '011');
 							MemBuffer(CurrAddr, 15 DOWNTO 8) <= ReadWriteSet;
 							
 							--Guarda na fila?
 						END IF;
+						--E se aboort flag por 1? O abortflag é atualizado no conflict_Buffer, porém isso pode ser feito dentro do próprio for tbm
 						
-					ELSIF (Status = '011') THEN
+					ELSIF (Status = '011') THEN	--Write --Aqui poderia ser somente else
 						FOR i IN (0 TO 3) LOOP
 							IF (ReadWriteSet(i) /= '00' AND ProcID /= i) THEN
 								--Marca flag de conflito do Processador i
-								AbortFlag <= '1';
+								AbortFlag := '1';
+								--Pode havar o caso de manipular o Conflict_Buffer de mais de um ProcID em um unico clock, então teria que ver o método melhor
+								--Se for precisar fazer em clocks diferentes tenho que rever isso
+								--Se for tentar em um unico clock oq eu posso fazer é sensitividade por modo, e trocar pra set no inicio e idle ao fim
 							END IF;
 						END LOOP;
 						
 						--Atualiza no Buffer (e guarda na fila?)
-						ReadWriteSet <= MemBuffer(CurrAddr, , 15 DOWNTO 8);
-						ReadWriteSet(ProcID, 0) <=  (Status = '010');		--Se eu quisesse fazer direto precisaria fazer algo tipo 15-(ProcID*2)
-						ReadWriteSet(ProcID, 1) <=  (Status = '011');		--																	  e	15-(ProcID*2)-1
+						ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
+						ReadWriteSet(ProcID, 0) :=  (Status = '010');		--Se eu quisesse fazer direto precisaria fazer algo tipo 15-(ProcID*2)
+						ReadWriteSet(ProcID, 1) :=  (Status = '011');		--																	  e	15-(ProcID*2)-1
 						MemBuffer(CurrAddr, 15 DOWNTO 8) <= ReadWriteSet;
 						MemBuffer(CurrAddr, 7 DOWNTO 0) <= Data;
 						

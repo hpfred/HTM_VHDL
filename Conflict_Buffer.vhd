@@ -20,6 +20,9 @@ SIGNAL ConflictFlag: STD_LOGIC_VECTOR (3 DOWNTO 0);
 BEGIN
 	PROCESS (Clock) --Mode e TrID ao invés de Clock?
 	BEGIN
+	
+		--Quando no estado Read e Write ele sempre vai ser somente retorno, e de uma transação especifica, então o "request" poderia ser feito com antencedencia, correto?
+	
 		IF (Mode = "01") THEN
 			ConflictFlag(TrID) <= '1';
 			
