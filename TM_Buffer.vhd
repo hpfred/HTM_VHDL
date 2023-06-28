@@ -15,9 +15,12 @@ ENTITY TM_Buffer IS
 		Data:				IN STD_LOGIC_VECTOR (7 DOWNTO 0);
 		ProcID:			IN STD_LOGIC_VECTOR (1 DOWNTO 0);
 		TransactionID:	IN STD_LOGIC_VECTOR (3 DOWNTO 0);
-		Status:			IN STD_LOGIC_VECTOR (2 DOWNTO 0);		--Qual o estado atual da FSM > 000: Idle, 001: Read, 010: Write, 011: Abort, 100: Commit, 101: MemUpdate
 		
-		RetStatus:		OUT STD_LOGIC_VECTOR ();					--Hit ou Miss, Abort?
+		CUStatus:		IN STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: Idle, 001: Read, 010: Write, 011: Abort, 100: Commit, 101: MemUpdate
+		
+		BuffStatus:		OUT STD_LOGIC_VECTOR (1 DOWNTO 0);		--00: Undefined, 01: Hit, 10: Miss, 11: Abort
+		AbortStatus:	OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--00: Non Abort, 01: Internal Abort, 10: External Abort, 11: Error
+		--Aborted:			OUT STD_LOGIC_VECTOR (3 DOWNTO 0);		--Assert nos bits equivalentes do ProcID que foi abortado
 		
 		Clock:	IN STD_LOGIC
 	);
@@ -147,8 +150,8 @@ BEGIN
 						
 						--Atualiza no Buffer (e guarda na fila?)
 						ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
-						ReadWriteSet(ProcID, 0) :=  (Status = '010');		--Se eu quisesse fazer direto precisaria fazer algo tipo 15-(ProcID*2)
-						ReadWriteSet(ProcID, 1) :=  (Status = '011');		--																	  e	15-(ProcID*2)-1
+						ReadWriteSet(ProcID, 0) :=  (Status = '010');
+						ReadWriteSet(ProcID, 1) :=  (Status = '011');
 						MemBuffer(CurrAddr, 15 DOWNTO 8) <= ReadWriteSet;
 						MemBuffer(CurrAddr, 7 DOWNTO 0) <= Data;
 						
@@ -158,8 +161,8 @@ BEGIN
 				END IF;
 			END IF;
 			
-		--ELSIF (Status = "Abort") THEN
-		--ELSIF (Status = "MemUpdate") THEN
+		ELSIF (CUStatus = '100') THEN		--Se Status é abort
+		ELSIF (CUStatus = '101') THEN		--Se Status é MemUpdate
 		END IF;
 		
 	END PROCESS;
