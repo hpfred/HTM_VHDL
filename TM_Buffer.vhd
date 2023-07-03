@@ -9,6 +9,14 @@ USE IEEE.STD_LOGIC_1164.ALL;
 USE IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 ENTITY TM_Buffer IS
+	--Forma de basicamente dar um define no X do tamanho do buffer
+	--ENTITY regn IS
+	--GENERIC ( N	: INTEGER := 16);
+	--PORT (	D	: IN STD_LOGIC_VECTOR (N-1 DOWNTO 0);
+ 	--	reset, clock	: IN STD_LOGIC;
+	--	Q	: OUT STD_LOGIC_VECTOR (N-1 DOWNTO 0) );
+	--END regn;
+
 	PORT
 	(
 		MemAddress:		IN STD_LOGIC_VECTOR (7 DOWNTO 0);
@@ -27,8 +35,9 @@ ENTITY TM_Buffer IS
 END ENTITY TM_Buffer;
 
 ARCHITECTURE  SharedData OF TM_Buffer IS
-TYPE DATA_LINE IS ARRAY (24 DOWNTO 0) OF STD_LOGIC;
-TYPE ALL_DATA IS ARRAY (X DOWNTO 0) OF DATA_LINE;
+--TYPE DATA_LINE IS ARRAY (24 DOWNTO 0) OF STD_LOGIC; 
+--TYPE ALL_DATA IS ARRAY (X DOWNTO 0) OF DATA_LINE; 
+TYPE ALL_DATA IS ARRAY (X DOWNTO 0) OF STD_LOGIC_VECTOR (24 DOWNTO 0);
 SIGNAL MemBuffer: ALL_DATA;		--Inicializa tudo zerado
 
 TYPE RW_SET IS ARRAY (3 DOWNTO 0) OF STD_LOGIC_VECTOR (1 DOWNTO 0);
@@ -74,6 +83,7 @@ BEGIN
 		VARIABLE CurrAddr: INTEGER;
 		VARIABLE HitFlag, AbortFlag: STD_LOGIC := '0';
 	BEGIN
+		--reset : std_logic_vector(N downto 0) <= (others => '0')
 		
 		IF (Status = '010' OR Status = '011') THEN		--Se Status é Read ou Write
 			--PORT MAP Conflict_Buffer TrID Ret
@@ -98,7 +108,7 @@ BEGIN
 					MemBuffer(CurrAddr, 24) <= '1';
 					MemBuffer(CurrAddr, 23 DOWNTO 16) <= MemAddress;
 					ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
-					ReadWriteSet(ProcID, 0) :=  (Status = '010');		--Se eu quisesse fazer direto precisaria fazer algo tipo 15-(ProcID*2)		--Repensando eu não acho que isso vai funcionar, mas vou ter que confirmar depois
+					ReadWriteSet(ProcID, 0) :=  (Status = "010");		--Se eu quisesse fazer direto precisaria fazer algo tipo 15-(ProcID*2)		--Repensando eu não acho que isso vai funcionar, mas vou ter que confirmar depois
 					ReadWriteSet(ProcID, 1) :=  (Status = '011');		--																	  e	15-(ProcID*2)-1
 					MemBuffer(CurrAddr, 15 DOWNTO 8) <= ReadWriteSet;
 					MemBuffer(CurrAddr, 7 DOWNTO 0) <= Data;
