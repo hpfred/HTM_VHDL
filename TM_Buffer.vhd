@@ -20,12 +20,9 @@ ENTITY TM_Buffer IS
 		
 		ConfBufMode:	OUT STD_LOGIC_VECTOR (1 DOWNTO 0);
 		ConfBufTrID:	OUT STD_LOGIC_VECTOR (1 DOWNTO 0);
-		ConfBufStatus:	IN STD_LOGIC;
+		ConfBufStatus:	IN STD_LOGIC_VECTOR (1 DOWNTO 0);
 		
-		BuffStatus:		OUT STD_LOGIC_VECTOR (1 DOWNTO 0);		--00: Undefined, 01: Hit, 10: Miss, 11: Abort
-		--AbortStatus:	OUT STD_LOGIC_VECTOR (1 DOWNTO 0);		--00: Non Abort, 01: Internal Abort, 10: External Abort, 11: Error
-		--AbortStatus:	OUT STD_LOGIC;									--0: Non Abort, 1: Internal Abort
---		ExtAbortStatus:	OUT STD_LOGIC_VECTOR (1 DOWNTO 0);	--00: Undefined, 01: Non Abort, 10: External Abort, 11: Error
+		BuffStatus:		OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: Undefined, 001: Hit, 010: Miss, 011: NotAbort, 100: CommitFail, 101: CommitSuccess
 		
 		Reset:	IN STD_LOGIC;
 		Clock:	IN STD_LOGIC
@@ -56,9 +53,9 @@ BEGIN
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
 			--Zera BuffStatus no inicio de cada execução?
 		
-			IF (Status = "010" OR Status = "011") THEN		--Se Status é Read ou Write
+			IF (CUStatus = "001" OR CUStatus = "010") THEN				--Se Status é Read ou Write
 				ConfBufTrID <= TransactionID;
-				IF (ConfBufStatus = '0') THEN						--Verifica com Conflict_Buffer se é transação zumbi
+				IF (ConfBufStatus = '0') THEN									--Verifica com Conflict_Buffer se é transação zumbi
 					FOR CurrAddr IN (0 TO 9) LOOP
 						IF (MemBuffer(i, 24) = '0' AND FrstNonValid > CurrAddr) THEN
 							FrstNonValid := CurrAddr;
@@ -73,25 +70,23 @@ BEGIN
 					--TODO: Caso de MISS por Overflow
 					--IF (CurrAddr = 9) THEN OVERFLOW.MISS
 					
-					IF (HitFlag = '0') THEN							--Buffer Miss
+					IF (HitFlag = '0') THEN										--Buffer Miss
 						MemBuffer(CurrAddr, 24) <= '1';
 						MemBuffer(CurrAddr, 23 DOWNTO 16) <= MemAddress;
 						
 						ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
-						IF (Status = "010") THEN
+						IF (CUStatus = "001") THEN
 							ReadWriteSet(ProcID, 0) := '1';
-						ELSIF (Status = "011") THEN
+						ELSIF (CUStatus = "010") THEN
 							ReadWriteSet(ProcID, 1) := '1';
 						END IF;
 						MemBuffer(CurrAddr, 15 DOWNTO 8) <= ReadWriteSet;
 						MemBuffer(CurrAddr, 7 DOWNTO 0) <= Data;
 						
-					ELSE THEN											--Buffer Hit
+					ELSE THEN														--Buffer Hit
 						ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
-						--Atk = (Status = "010") e (Status = "011")
-						--Def = RWSet - RWSet(ProcID)
 						
-						IF (Status = "010") THEN					--Read
+						IF (CUStatus = "001") THEN								--Read
 							FOR i IN (0 TO 3) LOOP
 								IF (ReadWriteSet(i,1) = '1' AND ProcID /= i) THEN
 									ConfBufMode <= "00";
@@ -104,9 +99,9 @@ BEGIN
 							IF (AbortFlag = '0') THEN
 								--Essa parte do RWSet especificamente eu acho que já dava pra ter atualizado antes até, pq vai ser atualizado em todas situações (até no abort dele mesmo, pq dps o AbortState é quem vai esvaziar isso)
 								ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
-								IF (Status = "010") THEN
+								IF (CUStatus = "001") THEN
 									ReadWriteSet(ProcID, 0) := '1';
-								ELSIF (Status = "011") THEN
+								ELSIF (CUStatus = "010") THEN
 									ReadWriteSet(ProcID, 1) := '1';
 								END IF;
 								MemBuffer(CurrAddr, 15 DOWNTO 8) <= ReadWriteSet;
@@ -116,7 +111,7 @@ BEGIN
 							END IF;
 							AbortFlag := '0';
 							
-						ELSIF (Status = "011") THEN				--Write
+						ELSIF (CUStatus = "010") THEN							--Write
 							FOR i IN (0 TO 3) LOOP
 								IF (ReadWriteSet(i) /= "00" AND ProcID /= i) THEN
 									ConfBufMode <= "00";
@@ -126,9 +121,9 @@ BEGIN
 							END LOOP;
 							
 							ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
-							IF (Status = "010") THEN
+							IF (CUStatus = "001") THEN
 								ReadWriteSet(ProcID, 0) := '1';
-							ELSIF (Status = "011") THEN
+							ELSIF (CUStatus = "010") THEN
 								ReadWriteSet(ProcID, 1) := '1';
 							END IF;
 							MemBuffer(CurrAddr, 15 DOWNTO 8) <= ReadWriteSet;
@@ -140,9 +135,8 @@ BEGIN
 					END IF;
 				END IF;
 				
-			ELSIF (CUStatus = "100") THEN		--Se Status é abort
+			ELSIF (CUStatus = "011") THEN										--Se Status é abort
 				--Pega no Conflict_Buffer qual(is) processadores estão com internal abort e faz a sequencia de abort deles
-				
 				FOR X IN Y LOOP			--Varre Conflict_Buffer
 					IF (X is Conflict) THEN
 						FOR Z IN W LOOP	--Varre TM_Buffer
@@ -153,12 +147,21 @@ BEGIN
 						--Remove Internal Conflict do Z
 					END IF;
 					
-					IF (CUStatus /= "100") THEN		--Para de varrer se CU já voltou pro idle (ou seja, garante que já foram todos endereços de Conflict_Buffer com Internal Abort Flag)
+					--Para de varrer se CU já voltou pro idle (ou seja, garante que já foram todos endereços de Conflict_Buffer com Internal Abort Flag)
+					IF (CUStatus /= "100") THEN
 						EXIT;
 					END IF;
 				END LOOP;
 			
-			ELSIF (CUStatus = "101") THEN		--Se Status é MemUpdate
+			ELSIF (CUStatus = "100") THEN										--Se status é Commit
+				ConfBufTrID <= ProcID;
+				IF (ConfBufStatus(1) = '1') THEN
+					BuffStatus <= "100";
+				ELSE
+					BuffStatus <= "011";
+				END IF;
+			
+			ELSIF (CUStatus = "101") THEN										--Se Status é MemUpdate
 				--Processo de MemUpdate
 				--Vai fazendo pull de Address_Queue do processo que commitou e passando pro Main_Memory
 				--Quando receber retorno de que a FIFO está vazia o processo é finalizado e retorno Commit Succes pra CU
@@ -207,3 +210,6 @@ END SharedData;
 						--Tem que ignorar o RWSet do Processador Atacante
 						--Atk 00
 						--Def 00 00 00
+						--
+						--Atk = (CUStatus = "001") e (CUStatus = "010")
+						--Def = RWSet - RWSet(ProcID)

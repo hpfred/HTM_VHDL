@@ -5,15 +5,14 @@ USE IEEE.STD_LOGIC_UNSIGNED.ALL;
 ENTITY Control_Unit IS
 	PORT
 	(
-		Action:		IN STD_LOGIC_VECTOR (1 DOWNTO 0);		--00: Undefined, 01: Read, 10: Write, 11: Commit
-		--Abort:		IN STD_LOGIC_VECTOR (1 DOWNTO 0);		--00: Non Abort, 01: Internal Abort, 10: External Abort, 11: Error
+		Action:				IN STD_LOGIC_VECTOR (1 DOWNTO 0);		--00: Undefined, 01: Read, 10: Write, 11: Commit
 		IntAbortStatus:	IN STD_LOGIC;
 		
-		BuffStatus:	IN STD_LOGIC_VECTOR (1 DOWNTO 0);		--00: Undefined, 01: Hit/Success, 10: Miss/Fail, 11: Abort --Commit Success e Commit Fail? Talvez usando o mesmo valor de Hit e Miss?	--Não usar os mesmos dificulta ter problemas tho	--Talvez só subtituir aquele 11: abort seja possivel e mais válido também
-		CUStatus:	OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: OnIdle, 001: OnRead, 010: OnWrite, 011: OnAbort, 100: OnCommit, 101: OnUpdate
+		BuffStatus:			IN STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: Undefined, 001: Hit, 010: Miss, 011: NotAbort, 100: CommitFail, 101: CommitSuccess
+		CUStatus:			OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: OnIdle, 001: OnRead, 010: OnWrite, 011: OnAbort, 100: OnCommit, 101: OnUpdate
 		
-		Reset:		IN STD_LOGIC;
-		Clock:		IN STD_LOGIC
+		Reset:				IN STD_LOGIC;
+		Clock:				IN STD_LOGIC
 	);
 END ENTITY Control_Unit;
 			
@@ -38,14 +37,13 @@ BEGIN
 				WHEN IdleState =>
 					CUStatus <= "000";
 					
-					--IF (Abort = "01") THEN			--AbortCmd
-					IF (IntAbortStatusAbort = '1') THEN			--AbortCmd
+					IF (IntAbortStatus = '1') THEN	--AbortCmd
 						NextStateIs <= AbortState;
-					ELSIF (Action = "01") THEN		--ReadCmd
+					ELSIF (Action = "01") THEN			--ReadCmd
 						NextStateIs <= ReadState;
-					ELSIF (Action = "10") THEN		--WriteCmd
+					ELSIF (Action = "10") THEN			--WriteCmd
 						NextStateIs <= WriteState;
-					ELSIF (Action = "11") THEN		--CommitCmd
+					ELSIF (Action = "11") THEN			--CommitCmd
 						NextStateIs <= CommitState;
 					END IF;
 				
@@ -64,18 +62,16 @@ BEGIN
 				WHEN AbortState =>
 					CUStatus <= "011";
 					--No TM buffer ele vai consultar o conflict buffer daquele endereço quais processadores estão em conflito e executar a sequencia de abort (limpando/atualizando o buffer)
-					IF (Abort = "00") THEN				--Abort eu não to passando mais (pelo menos por enquanto) então tenho que ver como vou fazer, talvez até colocar pra ele retornar pra Idle direto
-						NextStateIs <= IdleState;		--Na verdade a outra forma é só não voltar pro Idle até não ter mais nenhuma internal abort (ao invés de estado abort somente abortar uma transação por vez)
+					IF (IntAbortStatus = '0') THEN
+						NextStateIs <= IdleState;
 					END IF;
 				
 				WHEN CommitState =>
 					CUStatus <= "100";
-					--Verifica no Conflict Buffer o status de abort do processador
-					--Abort false >> MemoryUpdateState
-					--Abort true >> Idle & CommitFail
-					IF (BuffStatus = "10") THEN	--Esse valor do BuffStatus tá errado, deve ser de alguma coisa que mudei
+					IF (BuffStatus = "100") THEN
 						NextStateIs <= IdleState;
-					ELSE
+						--Informa que CommitFail
+					ELSIF (BuffStatus = "011") THEN
 						NextStateIs <= MemoryUpdateState;
 					END IF;
 				

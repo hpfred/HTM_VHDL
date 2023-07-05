@@ -40,9 +40,9 @@ BEGIN
 				Tail(TrID) <= Tail(TrID) + 1;
 				
 			ELSIF (Mode = "10") THEN						--PULL
-				--Esvaziar o dado dentro da posição?
 				Ret <= MemStorage(TrID, Head(TrID));
 				Head(TrID) <= Head(TrID) + 1;
+				--Esvaziar o dado dentro da posição?
 				
 			--ELSE THEN Ret <= "00000000"; ? - Talvez fique mais fácil eu perceber quando estiver botando tudo junto se eu estiver pegando valor de Ret errado (antes de atualizar, ou não estar atualizando pro valor certo)
 			END IF;
