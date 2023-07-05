@@ -9,33 +9,29 @@ USE IEEE.STD_LOGIC_1164.ALL;
 USE IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 ENTITY TM_Buffer IS
-	--Forma de basicamente dar um define no X do tamanho do buffer
-	--ENTITY regn IS
-	--GENERIC ( N	: INTEGER := 16);
-	--PORT (	D	: IN STD_LOGIC_VECTOR (N-1 DOWNTO 0);
- 	--	reset, clock	: IN STD_LOGIC;
-	--	Q	: OUT STD_LOGIC_VECTOR (N-1 DOWNTO 0) );
-	--END regn;
-
 	PORT
 	(
 		MemAddress:		IN STD_LOGIC_VECTOR (7 DOWNTO 0);
 		Data:				IN STD_LOGIC_VECTOR (7 DOWNTO 0);
 		ProcID:			IN STD_LOGIC_VECTOR (1 DOWNTO 0);
-		TransactionID:	IN STD_LOGIC_VECTOR (3 DOWNTO 0);
+		TransactionID:	IN STD_LOGIC_VECTOR (1 DOWNTO 0);
 		
 		CUStatus:		IN STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: Idle, 001: Read, 010: Write, 011: Abort, 100: Commit, 101: MemUpdate
 		
-		BuffStatus:		OUT STD_LOGIC_VECTOR (1 DOWNTO 0);		--00: Undefined, 01: Hit, 10: Miss, 11: Abort
-		AbortStatus:	OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--00: Non Abort, 01: Internal Abort, 10: External Abort, 11: Error
-		--Aborted:			OUT STD_LOGIC_VECTOR (3 DOWNTO 0);		--Assert nos bits equivalentes do ProcID que foi abortado
+		ConfBufMode:	OUT STD_LOGIC_VECTOR (1 DOWNTO 0);
+		ConfBufTrID:	OUT STD_LOGIC_VECTOR (1 DOWNTO 0);
+		ConfBufStatus:	IN STD_LOGIC;
 		
+		BuffStatus:		OUT STD_LOGIC_VECTOR (1 DOWNTO 0);		--00: Undefined, 01: Hit, 10: Miss, 11: Abort
+		--AbortStatus:	OUT STD_LOGIC_VECTOR (1 DOWNTO 0);		--00: Non Abort, 01: Internal Abort, 10: External Abort, 11: Error
+		AbortStatus:	OUT STD_LOGIC;									--0: Non Abort, 1: Internal Abort
+		
+		Reset:	IN STD_LOGIC;
 		Clock:	IN STD_LOGIC
 	);
 END ENTITY TM_Buffer;
 
 ARCHITECTURE  SharedData OF TM_Buffer IS
---Vou definir o tamanho do Buffer (X) como 10, por enquanto, para seguir a recomendação dos professores de ir fazendo algo funcional, e depois expandir
 TYPE ALL_DATA IS ARRAY (9 DOWNTO 0) OF STD_LOGIC_VECTOR (24 DOWNTO 0);
 SIGNAL MemBuffer: ALL_DATA;		
 --TODO: Inicializa tudo zerado
@@ -46,6 +42,109 @@ SIGNAL BufferAddress: STD_LOGIC_VECTOR (9 DOWNTO 0);
 SIGNAL ProcID: STD_LOGIC_VECTOR (1 DOWNTO 0);
 
 BEGIN
+
+	PROCESS (Clock)
+		VARIABLE ReadWriteSet: RW_SET;
+		VARIABLE FrstNonValid: INTEGER := 2147483647;
+		VARIABLE CurrAddr: INTEGER;
+		VARIABLE HitFlag, AbortFlag: STD_LOGIC := '0';
+	BEGIN
+		IF (Reset = '1') THEN
+			--reset : std_logic_vector(N downto 0) <= (others => '0')
+			
+		ELSIF (Clock'EVENT AND Clock = '1') THEN
+			IF (Status = "010" OR Status = "011") THEN		--Se Status é Read ou Write
+				ConfBufTrID <= TransactionID;
+				IF (ConfBufStatus = '0') THEN						--Verifica com Conflict_Buffer se é transação zumbi
+					FOR CurrAddr IN (0 TO 99) LOOP
+						IF (MemBuffer(i, 24) = '0' AND FrstNonValid > CurrAddr) THEN
+							FrstNonValid := CurrAddr;
+							HitFlag := '0';
+						END IF;
+						
+						IF (MemBuffer(i, (23 DOWNTO 16)) = MemAddress) THEN
+							HitFlag := '1';
+							EXIT;
+						END IF;
+					END LOOP;
+					--TODO: Caso de MISS por Overflow
+					--IF (CurrAddr = 99) THEN OVERFLOW.MISS
+					
+					IF (HitFlag = '0') THEN							--Buffer Miss
+						MemBuffer(CurrAddr, 24) <= '1';
+						MemBuffer(CurrAddr, 23 DOWNTO 16) <= MemAddress;
+						
+						ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
+						ReadWriteSet(ProcID, 0) :=  (Status = "010");		--Se eu quisesse fazer direto precisaria fazer algo tipo 15-(ProcID*2)		--Repensando eu não acho que isso vai funcionar, mas vou ter que confirmar depois
+						ReadWriteSet(ProcID, 1) :=  (Status = "011");		--																	  e	15-(ProcID*2)-1
+						
+						MemBuffer(CurrAddr, 15 DOWNTO 8) <= ReadWriteSet;
+						MemBuffer(CurrAddr, 7 DOWNTO 0) <= Data;
+						
+					ELSE THEN											--Buffer Hit
+						ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
+						--Atk = (Status = "010") e (Status = "011")
+						--Def = RWSet - RWSet(ProcID)
+						
+						IF (Status = "010") THEN					--Read
+							FOR i IN (0 TO 3) LOOP
+								IF (ReadWriteSet(i,1) = '1' AND ProcID /= i) THEN
+									AbortFlag := '1';
+								END IF;
+							END LOOP;
+							
+							IF (AbortFlag = '0') THEN
+								--Essa parte do RWSet especificamente eu acho que já dava pra ter atualizado antes até, pq vai ser atualizado em todas situações (até no abort dele mesmo, pq dps o AbortState é quem vai esvaziar isso)
+								ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
+								ReadWriteSet(ProcID, 0) :=  (Status = "010");
+								ReadWriteSet(ProcID, 1) :=  (Status = "011");
+								MemBuffer(CurrAddr, 15 DOWNTO 8) <= ReadWriteSet;
+								
+								--Guarda na fila?
+								
+							ELSE
+								--Marca flag de conflito do Processador ProcID
+								ConfBufMode <= "00";
+								ConfBufTrID <= ProcID;
+								ConfBufMode <= "01";
+								
+								AbortStatus <= '1';
+							END IF;
+							AbortFlag := '0';
+							
+						ELSIF (Status = "011") THEN				--Write
+							FOR i IN (0 TO 3) LOOP
+								IF (ReadWriteSet(i) /= "00" AND ProcID /= i) THEN
+									--Marca flag de conflito do Processador i
+									ConfBufMode <= "00";
+									ConfBufTrID <= i;
+									ConfBufMode <= "01";
+									AbortFlag := '1';
+								END IF;
+							END LOOP;
+							
+							ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
+							ReadWriteSet(ProcID, 0) :=  (Status = "010");
+							ReadWriteSet(ProcID, 1) :=  (Status = "011");
+							MemBuffer(CurrAddr, 15 DOWNTO 8) <= ReadWriteSet;
+							MemBuffer(CurrAddr, 7 DOWNTO 0) <= Data;
+							
+							--Guarda na fila?
+							
+						END IF;
+					END IF;
+				END IF;
+				
+			ELSIF (CUStatus = "100") THEN		--Se Status é abort
+			ELSIF (CUStatus = "101") THEN		--Se Status é MemUpdate
+			END IF;
+			
+		END IF;
+		
+	END PROCESS;
+	
+END SharedData;
+
 	
 	--Ok, se ele recebe as informações todas aqui oq vai ser feito?
 -- Tenho que ver de talvez o primeiro passo ser verificar com o Conflict Buffer se a Transação é zumbi
@@ -71,105 +170,14 @@ BEGIN
 	--Uma outra coisa que tá me travando um pouco na lógica é marcar os conflitos das transações que já estavam como leitura, pq não tenho como identificar elas, somente de que processador elas vieram
 	--Além da minha confusão de o que é e como é usado o Internal e External Abort Flags no Artigo, mas essa parte pelo menos acredito que consigo resolver do meu jeito (só talvez tendo um comportamento diferente tbm)
 	--A lógica que eu to chegando é de que se abortar uma transação do processador aborta todo processador, se depois eu descobrir sempre posso voltar e mudar ou repensar
-
-	PROCESS (Clock)
-		VARIABLE ReadWriteSet: RW_SET;
-		VARIABLE FrstNonValid: INTEGER := 2147483647;
-		VARIABLE CurrAddr: INTEGER;
-		VARIABLE HitFlag, AbortFlag: STD_LOGIC := '0';
-	BEGIN
-		--reset : std_logic_vector(N downto 0) <= (others => '0')
-		--Fazer teste de borda do clock
-		
-		IF (Status = "010" OR Status = "011") THEN		--Se Status é Read ou Write
-			IF (Ret = '0') THEN
-				FOR CurrAddr IN (0 TO 99) LOOP
-					IF (MemBuffer(i, 24) = '0' AND FrstNonValid > CurrAddr) THEN
-						FrstNonValid := CurrAddr;
-						HitFlag := '0';
-					END IF;
-					
-					IF (MemBuffer(i, (23 DOWNTO 16)) = MemAddress) THEN
-						HitFlag := '1';
-						EXIT;
-					END IF;
-				END LOOP;
-				--TODO: Caso de MISS por Overflow
-				--IF (CurrAddr = 99) THEN OVERFLOW.MISS
-				
-				IF (HitFlag = '0') THEN							--Buffer Miss
-					MemBuffer(CurrAddr, 24) <= '1';
-					MemBuffer(CurrAddr, 23 DOWNTO 16) <= MemAddress;
-					
-					ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
-					ReadWriteSet(ProcID, 0) :=  (Status = "010");		--Se eu quisesse fazer direto precisaria fazer algo tipo 15-(ProcID*2)		--Repensando eu não acho que isso vai funcionar, mas vou ter que confirmar depois
-					ReadWriteSet(ProcID, 1) :=  (Status = "011");		--																	  e	15-(ProcID*2)-1
-					
-					MemBuffer(CurrAddr, 15 DOWNTO 8) <= ReadWriteSet;
-					MemBuffer(CurrAddr, 7 DOWNTO 0) <= Data;
-					
-				ELSE THEN											--Buffer Hit
-					--Verifica Conflito
-					--Atk: R, Def: R  >>  Atk: Nc, Def: Nc
-					--Atk: R, Def: W  >>  Atk: C, Def: Nc
-					--Atk: W, Def: R  >>  Atk: Nc, Def: C
-					--Atk: W, Def: W  >>  Atk: Nc, Def: C
-					
-					--Tem que ignorar o RWSet do Processador Atacante
-					--Atk 00
-					--Def 00 00 00
-					ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
-					--Atk = (Status = "010") e (Status = "011")
-					--Def = RWSet - RWSet(ProcID)
-					
-					IF (Status = "010") THEN	--Read
-						FOR i IN (0 TO 3) LOOP
-							IF (ReadWriteSet(i,1) = '1' AND ProcID /= i) THEN
-								--Marca flag de conflito do Processador ProcID
-								AbortFlag := '1';
-							END IF;
-						END LOOP;
-						
-						IF (AbortFlag = '0') THEN
-							--Atualiza no Buffer (e guarda na fila?)
-							--Essa parte do RWSet especificamente eu acho que já dava pra ter atualizado antes até, pq vai ser atualizado em todas situações (até no abort dele mesmo, pq dps o AbortState é quem vai esvaziar isso)
-							ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
-							ReadWriteSet(ProcID, 0) :=  (Status = "010");
-							ReadWriteSet(ProcID, 1) :=  (Status = "011");
-							MemBuffer(CurrAddr, 15 DOWNTO 8) <= ReadWriteSet;
-							
-							--Guarda na fila?
-						END IF;
-						--E se aboort flag por 1? O abortflag é atualizado no conflict_Buffer, porém isso pode ser feito dentro do próprio for tbm
-						
-					ELSIF (Status = "011") THEN	--Write --Aqui poderia ser somente else
-						FOR i IN (0 TO 3) LOOP
-							IF (ReadWriteSet(i) /= "00" AND ProcID /= i) THEN
-								--Marca flag de conflito do Processador i
-								AbortFlag := '1';
-								--Pode havar o caso de manipular o Conflict_Buffer de mais de um ProcID em um unico clock, então teria que ver o método melhor
-								--Se for precisar fazer em clocks diferentes tenho que rever isso
-								--Se for tentar em um unico clock oq eu posso fazer é sensitividade por modo, e trocar pra set no inicio e idle ao fim
-							END IF;
-						END LOOP;
-						
-						--Atualiza no Buffer (e guarda na fila?)
-						ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
-						ReadWriteSet(ProcID, 0) :=  (Status = "010");
-						ReadWriteSet(ProcID, 1) :=  (Status = "011");
-						MemBuffer(CurrAddr, 15 DOWNTO 8) <= ReadWriteSet;
-						MemBuffer(CurrAddr, 7 DOWNTO 0) <= Data;
-						
-						--Guarda na fila?
-						
-					END IF;
-				END IF;
-			END IF;
-			
-		ELSIF (CUStatus = "100") THEN		--Se Status é abort
-		ELSIF (CUStatus = "101") THEN		--Se Status é MemUpdate
-		END IF;
-		
-	END PROCESS;
 	
-END SharedData;
+	
+	--Verifica Conflito
+						--Atk: R, Def: R  >>  Atk: Nc, Def: Nc
+						--Atk: R, Def: W  >>  Atk: C, Def: Nc
+						--Atk: W, Def: R  >>  Atk: Nc, Def: C
+						--Atk: W, Def: W  >>  Atk: Nc, Def: C
+						
+						--Tem que ignorar o RWSet do Processador Atacante
+						--Atk 00
+						--Def 00 00 00

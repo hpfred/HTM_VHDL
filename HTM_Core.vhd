@@ -9,9 +9,6 @@ ENTITY HTM_Core IS
 		MemAddress:		IN STD_LOGIC_VECTOR (7 DOWNTO 0);				--Endereço de 8 bits (Limite de 256 endereços)
 		Data:				IN STD_LOGIC_VECTOR (7 DOWNTO 0);				--8 bits de Dado
 		ProcID:			IN STD_LOGIC_VECTOR (1 DOWNTO 0);				--Limite de 4 Cores/Processadores
-		--TransactionID:	IN STD_LOGIC_VECTOR (3 DOWNTO 0);			--Limite de 16 transações (4 por processador parece um limite válido)
-		
-		--Pela minha sanidade mental, trocarei por enquanto para somente uma transação por processador
 		TransactionID:	IN STD_LOGIC_VECTOR (1 DOWNTO 0);				--Limite de 4 transações (1 por processador)
 		
 		TransactionStatus:	OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--6 status do HTM_Core que informam o processador -(OnRead, OnWrite, OnAbort, OnCommit, CommitFail, CommitSucc)? -Talvez seja interessante só o resultado de Commit?
@@ -28,7 +25,7 @@ COMPONENT Control_Unit IS
 		MemAddress:				IN STD_LOGIC_VECTOR (7 DOWNTO 0);
 		Data:						IN STD_LOGIC_VECTOR (7 DOWNTO 0);
 		ProcID:					IN STD_LOGIC_VECTOR (1 DOWNTO 0);
-		TransactionID:			IN STD_LOGIC_VECTOR (3 DOWNTO 0);
+		TransactionID:			IN STD_LOGIC_VECTOR (1 DOWNTO 0);
 		TransactionStatus:	OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
 		Reset:					IN STD_LOGIC;
 		Clock:					IN STD_LOGIC
@@ -41,16 +38,17 @@ COMPONENT TM_Buffer IS
 		MemAddress:		IN STD_LOGIC_VECTOR (7 DOWNTO 0);
 		Data:				IN STD_LOGIC_VECTOR (7 DOWNTO 0);
 		ProcID:			IN STD_LOGIC_VECTOR (1 DOWNTO 0);
-		TransactionID:	IN STD_LOGIC_VECTOR (3 DOWNTO 0);
+		TransactionID:	IN STD_LOGIC_VECTOR (1 DOWNTO 0);
 		Status:			IN STD_LOGIC_VECTOR (2 DOWNTO 0);
 		RetStatus:		OUT STD_LOGIC_VECTOR ();
+		Reset:			IN STD_LOGIC;
 		Clock:			IN STD_LOGIC
 	);
 
 COMPONENT Conflict_Buffer IS
 	PORT
 	(
-		TrID:		IN STD_LOGIC_VECTOR (3 DOWNTO 0);
+		TrID:		IN STD_LOGIC_VECTOR (1 DOWNTO 0);
 		Mode:		IN STD_LOGIC_VECTOR (1 DOWNTO 0);
 		Status:	OUT STD_LOGIC;
 		Clock:	IN STD_LOGIC
@@ -61,8 +59,9 @@ COMPONENT Address_Queue IS
 	(
 		Mode: 	IN STD_LOGIC_VECTOR (1 DOWNTO 0);
 		Addr:		IN STD_LOGIC_VECTOR (7 DOWNTO 0);
-		TrID:		IN STD_LOGIC_VECTOR (3 DOWNTO 0);
+		TrID:		IN STD_LOGIC_VECTOR (1 DOWNTO 0);
 		Ret:		OUT STD_LOGIC_VECTOR (7 DOWNTO 0);
+		Reset:	IN STD_LOGIC;
 		Clock:	IN STD_LOGIC
 	);
 
@@ -81,6 +80,7 @@ BEGIN
 									ProcID=>ProcID,
 									TransactionID=>TransactionID,
 									TransactionStatus=>TransactionStatus,
+									Reset=>Reset,
 									Clock=>Clock
 								);
 						
@@ -91,6 +91,7 @@ BEGIN
 								 TransactionID=>TransactionID,
 								 Status=>[X],
 								 RetStatus=>[X],
+								 Reset=>Reset,
 								 Clock=>Clock
 							 );
 						
@@ -106,6 +107,7 @@ BEGIN
 										 Addr=>MemAddress,
 										 TrID=>TransactionID,
 										 Ret=>[X],
+										 Reset=>Reset,
 										 Clock=>Clock
 									 );
 						
