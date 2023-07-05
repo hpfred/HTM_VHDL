@@ -24,7 +24,8 @@ ENTITY TM_Buffer IS
 		
 		BuffStatus:		OUT STD_LOGIC_VECTOR (1 DOWNTO 0);		--00: Undefined, 01: Hit, 10: Miss, 11: Abort
 		--AbortStatus:	OUT STD_LOGIC_VECTOR (1 DOWNTO 0);		--00: Non Abort, 01: Internal Abort, 10: External Abort, 11: Error
-		AbortStatus:	OUT STD_LOGIC;									--0: Non Abort, 1: Internal Abort
+		--AbortStatus:	OUT STD_LOGIC;									--0: Non Abort, 1: Internal Abort
+--		ExtAbortStatus:	OUT STD_LOGIC_VECTOR (1 DOWNTO 0);	--00: Undefined, 01: Non Abort, 10: External Abort, 11: Error
 		
 		Reset:	IN STD_LOGIC;
 		Clock:	IN STD_LOGIC
@@ -56,7 +57,7 @@ BEGIN
 			IF (Status = "010" OR Status = "011") THEN		--Se Status é Read ou Write
 				ConfBufTrID <= TransactionID;
 				IF (ConfBufStatus = '0') THEN						--Verifica com Conflict_Buffer se é transação zumbi
-					FOR CurrAddr IN (0 TO 99) LOOP
+					FOR CurrAddr IN (0 TO 9) LOOP
 						IF (MemBuffer(i, 24) = '0' AND FrstNonValid > CurrAddr) THEN
 							FrstNonValid := CurrAddr;
 							HitFlag := '0';
@@ -68,15 +69,15 @@ BEGIN
 						END IF;
 					END LOOP;
 					--TODO: Caso de MISS por Overflow
-					--IF (CurrAddr = 99) THEN OVERFLOW.MISS
+					--IF (CurrAddr = 9) THEN OVERFLOW.MISS
 					
 					IF (HitFlag = '0') THEN							--Buffer Miss
 						MemBuffer(CurrAddr, 24) <= '1';
 						MemBuffer(CurrAddr, 23 DOWNTO 16) <= MemAddress;
 						
 						ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
-						ReadWriteSet(ProcID, 0) :=  (Status = "010");		--Se eu quisesse fazer direto precisaria fazer algo tipo 15-(ProcID*2)		--Repensando eu não acho que isso vai funcionar, mas vou ter que confirmar depois
-						ReadWriteSet(ProcID, 1) :=  (Status = "011");		--																	  e	15-(ProcID*2)-1
+						ReadWriteSet(ProcID, 0) :=  (Status = "010");
+						ReadWriteSet(ProcID, 1) :=  (Status = "011");
 						
 						MemBuffer(CurrAddr, 15 DOWNTO 8) <= ReadWriteSet;
 						MemBuffer(CurrAddr, 7 DOWNTO 0) <= Data;
@@ -89,6 +90,9 @@ BEGIN
 						IF (Status = "010") THEN					--Read
 							FOR i IN (0 TO 3) LOOP
 								IF (ReadWriteSet(i,1) = '1' AND ProcID /= i) THEN
+									ConfBufMode <= "00";
+									ConfBufTrID <= ProcID;
+									ConfBufMode <= "01";
 									AbortFlag := '1';
 								END IF;
 							END LOOP;
@@ -102,24 +106,15 @@ BEGIN
 								
 								--Guarda na fila?
 								
-							ELSE
-								--Marca flag de conflito do Processador ProcID
-								ConfBufMode <= "00";
-								ConfBufTrID <= ProcID;
-								ConfBufMode <= "01";
-								
-								AbortStatus <= '1';
 							END IF;
 							AbortFlag := '0';
 							
 						ELSIF (Status = "011") THEN				--Write
 							FOR i IN (0 TO 3) LOOP
 								IF (ReadWriteSet(i) /= "00" AND ProcID /= i) THEN
-									--Marca flag de conflito do Processador i
 									ConfBufMode <= "00";
 									ConfBufTrID <= i;
 									ConfBufMode <= "01";
-									AbortFlag := '1';
 								END IF;
 							END LOOP;
 							

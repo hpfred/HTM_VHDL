@@ -6,7 +6,8 @@ ENTITY Control_Unit IS
 	PORT
 	(
 		Action:		IN STD_LOGIC_VECTOR (1 DOWNTO 0);		--00: Undefined, 01: Read, 10: Write, 11: Commit
-		Abort:		IN STD_LOGIC_VECTOR (1 DOWNTO 0);		--00: Non Abort, 01: Internal Abort, 10: External Abort, 11: Error
+		--Abort:		IN STD-_LOGIC_VECTOR (1 DOWNTO 0);		--00: Non Abort, 01: Internal Abort, 10: External Abort, 11: Error
+		IntAbortStatus:	IN STD_LOGIC;
 		
 		BuffStatus:	IN STD_LOGIC_VECTOR (1 DOWNTO 0);		--00: Undefined, 01: Hit, 10: Miss, 11: Abort
 		CUStatus:	OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: OnIdle, 001: OnRead, 010: OnWrite, 011: OnAbort, 100: OnCommit, 101: OnUpdate
@@ -37,7 +38,8 @@ BEGIN
 				WHEN IdleState =>
 					CUStatus <= "000";
 					
-					IF (Abort = "01") THEN			--AbortCmd
+					--IF (Abort = "01") THEN			--AbortCmd
+					IF (IntAbortStatusAbort = '1') THEN			--AbortCmd
 						NextStateIs <= AbortState;
 					ELSIF (Action = "01") THEN		--ReadCmd
 						NextStateIs <= ReadState;
@@ -61,9 +63,7 @@ BEGIN
 				
 				WHEN AbortState =>
 					CUStatus <= "011";
-					--Informa o TM Buffer que está em status de abort, e o endereço de memória
 					--No TM buffer ele vai consultar o conflict buffer daquele endereço quais processadores estão em conflito e executar a sequencia de abort (limpando/atualizando o buffer)
-					--Ao fim retorna ao Idle State
 					IF (Abort = "00") THEN
 						NextStateIs <= IdleState;
 					END IF;
@@ -71,10 +71,9 @@ BEGIN
 				WHEN CommitState =>
 					CUStatus <= "100";
 					--Verifica no Conflict Buffer o status de abort do processador
-					--Eu to agora é voltando um pouco a questionar a diferenciação da transações e processadores nessa implementação, mas vou ver melhor mais tarde, quando tudo estiver mais avançado
 					--Abort false >> MemoryUpdateState
 					--Abort true >> Idle & CommitFail
-					IF (BuffStatus = "10") THEN
+					IF (BuffStatus = "10") THEN	--Esse valor do BuffStatus tá errado, deve ser de alguma coisa que mudei
 						NextStateIs <= IdleState;
 					ELSE
 						NextStateIs <= MemoryUpdateState;

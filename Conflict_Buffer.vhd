@@ -5,32 +5,35 @@ USE IEEE.STD_LOGIC_UNSIGNED.ALL;
 ENTITY Conflict_Buffer IS
 	PORT
 	(
-		TrID:		IN STD_LOGIC_VECTOR (1 DOWNTO 0);
-		Mode:		IN STD_LOGIC_VECTOR (1 DOWNTO 0);		--00: Idle, 01: Set, 10: Reset, 11: Return
+		TrID:					IN STD_LOGIC_VECTOR (1 DOWNTO 0);
+		Mode:					IN STD_LOGIC_VECTOR (1 DOWNTO 0);		--00: Idle, 01: Set, 10: Reset Internal, 11: Reset Abort
 		
-		Status:	OUT STD_LOGIC;
+		Status:				OUT STD_LOGIC_VECTOR (1 DOWNTO 0);		--Array(InternalAbortFlag, ExternalAbortFlag)
+		IntAbortStatus:	OUT STD_LOGIC;
 		
-		Clock:	IN STD_LOGIC
+		Reset:				IN STD_LOGIC
 	);
 END ENTITY Conflict_Buffer;
 
 ARCHITECTURE  Flags OF Conflict_Buffer IS
-SIGNAL ConflictFlag: STD_LOGIC_VECTOR (3 DOWNTO 0);
+--SIGNAL ConflictFlag: STD_LOGIC_VECTOR (3 DOWNTO 0);
+SIGNAL ConflictFlag: ARRAY (3 DOWNTO 0) OF STD_LOGIC_VECTOR (1 DOWNTO 0);
 
 BEGIN
-	
-	--Faz uma MUX 4, que recebe o TrID, cada endereço do buffer vai numa entrada e a saída vai pro Status
-	--Acredito, mas ainda não tenho certeza, que a síntese do Quartus transforma um Process com cases em um MUX, e isso pode me poupar tempo de fazer os MUXes (já que aparentemente o VHDL não tem nada com componentes básicos pré-prontos)
 
 	Status <= ConflictFlag(TrID);
+	IntAbortStatus <= ConflictFlag(0,1) AND ConflictFlag(1,1) AND ConflictFlag(2,1) AND ConflictFlag(3,1);
 	
 	PROCESS (Mode)
 	BEGIN
 		IF (Mode = "01") THEN
-			ConflictFlag(TrID) <= '1';
+			ConflictFlag(TrID) <= "11";
 			
 		ELSIF (Mode = "10") THEN
-			ConflictFlag(TrID) <= '0';
+			ConflictFlag(TrID) <= "01";
+			
+		ELSIF (Mode = "11") THEN
+			ConflictFlag(TrID) <= "00";
 			
 		END IF;
 	END PROCESS;
