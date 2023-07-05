@@ -6,10 +6,10 @@ ENTITY Control_Unit IS
 	PORT
 	(
 		Action:		IN STD_LOGIC_VECTOR (1 DOWNTO 0);		--00: Undefined, 01: Read, 10: Write, 11: Commit
-		--Abort:		IN STD-_LOGIC_VECTOR (1 DOWNTO 0);		--00: Non Abort, 01: Internal Abort, 10: External Abort, 11: Error
+		--Abort:		IN STD_LOGIC_VECTOR (1 DOWNTO 0);		--00: Non Abort, 01: Internal Abort, 10: External Abort, 11: Error
 		IntAbortStatus:	IN STD_LOGIC;
 		
-		BuffStatus:	IN STD_LOGIC_VECTOR (1 DOWNTO 0);		--00: Undefined, 01: Hit, 10: Miss, 11: Abort
+		BuffStatus:	IN STD_LOGIC_VECTOR (1 DOWNTO 0);		--00: Undefined, 01: Hit/Success, 10: Miss/Fail, 11: Abort --Commit Success e Commit Fail? Talvez usando o mesmo valor de Hit e Miss?	--Não usar os mesmos dificulta ter problemas tho	--Talvez só subtituir aquele 11: abort seja possivel e mais válido também
 		CUStatus:	OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: OnIdle, 001: OnRead, 010: OnWrite, 011: OnAbort, 100: OnCommit, 101: OnUpdate
 		
 		Reset:		IN STD_LOGIC;
@@ -64,8 +64,8 @@ BEGIN
 				WHEN AbortState =>
 					CUStatus <= "011";
 					--No TM buffer ele vai consultar o conflict buffer daquele endereço quais processadores estão em conflito e executar a sequencia de abort (limpando/atualizando o buffer)
-					IF (Abort = "00") THEN
-						NextStateIs <= IdleState;
+					IF (Abort = "00") THEN				--Abort eu não to passando mais (pelo menos por enquanto) então tenho que ver como vou fazer, talvez até colocar pra ele retornar pra Idle direto
+						NextStateIs <= IdleState;		--Na verdade a outra forma é só não voltar pro Idle até não ter mais nenhuma internal abort (ao invés de estado abort somente abortar uma transação por vez)
 					END IF;
 				
 				WHEN CommitState =>
@@ -88,6 +88,10 @@ BEGIN
 					
 					--IF (QueueStatus = [Commit]) THEN
 					--END IF;
+					
+					IF (BuffStatus = CommitSuccess) THEN
+						NextStateIs <= IdleState;
+					END IF;
 				
 			END CASE;
 		END IF;

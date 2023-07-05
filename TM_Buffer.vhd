@@ -54,6 +54,8 @@ BEGIN
 			--reset : std_logic_vector(N downto 0) <= (others => '0')
 			
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
+			--Zera BuffStatus no inicio de cada execução?
+		
 			IF (Status = "010" OR Status = "011") THEN		--Se Status é Read ou Write
 				ConfBufTrID <= TransactionID;
 				IF (ConfBufStatus = '0') THEN						--Verifica com Conflict_Buffer se é transação zumbi
@@ -76,9 +78,11 @@ BEGIN
 						MemBuffer(CurrAddr, 23 DOWNTO 16) <= MemAddress;
 						
 						ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
-						ReadWriteSet(ProcID, 0) :=  (Status = "010");
-						ReadWriteSet(ProcID, 1) :=  (Status = "011");
-						
+						IF (Status = "010") THEN
+							ReadWriteSet(ProcID, 0) := '1';
+						ELSIF (Status = "011") THEN
+							ReadWriteSet(ProcID, 1) := '1';
+						END IF;
 						MemBuffer(CurrAddr, 15 DOWNTO 8) <= ReadWriteSet;
 						MemBuffer(CurrAddr, 7 DOWNTO 0) <= Data;
 						
@@ -100,8 +104,11 @@ BEGIN
 							IF (AbortFlag = '0') THEN
 								--Essa parte do RWSet especificamente eu acho que já dava pra ter atualizado antes até, pq vai ser atualizado em todas situações (até no abort dele mesmo, pq dps o AbortState é quem vai esvaziar isso)
 								ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
-								ReadWriteSet(ProcID, 0) :=  (Status = "010");
-								ReadWriteSet(ProcID, 1) :=  (Status = "011");
+								IF (Status = "010") THEN
+									ReadWriteSet(ProcID, 0) := '1';
+								ELSIF (Status = "011") THEN
+									ReadWriteSet(ProcID, 1) := '1';
+								END IF;
 								MemBuffer(CurrAddr, 15 DOWNTO 8) <= ReadWriteSet;
 								
 								--Guarda na fila?
@@ -119,8 +126,11 @@ BEGIN
 							END LOOP;
 							
 							ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
-							ReadWriteSet(ProcID, 0) :=  (Status = "010");
-							ReadWriteSet(ProcID, 1) :=  (Status = "011");
+							IF (Status = "010") THEN
+								ReadWriteSet(ProcID, 0) := '1';
+							ELSIF (Status = "011") THEN
+								ReadWriteSet(ProcID, 1) := '1';
+							END IF;
 							MemBuffer(CurrAddr, 15 DOWNTO 8) <= ReadWriteSet;
 							MemBuffer(CurrAddr, 7 DOWNTO 0) <= Data;
 							
@@ -131,7 +141,28 @@ BEGIN
 				END IF;
 				
 			ELSIF (CUStatus = "100") THEN		--Se Status é abort
+				--Pega no Conflict_Buffer qual(is) processadores estão com internal abort e faz a sequencia de abort deles
+				
+				FOR X IN Y LOOP			--Varre Conflict_Buffer
+					IF (X is Conflict) THEN
+						FOR Z IN W LOOP	--Varre TM_Buffer
+							IF (Z equal X) THEN
+								--Limpa Z dos dados de X (verifica se tem mais que X pra ver se limpa total)
+							END IF;
+						END LOOP;
+						--Remove Internal Conflict do Z
+					END IF;
+					
+					IF (CUStatus /= "100") THEN		--Para de varrer se CU já voltou pro idle (ou seja, garante que já foram todos endereços de Conflict_Buffer com Internal Abort Flag)
+						EXIT;
+					END IF;
+				END LOOP;
+			
 			ELSIF (CUStatus = "101") THEN		--Se Status é MemUpdate
+				--Processo de MemUpdate
+				--Vai fazendo pull de Address_Queue do processo que commitou e passando pro Main_Memory
+				--Quando receber retorno de que a FIFO está vazia o processo é finalizado e retorno Commit Succes pra CU
+			
 			END IF;
 			
 		END IF;

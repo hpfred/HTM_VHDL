@@ -16,25 +16,28 @@ ENTITY Conflict_Buffer IS
 END ENTITY Conflict_Buffer;
 
 ARCHITECTURE  Flags OF Conflict_Buffer IS
---SIGNAL ConflictFlag: STD_LOGIC_VECTOR (3 DOWNTO 0);
 SIGNAL ConflictFlag: ARRAY (3 DOWNTO 0) OF STD_LOGIC_VECTOR (1 DOWNTO 0);
 
 BEGIN
 
 	Status <= ConflictFlag(TrID);
-	IntAbortStatus <= ConflictFlag(0,1) AND ConflictFlag(1,1) AND ConflictFlag(2,1) AND ConflictFlag(3,1);
+	IntAbortStatus <= ConflictFlag(0,1) OR ConflictFlag(1,1) OR ConflictFlag(2,1) OR ConflictFlag(3,1);
 	
 	PROCESS (Mode)
 	BEGIN
-		IF (Mode = "01") THEN
-			ConflictFlag(TrID) <= "11";
-			
-		ELSIF (Mode = "10") THEN
-			ConflictFlag(TrID) <= "01";
-			
-		ELSIF (Mode = "11") THEN
-			ConflictFlag(TrID) <= "00";
-			
-		END IF;
+		CASE Mode IS
+			WHEN "00" =>
+				ConflictFlag(TrID) <= ConflictFlag(TrID);
+		
+			WHEN "01" =>
+				ConflictFlag(TrID) <= "11";
+				
+			WHEN "10" =>
+				ConflictFlag(TrID) <= "01";
+				
+			WHEN "11" =>
+				ConflictFlag(TrID) <= "00";
+				
+		END CASE
 	END PROCESS;
 END Flags;
