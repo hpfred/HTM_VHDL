@@ -15,10 +15,14 @@ ENTITY Conflict_Buffer IS
 END ENTITY Conflict_Buffer;
 
 ARCHITECTURE  Flags OF Conflict_Buffer IS
-SIGNAL ConflictFlag: STD_LOGIC_VECTOR (3 DOWNTO 0);
+SIGNAL ConflictFlag: STD_LOGIC_VECTOR (15 DOWNTO 0);		--Antes tava com o tamanho igual ao endereço de Transição e não o tamanho do numero de transições (agora correto, se tem um bit para cada uma)
 
 BEGIN
-	PROCESS (Clock) --Mode e TrID ao invés de Clock?
+	
+	--Faz uma MUX 16, que recebe o TrID, cada endereço do buffer vai numa entrada e a saída vai pro Status
+
+
+	PROCESS (Clock)
 	BEGIN
 	
 		--Quando no estado Read e Write ele sempre vai ser somente retorno, e de uma transação especifica, então o "request" poderia ser feito com antencedencia, correto?
