@@ -45,7 +45,7 @@ BEGIN
 		VARIABLE ReadWriteSet: RW_SET;
 		VARIABLE FrstNonValid: INTEGER := 2147483647;
 		VARIABLE CurrAddr: INTEGER;
-		VARIABLE HitFlag, AbortFlag: STD_LOGIC := '0';
+		VARIABLE HitFlag, AbortFlag, ProcFlag: STD_LOGIC := '0';
 	BEGIN
 		IF (Reset = '1') THEN
 			--TODO: Inicializa tudo zerado
@@ -140,13 +140,25 @@ BEGIN
 					ConfBufTrID <= Proc;
 					IF (ConfBufStatus(1) is '1') THEN						--Se Proc está com Internal Abort
 						FOR Addr IN (0 TO 9) LOOP								--Varre TM_Buffer
-							IF ((MemBuffer(Addr,Proc,0) OR MemBuffer(Addr,Proc,1)) = '1') THEN		--Se endereço do TM_Buffer tem RW do procesador retornado true
+							ReadWriteSet := MemBuffer(Addr, 15 DOWNTO 8);
+							IF ((ReadWriteSet(Proc,0) OR ReadWriteSet(Proc,1)) = '1') THEN		--Se endereço do TM_Buffer tem RW do procesador retornado true
 								--Limpa os dados do processador retornado daquele endereço do TM_Buffer
+								ReadWriteSet(Proc) := "00";
 								--Verifica se ele também possui o RW de algum dos outros processadores retornando true
-								--Caso não, então limpa os resto dos dados encontrados no endereço
+								FOR P IN (0 TO 3) LOOP
+									ProcFlag := ReadWriteSet(P,0) OR ReadWriteSet(P,1) OR ProcFlag;
+								END LOOP;
+								IF (ProcFlag = '0') THEN
+									--Caso não, então limpa os resto dos dados encontrados no endereço
+									MemBuffer(Addr, 24) <= '0';
+								END IF;
+								MemBuffer(Addr, 15 DOWNTO 8) <= ReadWriteSet;
 							END IF;
 						END LOOP;
 						--Remove Internal Conflict do Proc no Conflict_Buffer
+						ConfBufMode <= "00";
+						ConfBufTrID <= Proc;
+						ConfBufMode <= "10";
 					END IF;
 					
 					--Para de varrer se CU já voltou pro idle (ou seja, garante que já foram todos endereços de Conflict_Buffer com Internal Abort Flag)
