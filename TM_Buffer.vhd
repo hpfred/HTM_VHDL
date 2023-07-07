@@ -43,14 +43,14 @@ SIGNAL MemBuffer: ALL_DATA;
 
 TYPE RW_SET IS ARRAY (3 DOWNTO 0) OF STD_LOGIC_VECTOR (1 DOWNTO 0);
 
-SIGNAL ProcID: STD_LOGIC_VECTOR (1 DOWNTO 0);
+--SIGNAL ProcID: STD_LOGIC_VECTOR (1 DOWNTO 0);
 
 BEGIN
 
 	PROCESS (Reset, Clock)
 		VARIABLE ReadWriteSet: RW_SET;
 		VARIABLE FrstNonValid: INTEGER := 2147483647;
-		VARIABLE CurrAddr: INTEGER;
+		VARIABLE CurrAddr: INTEGER;	--STD_LOGIC_VECTOR (3 DOWNTO 0);
 		VARIABLE HitFlag, AbortFlag, ProcFlag: STD_LOGIC := '0';
 		VARIABLE UpdateAddress: STD_LOGIC_VECTOR (7 DOWNTO 0);
 	BEGIN
@@ -63,14 +63,14 @@ BEGIN
 		
 			IF (CUStatus = "001" OR CUStatus = "010") THEN				--Se Status é Read ou Write
 				ConfBufTrID <= TransactionID;
-				IF (ConfBufStatus = '0') THEN									--Verifica com Conflict_Buffer se é transação zumbi
+				IF (ConfBufStatus(0) = '0') THEN									--Verifica com Conflict_Buffer se é transação zumbi
 					FOR CurrAddr IN 0 TO 9 LOOP	--'length-1
-						IF (MemBuffer(i, 24) = '0' AND FrstNonValid > CurrAddr) THEN
+						IF (MemBuffer(CurrAddr)(24) = '0' AND FrstNonValid > CurrAddr) THEN
 							FrstNonValid := CurrAddr;
 							HitFlag := '0';
 						END IF;
 						
-						IF MemBuffer(i, (23 DOWNTO 16)) = MemAddress THEN
+						IF MemBuffer(CurrAddr)(23 DOWNTO 16) = MemAddress THEN
 							HitFlag := '1';
 							EXIT;
 						END IF;
@@ -79,26 +79,26 @@ BEGIN
 					--IF (CurrAddr = 9) THEN OVERFLOW.MISS
 					
 					IF (HitFlag = '0') THEN										--Buffer Miss
-						MemBuffer(CurrAddr, 24) <= '1';
-						MemBuffer(CurrAddr, 23 DOWNTO 16) <= MemAddress;
+						MemBuffer(CurrAddr)(24) <= '1';
+						MemBuffer(CurrAddr)(23 DOWNTO 16) <= MemAddress;
 						
-						ReadWriteSet := MemBuffer(CurrAddr, 15 DOWNTO 8);
+						ReadWriteSet := MemBuffer(CurrAddr)(15 DOWNTO 8);		--TO_STDLOGICVECTOR(MemBuffer(CurrAddr)(15 DOWNTO 8))?
 						IF (CUStatus = "001") THEN
 							ReadWriteSet(ProcID, 0) := '1';
 						ELSIF (CUStatus = "010") THEN
 							ReadWriteSet(ProcID, 1) := '1';
 						END IF;
-						MemBuffer(CurrAddr, 15 DOWNTO 8) <= ReadWriteSet;
-						MemBuffer(CurrAddr, 7 DOWNTO 0) <= Data;
+						MemBuffer(CurrAddr)(15 DOWNTO 8) <= ReadWriteSet;
+						MemBuffer(CurrAddr)(7 DOWNTO 0) <= Data;
 						
 						QueueMode <= "01";										--Guarda na fila --Adicionar IF só pra fazer nos Writes?
 						QueueMode <= "00";
 							
 					ELSE																--Buffer Hit
-						ReadWriteSet := MemBuffer(CurrAddr, 15 DOWNTO 8);
+						ReadWriteSet := MemBuffer(CurrAddr)(15 DOWNTO 8);
 						
 						IF (CUStatus = "001") THEN								--Read
-							FOR i IN (0 TO 3) LOOP
+							FOR i IN 0 TO 3 LOOP
 								IF (ReadWriteSet(i,1) = '1' AND ProcID /= i) THEN
 									ConfBufMode <= "00";
 									ConfBufTrID <= ProcID;
@@ -120,7 +120,7 @@ BEGIN
 							AbortFlag := '0';
 							
 						ELSIF (CUStatus = "010") THEN							--Write
-							FOR i IN (0 TO 3) LOOP
+							FOR i IN 0 TO 3 LOOP
 								IF (ReadWriteSet(i) /= "00" AND ProcID /= i) THEN
 									ConfBufMode <= "00";
 									ConfBufTrID <= i;
@@ -145,14 +145,14 @@ BEGIN
 				END IF;
 				
 			ELSIF (CUStatus = "011") THEN										--Se Status é abort
-				FOR Proc IN (0 TO 3) LOOP																				--Varre Conflict_Buffer
+				FOR Proc IN 0 TO 3 LOOP																				--Varre Conflict_Buffer
 					ConfBufTrID <= Proc;
 					IF (ConfBufStatus(1) = '1') THEN																--Se Proc está com Internal Abort
-						FOR Addr IN (0 TO 9) LOOP																		--Varre TM_Buffer
+						FOR Addr IN 0 TO 9 LOOP																		--Varre TM_Buffer
 							ReadWriteSet := MemBuffer(Addr, 15 DOWNTO 8);
 							IF ((ReadWriteSet(Proc,0) OR ReadWriteSet(Proc,1)) = '1') THEN					--Se endereço do TM_Buffer tem RW do procesador retornado true
 								ReadWriteSet(Proc) := "00";
-								FOR P IN (0 TO 3) LOOP
+								FOR P IN 0 TO 3 LOOP
 									ProcFlag := ReadWriteSet(P,0) OR ReadWriteSet(P,1) OR ProcFlag;		--Verifica se endereço é usado por outro processador
 								END LOOP;
 								IF (ProcFlag = '0') THEN
@@ -188,15 +188,15 @@ BEGIN
 					QueueMode <= "00";
 					UpdateAddress <= QueueReturn;
 					
-					FOR Addr IN (0 TO 9) LOOP
-						IF (MemBuffer(Addr, (23 DOWNTO 16)) = UpdateAddress) THEN
+					FOR Addr IN 0 TO 9 LOOP
+						IF MemBuffer(Addr, 23 DOWNTO 16) = UpdateAddress THEN
 							MemoryAddr <= UpdateAddress;								--Atualiza na Memória Principal
-							MemoryData <= MemBuffer(Addr, (7 DOWNTO 0));
+							MemoryData <= MemBuffer(Addr, 7 DOWNTO 0);
 							--Talvez alguma entrada de comunicação, pra dizer se é Fetch ou Post
 						
 							ReadWriteSet := MemBuffer(Addr, 15 DOWNTO 8);		--Remove/Limpa Buffer depois de atualizado na Memória Principal
 							ReadWriteSet(TransactionID) := "00";
-							FOR P IN (0 TO 3) LOOP
+							FOR P IN 0 TO 3 LOOP
 								ProcFlag := ReadWriteSet(P,0) OR ReadWriteSet(P,1) OR ProcFlag;
 							END LOOP;
 							IF (ProcFlag = '0') THEN
