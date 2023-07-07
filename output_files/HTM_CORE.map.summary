@@ -1,13 +1,13 @@
-Analysis & Synthesis Status : Successful - Fri Jul 07 16:31:59 2023
+Analysis & Synthesis Status : Successful - Fri Jul 07 17:00:13 2023
 Quartus II 64-Bit Version : 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition
 Revision Name : HTM_CORE
-Top-level Entity Name : Address_Queue
+Top-level Entity Name : HTM_Core
 Family : Cyclone II
 Total logic elements : 0
     Total combinational functions : 0
     Dedicated logic registers : 0
 Total registers : 0
-Total pins : 24
+Total pins : 27
 Total virtual pins : 0
 Total memory bits : 0
 Embedded Multiplier 9-bit elements : 0

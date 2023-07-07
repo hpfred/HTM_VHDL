@@ -25,15 +25,21 @@ SIGNAL MemStorage: ALL_DATA;
 
 TYPE POINTER IS ARRAY (3 DOWNTO 0) OF STD_LOGIC_VECTOR (3 DOWNTO 0);
 SIGNAL Head, Tail: POINTER;
+
+SIGNAL ModeLatest: STD_LOGIC_VECTOR (1 DOWNTO 0);
 SIGNAL ModeStorage: STD_LOGIC_VECTOR (1 DOWNTO 0);
+SIGNAL ResetMode:	STD_LOGIC;
 
 SIGNAL TrIDint: INTEGER := TO_INTEGER(UNSIGNED(TrID));
 --SIGNAL HeadInt: INTEGER := TO_INTEGER(UNSIGNED(Head(TrIDint)));
 --SIGNAL TailInt: INTEGER := TO_INTEGER(UNSIGNED(Tail(TrIDint)));
 
 BEGIN
+	
 	--ModeStorage(0) <= ((Mode(0) XOR Mode(1)) AND Mode(0)) OR (NOT(Mode(0) XOR Mode(1)) AND ModeStorage(0));
 	--ModeStorage(1) <= ((Mode(0) XOR Mode(1)) AND Mode(1)) OR (NOT(Mode(0) XOR Mode(1)) AND ModeStorage(1));
+	ModeLatest <= Mode WHEN (Mode /= "00") ELSE ModeLatest;
+	ModeStorage <= ModeLatest WHEN (ResetMode = '0') ELSE "00";
 	
 	PROCESS (Reset, Clock)
 	BEGIN
@@ -51,7 +57,9 @@ BEGIN
 				--Ret <= MemStorage(TrIDint)(HeadInt);
 				Ret <= MemStorage(TrIDint)(TO_INTEGER(UNSIGNED(Head(TrIDint))));
 				Head(TrIDint) <= Head(TrIDint) + 1;
-				ModeStorage <= "00";
+				--ModeStorage <= "00";
+				ResetMode <= '1';
+				ResetMode <= '0';
 				IF (Head(TrIDint) > Tail(TrIDint)) THEN				--Testa fila vazia de novo pra deixar Status atualizado
 					FIFOStatus <= "01";
 				ELSE
@@ -67,7 +75,9 @@ BEGIN
 				--MemStorage(TrIDint)(TailInt) <= Addr;
 				MemStorage(TrIDint)(TO_INTEGER(UNSIGNED(Tail(TrIDint)))) <= Addr;
 				Tail(TrIDint) <= Tail(TrIDint) + 1;
-				ModeStorage <= "00";
+				--ModeStorage <= "00";
+				ResetMode <= '1';
+				ResetMode <= '0';
 				IF (Tail(TrIDint) = "1111") THEN						--Testa fila cheia de novo pra deixar Status atualizado
 					FIFOStatus <= "10";
 				ELSE

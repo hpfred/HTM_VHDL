@@ -1,5 +1,5 @@
 Analysis & Synthesis report for HTM_CORE
-Fri Jul 07 16:31:59 2023
+Fri Jul 07 17:00:13 2023
 Quartus II 64-Bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -13,10 +13,14 @@ Quartus II 64-Bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edit
   5. Analysis & Synthesis Source Files Read
   6. Analysis & Synthesis Resource Usage Summary
   7. Analysis & Synthesis Resource Utilization by Entity
-  8. Registers Removed During Synthesis
-  9. General Register Statistics
- 10. Elapsed Time Per Partition
- 11. Analysis & Synthesis Messages
+  8. State Machine - |HTM_Core|Control_Unit:CU|NextStateIs
+  9. State Machine - |HTM_Core|Control_Unit:CU|CurrStateIs
+ 10. Registers Removed During Synthesis
+ 11. Removed Registers Triggering Further Register Optimizations
+ 12. General Register Statistics
+ 13. Multiplexer Restructuring Statistics (Restructuring Performed)
+ 14. Elapsed Time Per Partition
+ 15. Analysis & Synthesis Messages
 
 
 
@@ -42,16 +46,16 @@ applicable agreement for further details.
 +--------------------------------------------------------------------------------------+
 ; Analysis & Synthesis Summary                                                         ;
 +------------------------------------+-------------------------------------------------+
-; Analysis & Synthesis Status        ; Successful - Fri Jul 07 16:31:59 2023           ;
+; Analysis & Synthesis Status        ; Successful - Fri Jul 07 17:00:13 2023           ;
 ; Quartus II 64-Bit Version          ; 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition ;
 ; Revision Name                      ; HTM_CORE                                        ;
-; Top-level Entity Name              ; Address_Queue                                   ;
+; Top-level Entity Name              ; HTM_Core                                        ;
 ; Family                             ; Cyclone II                                      ;
 ; Total logic elements               ; 0                                               ;
 ;     Total combinational functions  ; 0                                               ;
 ;     Dedicated logic registers      ; 0                                               ;
 ; Total registers                    ; 0                                               ;
-; Total pins                         ; 24                                              ;
+; Total pins                         ; 27                                              ;
 ; Total virtual pins                 ; 0                                               ;
 ; Total memory bits                  ; 0                                               ;
 ; Embedded Multiplier 9-bit elements ; 0                                               ;
@@ -65,7 +69,7 @@ applicable agreement for further details.
 ; Option                                                                     ; Setting            ; Default Value      ;
 +----------------------------------------------------------------------------+--------------------+--------------------+
 ; Device                                                                     ; EP2C35F672C6       ;                    ;
-; Top-level entity name                                                      ; Address_Queue      ; HTM_CORE           ;
+; Top-level entity name                                                      ; HTM_Core           ; HTM_CORE           ;
 ; Family name                                                                ; Cyclone II         ; Cyclone IV GX      ;
 ; Use smart compilation                                                      ; Off                ; Off                ;
 ; Enable parallel Assembler and TimeQuest Timing Analyzer during compilation ; On                 ; On                 ;
@@ -155,13 +159,18 @@ Parallel compilation was disabled, but you have multiple processors available. E
 +----------------------------+--------+
 
 
-+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-; Analysis & Synthesis Source Files Read                                                                                                                                                            ;
-+----------------------------------+-----------------+-----------------+------------------------------------------------------------------------------------------------------------------+---------+
-; File Name with User-Entered Path ; Used in Netlist ; File Type       ; File Name with Absolute Path                                                                                     ; Library ;
-+----------------------------------+-----------------+-----------------+------------------------------------------------------------------------------------------------------------------+---------+
-; Address_Queue.vhd                ; yes             ; User VHDL File  ; C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Address_Queue.vhd ;         ;
-+----------------------------------+-----------------+-----------------+------------------------------------------------------------------------------------------------------------------+---------+
++-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Analysis & Synthesis Source Files Read                                                                                                                                                              ;
++----------------------------------+-----------------+-----------------+--------------------------------------------------------------------------------------------------------------------+---------+
+; File Name with User-Entered Path ; Used in Netlist ; File Type       ; File Name with Absolute Path                                                                                       ; Library ;
++----------------------------------+-----------------+-----------------+--------------------------------------------------------------------------------------------------------------------+---------+
+; HTM_Core.vhd                     ; yes             ; User VHDL File  ; C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/HTM_Core.vhd        ;         ;
+; TM_Buffer.vhd                    ; yes             ; User VHDL File  ; C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/TM_Buffer.vhd       ;         ;
+; Main_Memory.vhd                  ; yes             ; User VHDL File  ; C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Main_Memory.vhd     ;         ;
+; Control_Unit.vhd                 ; yes             ; User VHDL File  ; C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Control_Unit.vhd    ;         ;
+; Conflict_Buffer.vhd              ; yes             ; User VHDL File  ; C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Conflict_Buffer.vhd ;         ;
+; Address_Queue.vhd                ; yes             ; User VHDL File  ; C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Address_Queue.vhd   ;         ;
++----------------------------------+-----------------+-----------------+--------------------------------------------------------------------------------------------------------------------+---------+
 
 
 +-----------------------------------------------------+
@@ -184,7 +193,7 @@ Parallel compilation was disabled, but you have multiple processors available. E
 ;     -- Dedicated logic registers            ; 0     ;
 ;     -- I/O registers                        ; 0     ;
 ;                                             ;       ;
-; I/O pins                                    ; 24    ;
+; I/O pins                                    ; 27    ;
 ; Embedded Multiplier 9-bit elements          ; 0     ;
 +---------------------------------------------+-------+
 
@@ -194,62 +203,233 @@ Parallel compilation was disabled, but you have multiple processors available. E
 +----------------------------+-------------------+--------------+-------------+--------------+---------+-----------+------+--------------+---------------------+--------------+
 ; Compilation Hierarchy Node ; LC Combinationals ; LC Registers ; Memory Bits ; DSP Elements ; DSP 9x9 ; DSP 18x18 ; Pins ; Virtual Pins ; Full Hierarchy Name ; Library Name ;
 +----------------------------+-------------------+--------------+-------------+--------------+---------+-----------+------+--------------+---------------------+--------------+
-; |Address_Queue             ; 0 (0)             ; 0 (0)        ; 0           ; 0            ; 0       ; 0         ; 24   ; 0            ; |Address_Queue      ; work         ;
+; |HTM_Core                  ; 0 (0)             ; 0 (0)        ; 0           ; 0            ; 0       ; 0         ; 27   ; 0            ; |HTM_Core           ; work         ;
 +----------------------------+-------------------+--------------+-------------+--------------+---------+-----------+------+--------------+---------------------+--------------+
 Note: For table entries with two numbers listed, the numbers in parentheses indicate the number of resources of the given type used by the specific entity alone. The numbers listed outside of parentheses indicate the total resources of the given type used by the specific entity and all of its sub-entities in the hierarchy.
 
 
-+--------------------------------------------------------------------------------------+
-; Registers Removed During Synthesis                                                   ;
-+----------------------------------------+---------------------------------------------+
-; Register name                          ; Reason for Removal                          ;
-+----------------------------------------+---------------------------------------------+
-; ModeStorage[0]                         ; Merged with ModeStorage[1]                  ;
-; Tail[0][0]                             ; Stuck at GND due to stuck port clock_enable ;
-; Ret[7]~reg0                            ; Stuck at GND due to stuck port clock_enable ;
-; Ret[6]~reg0                            ; Stuck at GND due to stuck port clock_enable ;
-; Ret[5]~reg0                            ; Stuck at GND due to stuck port clock_enable ;
-; Ret[4]~reg0                            ; Stuck at GND due to stuck port clock_enable ;
-; Ret[3]~reg0                            ; Stuck at GND due to stuck port clock_enable ;
-; Ret[2]~reg0                            ; Stuck at GND due to stuck port clock_enable ;
-; Ret[1]~reg0                            ; Stuck at GND due to stuck port clock_enable ;
-; Ret[0]~reg0                            ; Stuck at GND due to stuck port clock_enable ;
-; Head[3][3]                             ; Stuck at GND due to stuck port clock_enable ;
-; Head[3][2]                             ; Stuck at GND due to stuck port clock_enable ;
-; Head[3][1]                             ; Stuck at GND due to stuck port clock_enable ;
-; Head[3][0]                             ; Stuck at GND due to stuck port clock_enable ;
-; Head[2][3]                             ; Stuck at GND due to stuck port clock_enable ;
-; Head[2][2]                             ; Stuck at GND due to stuck port clock_enable ;
-; Head[2][1]                             ; Stuck at GND due to stuck port clock_enable ;
-; Head[2][0]                             ; Stuck at GND due to stuck port clock_enable ;
-; Head[1][3]                             ; Stuck at GND due to stuck port clock_enable ;
-; Head[1][2]                             ; Stuck at GND due to stuck port clock_enable ;
-; Head[1][1]                             ; Stuck at GND due to stuck port clock_enable ;
-; Head[1][0]                             ; Stuck at GND due to stuck port clock_enable ;
-; Head[0][3]                             ; Stuck at GND due to stuck port clock_enable ;
-; Head[0][2]                             ; Stuck at GND due to stuck port clock_enable ;
-; Head[0][1]                             ; Stuck at GND due to stuck port clock_enable ;
-; Head[0][0]                             ; Stuck at GND due to stuck port clock_enable ;
-; Tail[3][3]                             ; Stuck at GND due to stuck port clock_enable ;
-; Tail[3][2]                             ; Stuck at GND due to stuck port clock_enable ;
-; Tail[3][1]                             ; Stuck at GND due to stuck port clock_enable ;
-; Tail[3][0]                             ; Stuck at GND due to stuck port clock_enable ;
-; Tail[2][3]                             ; Stuck at GND due to stuck port clock_enable ;
-; Tail[2][2]                             ; Stuck at GND due to stuck port clock_enable ;
-; Tail[2][1]                             ; Stuck at GND due to stuck port clock_enable ;
-; Tail[2][0]                             ; Stuck at GND due to stuck port clock_enable ;
-; Tail[1][3]                             ; Stuck at GND due to stuck port clock_enable ;
-; Tail[1][2]                             ; Stuck at GND due to stuck port clock_enable ;
-; Tail[1][1]                             ; Stuck at GND due to stuck port clock_enable ;
-; Tail[1][0]                             ; Stuck at GND due to stuck port clock_enable ;
-; Tail[0][3]                             ; Stuck at GND due to stuck port clock_enable ;
-; Tail[0][2]                             ; Stuck at GND due to stuck port clock_enable ;
-; Tail[0][1]                             ; Stuck at GND due to stuck port clock_enable ;
-; FIFOStatus[1]~reg0                     ; Stuck at GND due to stuck port data_in      ;
-; FIFOStatus[0]~reg0                     ; Stuck at GND due to stuck port data_in      ;
-; ModeStorage[1]                         ; Stuck at GND due to stuck port data_in      ;
-; Total Number of Removed Registers = 44 ;                                             ;
-+----------------------------------------+---------------------------------------------+
+Encoding Type:  One-Hot
++-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; State Machine - |HTM_Core|Control_Unit:CU|NextStateIs                                                                                                                                     ;
++-------------------------------+-------------------------------+-------------------------+------------------------+------------------------+-----------------------+-----------------------+
+; Name                          ; NextStateIs.MemoryUpdateState ; NextStateIs.CommitState ; NextStateIs.AbortState ; NextStateIs.WriteState ; NextStateIs.ReadState ; NextStateIs.IdleState ;
++-------------------------------+-------------------------------+-------------------------+------------------------+------------------------+-----------------------+-----------------------+
+; NextStateIs.IdleState         ; 0                             ; 0                       ; 0                      ; 0                      ; 0                     ; 0                     ;
+; NextStateIs.ReadState         ; 0                             ; 0                       ; 0                      ; 0                      ; 1                     ; 1                     ;
+; NextStateIs.WriteState        ; 0                             ; 0                       ; 0                      ; 1                      ; 0                     ; 1                     ;
+; NextStateIs.AbortState        ; 0                             ; 0                       ; 1                      ; 0                      ; 0                     ; 1                     ;
+; NextStateIs.CommitState       ; 0                             ; 1                       ; 0                      ; 0                      ; 0                     ; 1                     ;
+; NextStateIs.MemoryUpdateState ; 1                             ; 0                       ; 0                      ; 0                      ; 0                     ; 1                     ;
++-------------------------------+-------------------------------+-------------------------+------------------------+------------------------+-----------------------+-----------------------+
+
+
+Encoding Type:  One-Hot
++-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; State Machine - |HTM_Core|Control_Unit:CU|CurrStateIs                                                                                                                                     ;
++-------------------------------+-------------------------------+-------------------------+------------------------+------------------------+-----------------------+-----------------------+
+; Name                          ; CurrStateIs.MemoryUpdateState ; CurrStateIs.CommitState ; CurrStateIs.AbortState ; CurrStateIs.WriteState ; CurrStateIs.ReadState ; CurrStateIs.IdleState ;
++-------------------------------+-------------------------------+-------------------------+------------------------+------------------------+-----------------------+-----------------------+
+; CurrStateIs.IdleState         ; 0                             ; 0                       ; 0                      ; 0                      ; 0                     ; 0                     ;
+; CurrStateIs.ReadState         ; 0                             ; 0                       ; 0                      ; 0                      ; 1                     ; 1                     ;
+; CurrStateIs.WriteState        ; 0                             ; 0                       ; 0                      ; 1                      ; 0                     ; 1                     ;
+; CurrStateIs.AbortState        ; 0                             ; 0                       ; 1                      ; 0                      ; 0                     ; 1                     ;
+; CurrStateIs.CommitState       ; 0                             ; 1                       ; 0                      ; 0                      ; 0                     ; 1                     ;
+; CurrStateIs.MemoryUpdateState ; 1                             ; 0                       ; 0                      ; 0                      ; 0                     ; 1                     ;
++-------------------------------+-------------------------------+-------------------------+------------------------+------------------------+-----------------------+-----------------------+
+
+
++---------------------------------------------------------------------------------------------+
+; Registers Removed During Synthesis                                                          ;
++-----------------------------------------------+---------------------------------------------+
+; Register name                                 ; Reason for Removal                          ;
++-----------------------------------------------+---------------------------------------------+
+; TM_Buffer:Buff|AbortFlag                      ; Stuck at GND due to stuck port data_in      ;
+; TM_Buffer:Buff|QueueMode[0]                   ; Merged with TM_Buffer:Buff|QueueMode[1]     ;
+; TM_Buffer:Buff|MemBuffer[1][15]               ; Merged with TM_Buffer:Buff|MemBuffer[1][14] ;
+; TM_Buffer:Buff|MemBuffer[2][14]               ; Merged with TM_Buffer:Buff|MemBuffer[1][14] ;
+; TM_Buffer:Buff|MemBuffer[2][15]               ; Merged with TM_Buffer:Buff|MemBuffer[1][14] ;
+; TM_Buffer:Buff|MemBuffer[3][14]               ; Merged with TM_Buffer:Buff|MemBuffer[1][14] ;
+; TM_Buffer:Buff|MemBuffer[3][15]               ; Merged with TM_Buffer:Buff|MemBuffer[1][14] ;
+; TM_Buffer:Buff|MemBuffer[4][14]               ; Merged with TM_Buffer:Buff|MemBuffer[1][14] ;
+; TM_Buffer:Buff|MemBuffer[4][15]               ; Merged with TM_Buffer:Buff|MemBuffer[1][14] ;
+; TM_Buffer:Buff|MemBuffer[5][14]               ; Merged with TM_Buffer:Buff|MemBuffer[1][14] ;
+; TM_Buffer:Buff|MemBuffer[5][15]               ; Merged with TM_Buffer:Buff|MemBuffer[1][14] ;
+; TM_Buffer:Buff|MemBuffer[6][14]               ; Merged with TM_Buffer:Buff|MemBuffer[1][14] ;
+; TM_Buffer:Buff|MemBuffer[6][15]               ; Merged with TM_Buffer:Buff|MemBuffer[1][14] ;
+; TM_Buffer:Buff|MemBuffer[7][14]               ; Merged with TM_Buffer:Buff|MemBuffer[1][14] ;
+; TM_Buffer:Buff|MemBuffer[7][15]               ; Merged with TM_Buffer:Buff|MemBuffer[1][14] ;
+; TM_Buffer:Buff|MemBuffer[8][14]               ; Merged with TM_Buffer:Buff|MemBuffer[1][14] ;
+; TM_Buffer:Buff|MemBuffer[8][15]               ; Merged with TM_Buffer:Buff|MemBuffer[1][14] ;
+; TM_Buffer:Buff|MemBuffer[9][14]               ; Merged with TM_Buffer:Buff|MemBuffer[1][14] ;
+; TM_Buffer:Buff|MemBuffer[9][15]               ; Merged with TM_Buffer:Buff|MemBuffer[1][14] ;
+; TM_Buffer:Buff|MemBuffer[1][13]               ; Merged with TM_Buffer:Buff|MemBuffer[1][12] ;
+; TM_Buffer:Buff|MemBuffer[2][12]               ; Merged with TM_Buffer:Buff|MemBuffer[1][12] ;
+; TM_Buffer:Buff|MemBuffer[2][13]               ; Merged with TM_Buffer:Buff|MemBuffer[1][12] ;
+; TM_Buffer:Buff|MemBuffer[3][12]               ; Merged with TM_Buffer:Buff|MemBuffer[1][12] ;
+; TM_Buffer:Buff|MemBuffer[3][13]               ; Merged with TM_Buffer:Buff|MemBuffer[1][12] ;
+; TM_Buffer:Buff|MemBuffer[4][12]               ; Merged with TM_Buffer:Buff|MemBuffer[1][12] ;
+; TM_Buffer:Buff|MemBuffer[4][13]               ; Merged with TM_Buffer:Buff|MemBuffer[1][12] ;
+; TM_Buffer:Buff|MemBuffer[5][12]               ; Merged with TM_Buffer:Buff|MemBuffer[1][12] ;
+; TM_Buffer:Buff|MemBuffer[5][13]               ; Merged with TM_Buffer:Buff|MemBuffer[1][12] ;
+; TM_Buffer:Buff|MemBuffer[6][12]               ; Merged with TM_Buffer:Buff|MemBuffer[1][12] ;
+; TM_Buffer:Buff|MemBuffer[6][13]               ; Merged with TM_Buffer:Buff|MemBuffer[1][12] ;
+; TM_Buffer:Buff|MemBuffer[7][12]               ; Merged with TM_Buffer:Buff|MemBuffer[1][12] ;
+; TM_Buffer:Buff|MemBuffer[7][13]               ; Merged with TM_Buffer:Buff|MemBuffer[1][12] ;
+; TM_Buffer:Buff|MemBuffer[8][12]               ; Merged with TM_Buffer:Buff|MemBuffer[1][12] ;
+; TM_Buffer:Buff|MemBuffer[8][13]               ; Merged with TM_Buffer:Buff|MemBuffer[1][12] ;
+; TM_Buffer:Buff|MemBuffer[9][12]               ; Merged with TM_Buffer:Buff|MemBuffer[1][12] ;
+; TM_Buffer:Buff|MemBuffer[9][13]               ; Merged with TM_Buffer:Buff|MemBuffer[1][12] ;
+; TM_Buffer:Buff|MemBuffer[1][11]               ; Merged with TM_Buffer:Buff|MemBuffer[1][10] ;
+; TM_Buffer:Buff|MemBuffer[2][10]               ; Merged with TM_Buffer:Buff|MemBuffer[1][10] ;
+; TM_Buffer:Buff|MemBuffer[2][11]               ; Merged with TM_Buffer:Buff|MemBuffer[1][10] ;
+; TM_Buffer:Buff|MemBuffer[3][10]               ; Merged with TM_Buffer:Buff|MemBuffer[1][10] ;
+; TM_Buffer:Buff|MemBuffer[3][11]               ; Merged with TM_Buffer:Buff|MemBuffer[1][10] ;
+; TM_Buffer:Buff|MemBuffer[4][10]               ; Merged with TM_Buffer:Buff|MemBuffer[1][10] ;
+; TM_Buffer:Buff|MemBuffer[4][11]               ; Merged with TM_Buffer:Buff|MemBuffer[1][10] ;
+; TM_Buffer:Buff|MemBuffer[5][10]               ; Merged with TM_Buffer:Buff|MemBuffer[1][10] ;
+; TM_Buffer:Buff|MemBuffer[5][11]               ; Merged with TM_Buffer:Buff|MemBuffer[1][10] ;
+; TM_Buffer:Buff|MemBuffer[6][10]               ; Merged with TM_Buffer:Buff|MemBuffer[1][10] ;
+; TM_Buffer:Buff|MemBuffer[6][11]               ; Merged with TM_Buffer:Buff|MemBuffer[1][10] ;
+; TM_Buffer:Buff|MemBuffer[7][10]               ; Merged with TM_Buffer:Buff|MemBuffer[1][10] ;
+; TM_Buffer:Buff|MemBuffer[7][11]               ; Merged with TM_Buffer:Buff|MemBuffer[1][10] ;
+; TM_Buffer:Buff|MemBuffer[8][10]               ; Merged with TM_Buffer:Buff|MemBuffer[1][10] ;
+; TM_Buffer:Buff|MemBuffer[8][11]               ; Merged with TM_Buffer:Buff|MemBuffer[1][10] ;
+; TM_Buffer:Buff|MemBuffer[9][10]               ; Merged with TM_Buffer:Buff|MemBuffer[1][10] ;
+; TM_Buffer:Buff|MemBuffer[9][11]               ; Merged with TM_Buffer:Buff|MemBuffer[1][10] ;
+; TM_Buffer:Buff|MemBuffer[1][9]                ; Merged with TM_Buffer:Buff|MemBuffer[1][8]  ;
+; TM_Buffer:Buff|MemBuffer[2][8]                ; Merged with TM_Buffer:Buff|MemBuffer[1][8]  ;
+; TM_Buffer:Buff|MemBuffer[2][9]                ; Merged with TM_Buffer:Buff|MemBuffer[1][8]  ;
+; TM_Buffer:Buff|MemBuffer[3][8]                ; Merged with TM_Buffer:Buff|MemBuffer[1][8]  ;
+; TM_Buffer:Buff|MemBuffer[3][9]                ; Merged with TM_Buffer:Buff|MemBuffer[1][8]  ;
+; TM_Buffer:Buff|MemBuffer[4][8]                ; Merged with TM_Buffer:Buff|MemBuffer[1][8]  ;
+; TM_Buffer:Buff|MemBuffer[4][9]                ; Merged with TM_Buffer:Buff|MemBuffer[1][8]  ;
+; TM_Buffer:Buff|MemBuffer[5][8]                ; Merged with TM_Buffer:Buff|MemBuffer[1][8]  ;
+; TM_Buffer:Buff|MemBuffer[5][9]                ; Merged with TM_Buffer:Buff|MemBuffer[1][8]  ;
+; TM_Buffer:Buff|MemBuffer[6][8]                ; Merged with TM_Buffer:Buff|MemBuffer[1][8]  ;
+; TM_Buffer:Buff|MemBuffer[6][9]                ; Merged with TM_Buffer:Buff|MemBuffer[1][8]  ;
+; TM_Buffer:Buff|MemBuffer[7][8]                ; Merged with TM_Buffer:Buff|MemBuffer[1][8]  ;
+; TM_Buffer:Buff|MemBuffer[7][9]                ; Merged with TM_Buffer:Buff|MemBuffer[1][8]  ;
+; TM_Buffer:Buff|MemBuffer[8][8]                ; Merged with TM_Buffer:Buff|MemBuffer[1][8]  ;
+; TM_Buffer:Buff|MemBuffer[8][9]                ; Merged with TM_Buffer:Buff|MemBuffer[1][8]  ;
+; TM_Buffer:Buff|MemBuffer[9][8]                ; Merged with TM_Buffer:Buff|MemBuffer[1][8]  ;
+; TM_Buffer:Buff|MemBuffer[9][9]                ; Merged with TM_Buffer:Buff|MemBuffer[1][8]  ;
+; TM_Buffer:Buff|FrstNonValid[4..9,11..30]      ; Merged with TM_Buffer:Buff|FrstNonValid[10] ;
+; Address_Queue:Commit|Tail[0][0]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Ret[0..7]                ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Head[3][3]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Head[3][2]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Head[3][1]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Head[3][0]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Head[2][3]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Head[2][2]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Head[2][1]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Head[2][0]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Head[1][3]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Head[1][2]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Head[1][1]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Head[1][0]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Head[0][3]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Head[0][2]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Head[0][1]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Head[0][0]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Tail[3][3]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Tail[3][2]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Tail[3][1]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Tail[3][0]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Tail[2][3]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Tail[2][2]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Tail[2][1]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Tail[2][0]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Tail[1][3]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Tail[1][2]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Tail[1][1]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Tail[1][0]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Tail[0][3]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Tail[0][2]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|Tail[0][1]               ; Stuck at GND due to stuck port clock_enable ;
+; Address_Queue:Commit|FIFOStatus[0,1]          ; Stuck at GND due to stuck port data_in      ;
+; Address_Queue:Commit|ResetMode                ; Stuck at GND due to stuck port data_in      ;
+; TM_Buffer:Buff|MemBuffer[3][24]               ; Merged with TM_Buffer:Buff|MemBuffer[9][24] ;
+; TM_Buffer:Buff|MemBuffer[2][24]               ; Merged with TM_Buffer:Buff|MemBuffer[9][24] ;
+; TM_Buffer:Buff|MemBuffer[4][24]               ; Merged with TM_Buffer:Buff|MemBuffer[9][24] ;
+; TM_Buffer:Buff|MemBuffer[8][24]               ; Merged with TM_Buffer:Buff|MemBuffer[9][24] ;
+; TM_Buffer:Buff|MemBuffer[7][24]               ; Merged with TM_Buffer:Buff|MemBuffer[9][24] ;
+; TM_Buffer:Buff|MemBuffer[6][24]               ; Merged with TM_Buffer:Buff|MemBuffer[9][24] ;
+; TM_Buffer:Buff|MemBuffer[5][24]               ; Merged with TM_Buffer:Buff|MemBuffer[9][24] ;
+; TM_Buffer:Buff|BuffStatus[0]                  ; Merged with TM_Buffer:Buff|BuffStatus[1]    ;
+; TM_Buffer:Buff|FrstNonValid[31]               ; Stuck at GND due to stuck port data_in      ;
+; TM_Buffer:Buff|MemBuffer[1][24]               ; Stuck at GND due to stuck port data_in      ;
+; TM_Buffer:Buff|MemBuffer[9][24]               ; Stuck at GND due to stuck port data_in      ;
+; TM_Buffer:Buff|MemBuffer[1][10]               ; Stuck at GND due to stuck port data_in      ;
+; TM_Buffer:Buff|MemBuffer[1][12]               ; Stuck at GND due to stuck port data_in      ;
+; TM_Buffer:Buff|MemBuffer[1][14]               ; Stuck at GND due to stuck port data_in      ;
+; TM_Buffer:Buff|BuffStatus[2]                  ; Merged with TM_Buffer:Buff|BuffStatus[1]    ;
+; TM_Buffer:Buff|ConfBufMode[0]                 ; Merged with TM_Buffer:Buff|ConfBufMode[1]   ;
+; TM_Buffer:Buff|BuffStatus[1]                  ; Stuck at GND due to stuck port data_in      ;
+; TM_Buffer:Buff|FrstNonValid[0..3,10]          ; Stuck at VCC due to stuck port clock_enable ;
+; TM_Buffer:Buff|HitFlag                        ; Stuck at GND due to stuck port clock_enable ;
+; TM_Buffer:Buff|MemBuffer[0][23]               ; Stuck at GND due to stuck port clock_enable ;
+; TM_Buffer:Buff|MemBuffer[0][22]               ; Stuck at GND due to stuck port clock_enable ;
+; TM_Buffer:Buff|MemBuffer[0][21]               ; Stuck at GND due to stuck port clock_enable ;
+; TM_Buffer:Buff|MemBuffer[0][20]               ; Stuck at GND due to stuck port clock_enable ;
+; TM_Buffer:Buff|MemBuffer[0][19]               ; Stuck at GND due to stuck port clock_enable ;
+; TM_Buffer:Buff|MemBuffer[0][18]               ; Stuck at GND due to stuck port clock_enable ;
+; TM_Buffer:Buff|MemBuffer[0][17]               ; Stuck at GND due to stuck port clock_enable ;
+; TM_Buffer:Buff|MemBuffer[0][16]               ; Stuck at GND due to stuck port clock_enable ;
+; TM_Buffer:Buff|MemBuffer[0][24]               ; Lost fanout                                 ;
+; TM_Buffer:Buff|ProcFlag                       ; Lost fanout                                 ;
+; TM_Buffer:Buff|MemBuffer[1][8]                ; Lost fanout                                 ;
+; TM_Buffer:Buff|MemBuffer[0][10]               ; Merged with TM_Buffer:Buff|MemBuffer[0][11] ;
+; TM_Buffer:Buff|MemBuffer[0][12]               ; Merged with TM_Buffer:Buff|MemBuffer[0][13] ;
+; TM_Buffer:Buff|MemBuffer[0][14]               ; Merged with TM_Buffer:Buff|MemBuffer[0][15] ;
+; TM_Buffer:Buff|ConfBufMode[1]                 ; Lost fanout                                 ;
+; TM_Buffer:Buff|ConfBufTrID[0,1]               ; Lost fanout                                 ;
+; Control_Unit:CU|CUStatus[0..2]                ; Lost fanout                                 ;
+; TM_Buffer:Buff|MemBuffer[0][9]                ; Lost fanout                                 ;
+; TM_Buffer:Buff|MemBuffer[0][8]                ; Lost fanout                                 ;
+; TM_Buffer:Buff|MemBuffer[0][11]               ; Lost fanout                                 ;
+; TM_Buffer:Buff|MemBuffer[0][13]               ; Lost fanout                                 ;
+; TM_Buffer:Buff|MemBuffer[0][15]               ; Lost fanout                                 ;
+; Control_Unit:CU|NextStateIs.IdleState         ; Lost fanout                                 ;
+; Control_Unit:CU|NextStateIs.ReadState         ; Lost fanout                                 ;
+; Control_Unit:CU|NextStateIs.WriteState        ; Lost fanout                                 ;
+; Control_Unit:CU|NextStateIs.AbortState        ; Lost fanout                                 ;
+; Control_Unit:CU|NextStateIs.CommitState       ; Lost fanout                                 ;
+; Control_Unit:CU|NextStateIs.MemoryUpdateState ; Lost fanout                                 ;
+; Control_Unit:CU|CurrStateIs.IdleState         ; Lost fanout                                 ;
+; Control_Unit:CU|CurrStateIs.ReadState         ; Lost fanout                                 ;
+; Control_Unit:CU|CurrStateIs.WriteState        ; Lost fanout                                 ;
+; Control_Unit:CU|CurrStateIs.AbortState        ; Lost fanout                                 ;
+; Control_Unit:CU|CurrStateIs.CommitState       ; Lost fanout                                 ;
+; Control_Unit:CU|CurrStateIs.MemoryUpdateState ; Lost fanout                                 ;
+; Total Number of Removed Registers = 199       ;                                             ;
++-----------------------------------------------+---------------------------------------------+
+
+
++-----------------------------------------------------------------------------------------------------------------------------------------+
+; Removed Registers Triggering Further Register Optimizations                                                                             ;
++------------------------------------+--------------------------------+-------------------------------------------------------------------+
+; Register name                      ; Reason for Removal             ; Registers Removed due to This Register                            ;
++------------------------------------+--------------------------------+-------------------------------------------------------------------+
+; TM_Buffer:Buff|FrstNonValid[31]    ; Stuck at GND                   ; TM_Buffer:Buff|FrstNonValid[10], TM_Buffer:Buff|FrstNonValid[3],  ;
+;                                    ; due to stuck port data_in      ; TM_Buffer:Buff|FrstNonValid[2], TM_Buffer:Buff|FrstNonValid[1],   ;
+;                                    ;                                ; TM_Buffer:Buff|FrstNonValid[0], TM_Buffer:Buff|HitFlag,           ;
+;                                    ;                                ; TM_Buffer:Buff|MemBuffer[0][23], TM_Buffer:Buff|MemBuffer[0][22], ;
+;                                    ;                                ; TM_Buffer:Buff|MemBuffer[0][21], TM_Buffer:Buff|MemBuffer[0][20], ;
+;                                    ;                                ; TM_Buffer:Buff|MemBuffer[0][19], TM_Buffer:Buff|MemBuffer[0][18], ;
+;                                    ;                                ; TM_Buffer:Buff|MemBuffer[0][17], TM_Buffer:Buff|MemBuffer[0][16], ;
+;                                    ;                                ; TM_Buffer:Buff|MemBuffer[0][24], TM_Buffer:Buff|ProcFlag,         ;
+;                                    ;                                ; TM_Buffer:Buff|ConfBufMode[1], TM_Buffer:Buff|MemBuffer[0][9],    ;
+;                                    ;                                ; TM_Buffer:Buff|MemBuffer[0][8]                                    ;
+; Address_Queue:Commit|FIFOStatus[1] ; Stuck at GND                   ; TM_Buffer:Buff|MemBuffer[1][24], TM_Buffer:Buff|MemBuffer[9][24], ;
+;                                    ; due to stuck port data_in      ; TM_Buffer:Buff|MemBuffer[1][10], TM_Buffer:Buff|BuffStatus[1],    ;
+;                                    ;                                ; TM_Buffer:Buff|MemBuffer[0][11], TM_Buffer:Buff|MemBuffer[0][13]  ;
+; TM_Buffer:Buff|AbortFlag           ; Stuck at GND                   ; TM_Buffer:Buff|ConfBufTrID[1], TM_Buffer:Buff|ConfBufTrID[0],     ;
+;                                    ; due to stuck port data_in      ; Control_Unit:CU|CUStatus[1], Control_Unit:CU|CUStatus[2],         ;
+;                                    ;                                ; Control_Unit:CU|CUStatus[0]                                       ;
+; Address_Queue:Commit|Ret[7]        ; Stuck at GND                   ; TM_Buffer:Buff|MemBuffer[1][8], TM_Buffer:Buff|MemBuffer[0][15]   ;
+;                                    ; due to stuck port clock_enable ;                                                                   ;
++------------------------------------+--------------------------------+-------------------------------------------------------------------+
 
 
 +------------------------------------------------------+
@@ -267,6 +447,23 @@ Note: For table entries with two numbers listed, the numbers in parentheses indi
 +----------------------------------------------+-------+
 
 
++---------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Multiplexer Restructuring Statistics (Restructuring Performed)                                                                                          ;
++--------------------+-----------+---------------+----------------------+------------------------+------------+-------------------------------------------+
+; Multiplexer Inputs ; Bus Width ; Baseline Area ; Area if Restructured ; Saving if Restructured ; Registered ; Example Multiplexer Output                ;
++--------------------+-----------+---------------+----------------------+------------------------+------------+-------------------------------------------+
+; 11:1               ; 2 bits    ; 14 LEs        ; 4 LEs                ; 10 LEs                 ; Yes        ; |HTM_Core|TM_Buffer:Buff|ConfBufTrID[1]   ;
+; 16:1               ; 2 bits    ; 20 LEs        ; 2 LEs                ; 18 LEs                 ; Yes        ; |HTM_Core|TM_Buffer:Buff|ConfBufMode[1]   ;
+; 11:1               ; 4 bits    ; 28 LEs        ; 24 LEs               ; 4 LEs                  ; Yes        ; |HTM_Core|TM_Buffer:Buff|FrstNonValid[10] ;
+; 5:1                ; 2 bits    ; 6 LEs         ; 6 LEs                ; 0 LEs                  ; No         ; |HTM_Core|Conflict_Buffer:Abort|Mux9      ;
+; 5:1                ; 2 bits    ; 6 LEs         ; 6 LEs                ; 0 LEs                  ; No         ; |HTM_Core|Conflict_Buffer:Abort|Mux5      ;
+; 5:1                ; 2 bits    ; 6 LEs         ; 6 LEs                ; 0 LEs                  ; No         ; |HTM_Core|Conflict_Buffer:Abort|Mux6      ;
+; 5:1                ; 2 bits    ; 6 LEs         ; 6 LEs                ; 0 LEs                  ; No         ; |HTM_Core|Conflict_Buffer:Abort|Mux3      ;
+; 11:1               ; 3 bits    ; 21 LEs        ; 12 LEs               ; 9 LEs                  ; No         ; |HTM_Core|Control_Unit:CU|Selector4       ;
+; 10:1               ; 2 bits    ; 12 LEs        ; 8 LEs                ; 4 LEs                  ; No         ; |HTM_Core|Control_Unit:CU|Selector0       ;
++--------------------+-----------+---------------+----------------------+------------------------+------------+-------------------------------------------+
+
+
 +-------------------------------+
 ; Elapsed Time Per Partition    ;
 +----------------+--------------+
@@ -282,7 +479,7 @@ Note: For table entries with two numbers listed, the numbers in parentheses indi
 Info: *******************************************************************
 Info: Running Quartus II 64-Bit Analysis & Synthesis
     Info: Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
-    Info: Processing started: Fri Jul 07 16:31:57 2023
+    Info: Processing started: Fri Jul 07 17:00:10 2023
 Info: Command: quartus_map --read_settings_files=on --write_settings_files=off HTM_CORE -c HTM_CORE
 Warning (20028): Parallel compilation is not licensed and has been disabled
 Info (12021): Found 2 design units, including 1 entities, in source file htm_core.vhd
@@ -303,43 +500,93 @@ Info (12021): Found 2 design units, including 1 entities, in source file conflic
 Info (12021): Found 2 design units, including 1 entities, in source file address_queue.vhd
     Info (12022): Found design unit 1: Address_Queue-Queue
     Info (12023): Found entity 1: Address_Queue
-Info (12127): Elaborating entity "Address_Queue" for the top level hierarchy
-Warning (10540): VHDL Signal Declaration warning at Address_Queue.vhd(30): used explicit default value for signal "TrIDint" because signal was never assigned a value
+Info (12127): Elaborating entity "HTM_Core" for the top level hierarchy
+Info (12128): Elaborating entity "Control_Unit" for hierarchy "Control_Unit:CU"
+Info (12128): Elaborating entity "TM_Buffer" for hierarchy "TM_Buffer:Buff"
+Warning (10540): VHDL Signal Declaration warning at TM_Buffer.vhd(47): used explicit default value for signal "ProcIDint" because signal was never assigned a value
+Warning (10540): VHDL Signal Declaration warning at TM_Buffer.vhd(48): used explicit default value for signal "TransactionIDint" because signal was never assigned a value
+Warning (10542): VHDL Variable Declaration warning at TM_Buffer.vhd(55): used initial value expression for variable "CurrAddr" because variable was never assigned a value
+Warning (10873): Using initial value X (don't care) for net "MemBuffer[9][23..16]" at TM_Buffer.vhd(43)
+Warning (10873): Using initial value X (don't care) for net "MemBuffer[9][7..0]" at TM_Buffer.vhd(43)
+Warning (10873): Using initial value X (don't care) for net "MemBuffer[8][23..16]" at TM_Buffer.vhd(43)
+Warning (10873): Using initial value X (don't care) for net "MemBuffer[8][7..0]" at TM_Buffer.vhd(43)
+Warning (10873): Using initial value X (don't care) for net "MemBuffer[7][23..16]" at TM_Buffer.vhd(43)
+Warning (10873): Using initial value X (don't care) for net "MemBuffer[7][7..0]" at TM_Buffer.vhd(43)
+Warning (10873): Using initial value X (don't care) for net "MemBuffer[6][23..16]" at TM_Buffer.vhd(43)
+Warning (10873): Using initial value X (don't care) for net "MemBuffer[6][7..0]" at TM_Buffer.vhd(43)
+Warning (10873): Using initial value X (don't care) for net "MemBuffer[5][23..16]" at TM_Buffer.vhd(43)
+Warning (10873): Using initial value X (don't care) for net "MemBuffer[5][7..0]" at TM_Buffer.vhd(43)
+Warning (10873): Using initial value X (don't care) for net "MemBuffer[4][23..16]" at TM_Buffer.vhd(43)
+Warning (10873): Using initial value X (don't care) for net "MemBuffer[4][7..0]" at TM_Buffer.vhd(43)
+Warning (10873): Using initial value X (don't care) for net "MemBuffer[3][23..16]" at TM_Buffer.vhd(43)
+Warning (10873): Using initial value X (don't care) for net "MemBuffer[3][7..0]" at TM_Buffer.vhd(43)
+Warning (10873): Using initial value X (don't care) for net "MemBuffer[2][23..16]" at TM_Buffer.vhd(43)
+Warning (10873): Using initial value X (don't care) for net "MemBuffer[2][7..0]" at TM_Buffer.vhd(43)
+Warning (10873): Using initial value X (don't care) for net "MemBuffer[1][23..16]" at TM_Buffer.vhd(43)
+Warning (10873): Using initial value X (don't care) for net "MemBuffer[1][7..0]" at TM_Buffer.vhd(43)
+Info (12128): Elaborating entity "Conflict_Buffer" for hierarchy "Conflict_Buffer:Abort"
+Warning (10540): VHDL Signal Declaration warning at Conflict_Buffer.vhd(23): used explicit default value for signal "TrIDint" because signal was never assigned a value
+Warning (10492): VHDL Process Statement warning at Conflict_Buffer.vhd(34): signal "ConflictFlag" is read inside the Process Statement but isn't in the Process Statement's sensitivity list
+Warning (10492): VHDL Process Statement warning at Conflict_Buffer.vhd(34): signal "TrIDint" is read inside the Process Statement but isn't in the Process Statement's sensitivity list
+Warning (10492): VHDL Process Statement warning at Conflict_Buffer.vhd(37): signal "TrIDint" is read inside the Process Statement but isn't in the Process Statement's sensitivity list
+Warning (10492): VHDL Process Statement warning at Conflict_Buffer.vhd(40): signal "TrIDint" is read inside the Process Statement but isn't in the Process Statement's sensitivity list
+Warning (10492): VHDL Process Statement warning at Conflict_Buffer.vhd(43): signal "TrIDint" is read inside the Process Statement but isn't in the Process Statement's sensitivity list
+Warning (10631): VHDL Process Statement warning at Conflict_Buffer.vhd(30): inferring latch(es) for signal or variable "ConflictFlag", which holds its previous value in one or more paths through the process
+Info (10041): Inferred latch for "ConflictFlag[0][0]" at Conflict_Buffer.vhd(30)
+Info (10041): Inferred latch for "ConflictFlag[0][1]" at Conflict_Buffer.vhd(30)
+Info (10041): Inferred latch for "ConflictFlag[1][0]" at Conflict_Buffer.vhd(30)
+Info (10041): Inferred latch for "ConflictFlag[1][1]" at Conflict_Buffer.vhd(30)
+Info (10041): Inferred latch for "ConflictFlag[2][0]" at Conflict_Buffer.vhd(30)
+Info (10041): Inferred latch for "ConflictFlag[2][1]" at Conflict_Buffer.vhd(30)
+Info (10041): Inferred latch for "ConflictFlag[3][0]" at Conflict_Buffer.vhd(30)
+Info (10041): Inferred latch for "ConflictFlag[3][1]" at Conflict_Buffer.vhd(30)
+Info (12128): Elaborating entity "Address_Queue" for hierarchy "Address_Queue:Commit"
+Warning (10540): VHDL Signal Declaration warning at Address_Queue.vhd(33): used explicit default value for signal "TrIDint" because signal was never assigned a value
+Info (10041): Inferred latch for "ModeLatest[0]" at Address_Queue.vhd(41)
+Info (10041): Inferred latch for "ModeLatest[1]" at Address_Queue.vhd(41)
+Info (12128): Elaborating entity "Main_Memory" for hierarchy "Main_Memory:Memory"
+Warning (10036): Verilog HDL or VHDL warning at Main_Memory.vhd(19): object "Mem" assigned a value but never read
+Warning (10540): VHDL Signal Declaration warning at Main_Memory.vhd(21): used explicit default value for signal "AddrInt" because signal was never assigned a value
+Warning (12158): Entity "Main_Memory" contains only dangling pins
 Warning (13024): Output pins are stuck at VCC or GND
-    Warning (13410): Pin "FIFOStatus[0]" is stuck at GND
-    Warning (13410): Pin "FIFOStatus[1]" is stuck at GND
-    Warning (13410): Pin "Ret[0]" is stuck at GND
-    Warning (13410): Pin "Ret[1]" is stuck at GND
-    Warning (13410): Pin "Ret[2]" is stuck at GND
-    Warning (13410): Pin "Ret[3]" is stuck at GND
-    Warning (13410): Pin "Ret[4]" is stuck at GND
-    Warning (13410): Pin "Ret[5]" is stuck at GND
-    Warning (13410): Pin "Ret[6]" is stuck at GND
-    Warning (13410): Pin "Ret[7]" is stuck at GND
+    Warning (13410): Pin "TransactionStatus[0]" is stuck at GND
+    Warning (13410): Pin "TransactionStatus[1]" is stuck at GND
+    Warning (13410): Pin "TransactionStatus[2]" is stuck at VCC
+Info (17049): 26 registers lost all their fanouts during netlist optimizations.
 Info (16010): Generating hard_block partition "hard_block:auto_generated_inst"
     Info (16011): Adding 0 node(s), including 0 DDIO, 0 PLL, 0 transceiver and 0 LCELL
-Warning (21074): Design contains 14 input pin(s) that do not drive logic
-    Warning (15610): No output dependent on input pin "Mode[0]"
-    Warning (15610): No output dependent on input pin "Mode[1]"
-    Warning (15610): No output dependent on input pin "Addr[0]"
-    Warning (15610): No output dependent on input pin "Addr[1]"
-    Warning (15610): No output dependent on input pin "Addr[2]"
-    Warning (15610): No output dependent on input pin "Addr[3]"
-    Warning (15610): No output dependent on input pin "Addr[4]"
-    Warning (15610): No output dependent on input pin "Addr[5]"
-    Warning (15610): No output dependent on input pin "Addr[6]"
-    Warning (15610): No output dependent on input pin "Addr[7]"
-    Warning (15610): No output dependent on input pin "TrID[0]"
-    Warning (15610): No output dependent on input pin "TrID[1]"
-    Warning (15610): No output dependent on input pin "Reset"
+Warning (21074): Design contains 24 input pin(s) that do not drive logic
+    Warning (15610): No output dependent on input pin "Data[0]"
+    Warning (15610): No output dependent on input pin "Data[1]"
+    Warning (15610): No output dependent on input pin "Data[2]"
+    Warning (15610): No output dependent on input pin "Data[3]"
+    Warning (15610): No output dependent on input pin "Data[4]"
+    Warning (15610): No output dependent on input pin "Data[5]"
+    Warning (15610): No output dependent on input pin "Data[6]"
+    Warning (15610): No output dependent on input pin "Data[7]"
+    Warning (15610): No output dependent on input pin "MemAddress[7]"
+    Warning (15610): No output dependent on input pin "MemAddress[6]"
+    Warning (15610): No output dependent on input pin "MemAddress[5]"
+    Warning (15610): No output dependent on input pin "MemAddress[4]"
+    Warning (15610): No output dependent on input pin "MemAddress[3]"
+    Warning (15610): No output dependent on input pin "MemAddress[2]"
+    Warning (15610): No output dependent on input pin "MemAddress[1]"
+    Warning (15610): No output dependent on input pin "MemAddress[0]"
+    Warning (15610): No output dependent on input pin "Action[0]"
+    Warning (15610): No output dependent on input pin "Action[1]"
     Warning (15610): No output dependent on input pin "Clock"
-Info (21057): Implemented 24 device resources after synthesis - the final resource count might be different
-    Info (21058): Implemented 14 input pins
-    Info (21059): Implemented 10 output pins
-Info: Quartus II 64-Bit Analysis & Synthesis was successful. 0 errors, 28 warnings
-    Info: Peak virtual memory: 4646 megabytes
-    Info: Processing ended: Fri Jul 07 16:31:59 2023
-    Info: Elapsed time: 00:00:02
-    Info: Total CPU time (on all processors): 00:00:02
+    Warning (15610): No output dependent on input pin "Reset"
+    Warning (15610): No output dependent on input pin "ProcID[0]"
+    Warning (15610): No output dependent on input pin "ProcID[1]"
+    Warning (15610): No output dependent on input pin "TransactionID[1]"
+    Warning (15610): No output dependent on input pin "TransactionID[0]"
+Info (21057): Implemented 27 device resources after synthesis - the final resource count might be different
+    Info (21058): Implemented 24 input pins
+    Info (21059): Implemented 3 output pins
+Info: Quartus II 64-Bit Analysis & Synthesis was successful. 0 errors, 62 warnings
+    Info: Peak virtual memory: 4641 megabytes
+    Info: Processing ended: Fri Jul 07 17:00:13 2023
+    Info: Elapsed time: 00:00:03
+    Info: Total CPU time (on all processors): 00:00:03
 
 
