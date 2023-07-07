@@ -65,11 +65,11 @@ COMPONENT Address_Queue IS
 		Clock:	IN STD_LOGIC
 	);
 
---COMPONENT Main_Memory IS
---	PORT
---	(
---	);
---END COMPONENT;
+COMPONENT Main_Memory IS
+	PORT
+	(
+	);
+END COMPONENT;
 
 BEGIN
 
@@ -111,7 +111,7 @@ BEGIN
 										 Clock=>Clock
 									 );
 						
-		--Memory: Main_Memory PORT MAP (
-		--							 );
+		Memory: Main_Memory PORT MAP (
+									 );
 
 END HTM;

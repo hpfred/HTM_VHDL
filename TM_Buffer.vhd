@@ -27,6 +27,9 @@ ENTITY TM_Buffer IS
 		QueueStatus:	IN STD_LOGIC_VECTOR (1 DOWNTO 0);
 		QueueReturn:	IN STD_LOGIC_VECTOR (7 DOWNTO 0);
 		
+		MemoryAddr:		OUT STD_LOGIC_VECTOR (7 DOWNTO 0);
+		MemoryData:		OUT STD_LOGIC_VECTOR (7 DOWNTO 0);
+		
 		BuffStatus:		OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: Undefined, 001: Hit, 010: Miss, 011: NotAbort, 100: CommitFail, 101: CommitSuccess
 		
 		Reset:	IN STD_LOGIC;
@@ -45,7 +48,7 @@ SIGNAL ProcID: STD_LOGIC_VECTOR (1 DOWNTO 0);
 
 BEGIN
 
-	PROCESS (Clock)
+	PROCESS (Reset, Clock)
 		VARIABLE ReadWriteSet: RW_SET;
 		VARIABLE FrstNonValid: INTEGER := 2147483647;
 		VARIABLE CurrAddr: INTEGER;
@@ -57,7 +60,6 @@ BEGIN
 			--reset : std_logic_vector(N downto 0) <= (others => '0')
 			
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
-			--QueueMode <= "00";
 			--Zera BuffStatus no inicio de cada execução?
 		
 			IF (CUStatus = "001" OR CUStatus = "010") THEN				--Se Status é Read ou Write
@@ -92,6 +94,7 @@ BEGIN
 						
 						--Guarda na fila? --Guarda na fila só se for Write?
 						QueueMode <= "01";
+						QueueMode <= "00";
 							
 					ELSE THEN														--Buffer Hit
 						ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
@@ -139,6 +142,7 @@ BEGIN
 							
 							--Guarda na fila?
 							QueueMode <= "01";
+							QueueMode <= "00";
 							
 						END IF;
 					END IF;
@@ -187,10 +191,33 @@ BEGIN
 				--Vai fazendo pull de Address_Queue do processo que commitou e passando pro Main_Memory
 				IF (QueueStatus /= "01") THEN
 					QueueMode <= "10";
+					QueueMode <= "00";
 					UpdateAddress <= QueueReturn;
-				
+					
+					FOR Addr IN (0 TO 9) LOOP
+						IF (MemBuffer(Addr, (23 DOWNTO 16)) = UpdateAddress) THEN
+							--Passa pra memória principal agora
+							MemoryAddr <= UpdateAddress;
+							MemoryData <= MemBuffer(Addr, (7 DOWNTO 0));
+							--Talvez alguma entrada de comunicação, pra dizer se é Fetch ou Post. Mas como não to focando na Memória principal, vou ver isso conforme for, só adicionando se necessário.
+						
+							--Limpa do Buffer
+							ReadWriteSet := MemBuffer(Addr, 15 DOWNTO 8);
+							ReadWriteSet(TransactionID) := "00";
+							FOR P IN (0 TO 3) LOOP
+								ProcFlag := ReadWriteSet(P,0) OR ReadWriteSet(P,1) OR ProcFlag;
+							END LOOP;
+							IF (ProcFlag = '0') THEN
+								MemBuffer(Addr, 24) <= '0';
+							END IF;
+							ProcFlag := '0';
+							MemBuffer(Addr, 15 DOWNTO 8) <= ReadWriteSet;
+						END IF;
+					END LOOP;
+					
 				--Quando receber retorno de que a FIFO está vazia o processo é finalizado e retorno Commit Succes pra CU
 				ELSE
+					BuffStatus <= "101";
 				END IF;
 			
 			END IF;

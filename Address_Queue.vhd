@@ -28,37 +28,48 @@ SIGNAL Head, Tail: POINTER;
 SIGNAL ModeStorage: STD_LOGIC_VECTOR (1 DOWNTO 0);
 
 BEGIN
+	--Fiz esse ModeStorage pra não ter problema de precisar esperar o Clock pra continuar no TM_Buffer, e também resolver o problema de ter Push e Pull não desejados em cada pulso de Clock
+	ModeStorage(0) <= ((Mode(0) XOR Mode(1)) AND Mode(0)) OR (NOT(Mode(0) XOR Mode(1)) AND ModeStorage(0));
+	ModeStorage(1) <= ((Mode(0) XOR Mode(1)) AND Mode(1)) OR (NOT(Mode(0) XOR Mode(1)) AND ModeStorage(1));
 	
-	--MUX, se 00 ou 11 coloca ModeStorage no ModeStorage, se outro coloca Mode no ModeStorage
-	ModeStorage <= ((Mode(0) XOR Mode(1)) AND Mode) OR (NOT(Mode(0) XOR Mode(1)) AND ModeStorage);
-	
-	PROCESS (Clock)
+	PROCESS (Reset, Clock)
 	BEGIN
 		IF (Reset = '1') THEN
 			--Inicializa Head como 1 e tail como 0?
+			--FIFOStatus <= "00";
 			
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
-			FIFOStatus <= "00";
+			--FIFOStatus <= "00";
 			
 			IF (Head(TrID) > Tail(TrID)) THEN				--Caso fila vazia
 				FIFOStatus <= "01";								--Isso ainda tem problema pra quando a lista der overflow	--Tenho que depois ver de mudar pra um sistema de registrador deslocador + contador, pq isso resolveria o problema
 																																						--Na verdade usar nesse sistema atual usar um contador já poderia ajudar, pq posso verificar além do tamanho de cada tbm ver quantas vezes ele já deu a volta na cadeia - if CountHead = CountTail + 1
-			ELSIF (Mode = "10") THEN							--PULL
+			ELSIF (ModeStorage = "10") THEN							--PULL
 				Ret <= MemStorage(TrID, Head(TrID));
 				Head(TrID) <= Head(TrID) + 1;
+				ModeStorage <= "00";
+				IF (Head(TrID) > Tail(TrID)) THEN				--Testa fila vazia de novo pra deixar Status atualizado
+					FIFOStatus <= "01";
+				ELSE
+					FIFOStatus <= "00";
+				END IF;
 					
 			END IF;
 			
 			IF (Tail(TrID) = "1111") THEN						--Caso fila cheia
 				FIFOStatus <= "10";								--Esse daqui não é resolvido pelo de cima, mas um contador que checa se é igual ao tamanho máximo
 				
-			ELSIF (Mode = "01") THEN							--PUSH
+			ELSIF (ModeStorage = "01") THEN							--PUSH
 				MemStorage(TrID, Tail(TrID)) <= Addr;
 				Tail(TrID) <= Tail(TrID) + 1;
-					
+				ModeStorage <= "00";
+				IF (Tail(TrID) = "1111") THEN						--Testa fila cheia de novo pra deixar Status atualizado
+					FIFOStatus <= "10";
+				ELSE
+					FIFOStatus <= "00";
+				END IF;	
+				
 			END IF;
-			
-			--Talvez tbm ver de não adicionar o msm valor duas vezes seguidas (o melhor era nunca colocar valor repetido, mas aí seria mais coisa pra ver depois
 			
 		END IF;
 	END PROCESS;
