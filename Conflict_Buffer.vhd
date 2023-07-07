@@ -21,23 +21,23 @@ SIGNAL ConflictFlag: FlagBuff;
 
 BEGIN
 
-	Status <= ConflictFlag(TrID);
-	IntAbortStatus <= ConflictFlag(0,1) OR ConflictFlag(1,1) OR ConflictFlag(2,1) OR ConflictFlag(3,1);
+---	Status <= ConflictFlag(TrID);
+	IntAbortStatus <= ConflictFlag(0)(1) OR ConflictFlag(1)(1) OR ConflictFlag(2)(1) OR ConflictFlag(3)(1);
 	
 	PROCESS (Mode)
 	BEGIN
 		CASE Mode IS
 			WHEN "00" =>
-				ConflictFlag(TrID) <= ConflictFlag(TrID);
+			---	ConflictFlag(TrID) <= ConflictFlag(TrID);
 		
 			WHEN "01" =>
-				ConflictFlag(TrID) <= "11";
+		---		ConflictFlag(TrID) <= "11";
 				
 			WHEN "10" =>
-				ConflictFlag(TrID) <= "01";
+		---		ConflictFlag(TrID) <= "01";
 				
 			WHEN "11" =>
-				ConflictFlag(TrID) <= "00";
+		---		ConflictFlag(TrID) <= "00";
 				
 		END CASE;
 	END PROCESS;

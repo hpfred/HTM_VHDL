@@ -8,6 +8,7 @@
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 USE IEEE.STD_LOGIC_UNSIGNED.ALL;
+USE IEEE.NUMERIC_STD.all;
 
 ENTITY TM_Buffer IS
 	PORT
@@ -50,7 +51,7 @@ BEGIN
 	PROCESS (Reset, Clock)
 		VARIABLE ReadWriteSet: RW_SET;
 		VARIABLE FrstNonValid: INTEGER := 2147483647;
-		VARIABLE CurrAddr: INTEGER;	--STD_LOGIC_VECTOR (3 DOWNTO 0);
+		VARIABLE CurrAddr: INTEGER;	--STD_LOGIC_VECTOR (3 DOWNTO 0); Se manter integer mudar pra unsigned?
 		VARIABLE HitFlag, AbortFlag, ProcFlag: STD_LOGIC := '0';
 		VARIABLE UpdateAddress: STD_LOGIC_VECTOR (7 DOWNTO 0);
 	BEGIN
@@ -89,8 +90,9 @@ BEGIN
 						ReadWriteSet(1) := MemBuffer(CurrAddr)(11 DOWNTO 10);
 						ReadWriteSet(0) := MemBuffer(CurrAddr)(9 DOWNTO 8);
 						IF (CUStatus = "001") THEN
-							ReadWriteSet(TO_INTEGER(ProcID))(0) := '1';
-							--conv_integer(unsigned(
+							--ReadWriteSet(TO_INTEGER(ProcID))(0) := '1';
+							ReadWriteSet(TO_INTEGER(UNSIGNED(ProcID)))(0) := '1';
+							--ReadWriteSet(CONV_INTEGER(UNSIGNED(ProcID)))(0) := '1';
 						ELSIF CUStatus = "010" THEN
 							---ReadWriteSet(ProcID)(1) := '1';
 						END IF;
@@ -178,11 +180,11 @@ BEGIN
 									MemBuffer(Addr)(24) <= '0';
 								END IF;
 								ProcFlag := '0';
-								MemBuffer(Addr)(15 DOWNTO 8) <= ReadWriteSet;
+								---MemBuffer(Addr)(15 DOWNTO 8) <= ReadWriteSet;
 							END IF;
 						END LOOP;
 						ConfBufMode <= "00";																				--Remove flag de Internal Conflict do Conflict_Buffer
-						ConfBufTrID <= Proc;
+						---ConfBufTrID <= Proc;
 						ConfBufMode <= "10";
 					END IF;
 					
@@ -205,16 +207,16 @@ BEGIN
 				IF (QueueStatus /= "01") THEN									--Se fila não vazia faz pull da FIFO
 					QueueMode <= "10";
 					QueueMode <= "00";
-					UpdateAddress <= QueueReturn;
+					UpdateAddress := QueueReturn;
 					
 					FOR Addr IN 0 TO 9 LOOP
 						IF MemBuffer(Addr)(23 DOWNTO 16) = UpdateAddress THEN
 							MemoryAddr <= UpdateAddress;								--Atualiza na Memória Principal
-							MemoryData <= MemBuffer(Addr, 7 DOWNTO 0);
+				---			MemoryData <= MemBuffer(Addr, 7 DOWNTO 0);
 							--Talvez alguma entrada de comunicação, pra dizer se é Fetch ou Post
 						
-							ReadWriteSet := MemBuffer(Addr, 15 DOWNTO 8);		--Remove/Limpa Buffer depois de atualizado na Memória Principal
-							ReadWriteSet(TransactionID) := "00";
+			---				ReadWriteSet := MemBuffer(Addr)(15 DOWNTO 8);		--Remove/Limpa Buffer depois de atualizado na Memória Principal
+			---				ReadWriteSet(TransactionID) := "00";
 							FOR P IN 0 TO 3 LOOP
 								ProcFlag := ReadWriteSet(P)(0) OR ReadWriteSet(P)(1) OR ProcFlag;
 							END LOOP;
@@ -222,7 +224,7 @@ BEGIN
 								MemBuffer(Addr)(24) <= '0';
 							END IF;
 							ProcFlag := '0';
-							MemBuffer(Addr)(15 DOWNTO 8) <= ReadWriteSet;
+			---				MemBuffer(Addr)(15 DOWNTO 8) <= ReadWriteSet;
 						END IF;
 					END LOOP;
 					

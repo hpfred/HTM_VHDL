@@ -24,7 +24,7 @@ BEGIN
 			--Zera memória
 		
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
-			Mem(Addr) <= Data;
+	---		Mem(Addr) <= Data;
 			
 		END IF;
 	END PROCESS;

@@ -1,5 +1,5 @@
 Analysis & Synthesis report for HTM_CORE
-Fri Jul 07 15:00:22 2023
+Fri Jul 07 15:35:30 2023
 Quartus II 64-Bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -36,7 +36,7 @@ applicable agreement for further details.
 +--------------------------------------------------------------------------------------+
 ; Analysis & Synthesis Summary                                                         ;
 +------------------------------------+-------------------------------------------------+
-; Analysis & Synthesis Status        ; Failed - Fri Jul 07 15:00:22 2023               ;
+; Analysis & Synthesis Status        ; Failed - Fri Jul 07 15:35:30 2023               ;
 ; Quartus II 64-Bit Version          ; 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition ;
 ; Revision Name                      ; HTM_CORE                                        ;
 ; Top-level Entity Name              ; HTM_CORE                                        ;
@@ -155,14 +155,15 @@ Parallel compilation was disabled, but you have multiple processors available. E
 Info: *******************************************************************
 Info: Running Quartus II 64-Bit Analysis & Synthesis
     Info: Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
-    Info: Processing started: Fri Jul 07 15:00:20 2023
+    Info: Processing started: Fri Jul 07 15:35:26 2023
 Info: Command: quartus_map --read_settings_files=on --write_settings_files=off HTM_CORE -c HTM_CORE
 Warning (20028): Parallel compilation is not licensed and has been disabled
 Info (12021): Found 2 design units, including 1 entities, in source file htm_core.vhd
     Info (12022): Found design unit 1: HTM_Core-HTM
     Info (12023): Found entity 1: HTM_Core
-Error (10500): VHDL syntax error at TM_Buffer.vhd(91) near text "ELSIF";  expecting "(", or "'", or "." File: C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/TM_Buffer.vhd Line: 91
-Info (12021): Found 0 design units, including 0 entities, in source file tm_buffer.vhd
+Info (12021): Found 2 design units, including 1 entities, in source file tm_buffer.vhd
+    Info (12022): Found design unit 1: TM_Buffer-SharedData
+    Info (12023): Found entity 1: TM_Buffer
 Info (12021): Found 2 design units, including 1 entities, in source file main_memory.vhd
     Info (12022): Found design unit 1: Main_Memory-Memory
     Info (12023): Found entity 1: Main_Memory
@@ -175,10 +176,17 @@ Info (12021): Found 2 design units, including 1 entities, in source file conflic
 Info (12021): Found 2 design units, including 1 entities, in source file address_queue.vhd
     Info (12022): Found design unit 1: Address_Queue-Queue
     Info (12023): Found entity 1: Address_Queue
-Error: Quartus II 64-Bit Analysis & Synthesis was unsuccessful. 1 error, 1 warning
-    Error: Peak virtual memory: 4630 megabytes
-    Error: Processing ended: Fri Jul 07 15:00:22 2023
-    Error: Elapsed time: 00:00:02
+Info (12127): Elaborating entity "HTM_CORE" for the top level hierarchy
+Info (12128): Elaborating entity "Control_Unit" for hierarchy "Control_Unit:CU"
+Info (12128): Elaborating entity "TM_Buffer" for hierarchy "TM_Buffer:Buff"
+Warning (10541): VHDL Signal Declaration warning at TM_Buffer.vhd(32): used implicit default value for signal "MemoryData" because signal was never assigned a value or an explicit default value. Use of implicit default value may introduce unintended design optimizations.
+Warning (10543): VHDL Variable Declaration warning at TM_Buffer.vhd(54): used default initial value for variable "CurrAddr" because variable was never assigned a value or an initial value expression. Use of default initial value may introduce unintended design optimizations.
+Error (10384): VHDL assignment error at TM_Buffer.vhd(85): index -2147483647 is outside the range (9 downto 0) of object "MemBuffer" File: C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/TM_Buffer.vhd Line: 85
+Error (12152): Can't elaborate user hierarchy "TM_Buffer:Buff" File: C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/HTM_Core.vhd Line: 109
+Error: Quartus II 64-Bit Analysis & Synthesis was unsuccessful. 2 errors, 3 warnings
+    Error: Peak virtual memory: 4629 megabytes
+    Error: Processing ended: Fri Jul 07 15:35:30 2023
+    Error: Elapsed time: 00:00:04
     Error: Total CPU time (on all processors): 00:00:02
 
 
