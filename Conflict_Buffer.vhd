@@ -16,7 +16,8 @@ ENTITY Conflict_Buffer IS
 END ENTITY Conflict_Buffer;
 
 ARCHITECTURE  Flags OF Conflict_Buffer IS
-SIGNAL ConflictFlag: ARRAY (3 DOWNTO 0) OF STD_LOGIC_VECTOR (1 DOWNTO 0);
+TYPE FlagBuff IS ARRAY (3 DOWNTO 0) OF STD_LOGIC_VECTOR (1 DOWNTO 0);
+SIGNAL ConflictFlag: FlagBuff;
 
 BEGIN
 
@@ -38,6 +39,6 @@ BEGIN
 			WHEN "11" =>
 				ConflictFlag(TrID) <= "00";
 				
-		END CASE
+		END CASE;
 	END PROCESS;
 END Flags;

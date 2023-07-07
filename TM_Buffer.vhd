@@ -82,7 +82,7 @@ BEGIN
 						MemBuffer(CurrAddr, 24) <= '1';
 						MemBuffer(CurrAddr, 23 DOWNTO 16) <= MemAddress;
 						
-						ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
+						ReadWriteSet := MemBuffer(CurrAddr, 15 DOWNTO 8);
 						IF (CUStatus = "001") THEN
 							ReadWriteSet(ProcID, 0) := '1';
 						ELSIF (CUStatus = "010") THEN
@@ -94,8 +94,8 @@ BEGIN
 						QueueMode <= "01";										--Guarda na fila --Adicionar IF só pra fazer nos Writes?
 						QueueMode <= "00";
 							
-					ELSE THEN														--Buffer Hit
-						ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
+					ELSE																--Buffer Hit
+						ReadWriteSet := MemBuffer(CurrAddr, 15 DOWNTO 8);
 						
 						IF (CUStatus = "001") THEN								--Read
 							FOR i IN (0 TO 3) LOOP
@@ -108,7 +108,7 @@ BEGIN
 							END LOOP;
 							
 							IF (AbortFlag = '0') THEN
-								ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
+								ReadWriteSet := MemBuffer(CurrAddr, 15 DOWNTO 8);
 								IF (CUStatus = "001") THEN
 									ReadWriteSet(ProcID, 0) := '1';
 								ELSIF (CUStatus = "010") THEN
@@ -128,7 +128,7 @@ BEGIN
 								END IF;
 							END LOOP;
 							
-							ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
+							ReadWriteSet := MemBuffer(CurrAddr, 15 DOWNTO 8);
 							IF (CUStatus = "001") THEN
 								ReadWriteSet(ProcID, 0) := '1';
 							ELSIF (CUStatus = "010") THEN
@@ -147,7 +147,7 @@ BEGIN
 			ELSIF (CUStatus = "011") THEN										--Se Status é abort
 				FOR Proc IN (0 TO 3) LOOP																				--Varre Conflict_Buffer
 					ConfBufTrID <= Proc;
-					IF (ConfBufStatus(1) is '1') THEN																--Se Proc está com Internal Abort
+					IF (ConfBufStatus(1) = '1') THEN																--Se Proc está com Internal Abort
 						FOR Addr IN (0 TO 9) LOOP																		--Varre TM_Buffer
 							ReadWriteSet := MemBuffer(Addr, 15 DOWNTO 8);
 							IF ((ReadWriteSet(Proc,0) OR ReadWriteSet(Proc,1)) = '1') THEN					--Se endereço do TM_Buffer tem RW do procesador retornado true
@@ -176,7 +176,7 @@ BEGIN
 			
 			ELSIF (CUStatus = "100") THEN										--Se status é Commit
 				ConfBufTrID <= ProcID;
-				IF (ConfBufStatus(0) = '1') THEN
+				IF (ConfBufStatus(0) = '1') THEN					--AQUI que acho que deveria ir deassert da flag externa
 					BuffStatus <= "100";
 				ELSE
 					BuffStatus <= "011";
@@ -210,7 +210,7 @@ BEGIN
 				ELSE																			--Se a FIFO está vazia o processo é finalizado e retorna Commit Succes
 					BuffStatus <= "101";
 
-					ConfBufMode <= "00";													--Deassert da Conflict Flag Externa
+					ConfBufMode <= "00";													--Deassert da Conflict Flag Externa		--Na verdade agora eu to em dúvida, acho que não seria aqui, por mais que seja oq o artigo parece indicar. Eu acho que fazer o deassert deve ser após o commit fail
 					ConfBufTrID <= TransactionID;
 					ConfBufMode <= "11";
 				END IF;

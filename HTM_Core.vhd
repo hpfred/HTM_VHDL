@@ -51,6 +51,7 @@ COMPONENT TM_Buffer IS
 		Reset:			IN STD_LOGIC;
 		Clock:			IN STD_LOGIC
 	);
+END COMPONENT;
 
 COMPONENT Conflict_Buffer IS
 	PORT
@@ -61,6 +62,7 @@ COMPONENT Conflict_Buffer IS
 		IntAbortStatus:	OUT STD_LOGIC;
 		Reset:				IN STD_LOGIC
 	);
+END COMPONENT;
 
 COMPONENT Address_Queue IS
 	PORT
@@ -73,6 +75,7 @@ COMPONENT Address_Queue IS
 		Reset:	IN STD_LOGIC;
 		Clock:	IN STD_LOGIC
 	);
+END COMPONENT;
 
 COMPONENT Main_Memory IS
 	PORT
