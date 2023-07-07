@@ -64,13 +64,13 @@ BEGIN
 			IF (CUStatus = "001" OR CUStatus = "010") THEN				--Se Status é Read ou Write
 				ConfBufTrID <= TransactionID;
 				IF (ConfBufStatus = '0') THEN									--Verifica com Conflict_Buffer se é transação zumbi
-					FOR CurrAddr IN (0 TO 9) LOOP
+					FOR CurrAddr IN 0 TO 9 LOOP	--'length-1
 						IF (MemBuffer(i, 24) = '0' AND FrstNonValid > CurrAddr) THEN
 							FrstNonValid := CurrAddr;
 							HitFlag := '0';
 						END IF;
 						
-						IF (MemBuffer(i, (23 DOWNTO 16)) = MemAddress) THEN
+						IF MemBuffer(i, (23 DOWNTO 16)) = MemAddress THEN
 							HitFlag := '1';
 							EXIT;
 						END IF;
