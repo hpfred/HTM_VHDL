@@ -57,6 +57,8 @@ BEGIN
 		IF (Reset = '1') THEN
 			--TODO: Inicializa tudo zerado
 			--reset : std_logic_vector(N downto 0) <= (others => '0')
+			--(others => '0')
+			--(others=>(Others=>'0'))
 			
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
 			--Zera BuffStatus no inicio de cada execução?
@@ -82,24 +84,34 @@ BEGIN
 						MemBuffer(CurrAddr)(24) <= '1';
 						MemBuffer(CurrAddr)(23 DOWNTO 16) <= MemAddress;
 						
-						ReadWriteSet := MemBuffer(CurrAddr)(15 DOWNTO 8);		--TO_STDLOGICVECTOR(MemBuffer(CurrAddr)(15 DOWNTO 8))?
+						ReadWriteSet(3) := MemBuffer(CurrAddr)(15 DOWNTO 14);
+						ReadWriteSet(2) := MemBuffer(CurrAddr)(13 DOWNTO 12);
+						ReadWriteSet(1) := MemBuffer(CurrAddr)(11 DOWNTO 10);
+						ReadWriteSet(0) := MemBuffer(CurrAddr)(9 DOWNTO 8);
 						IF (CUStatus = "001") THEN
-							ReadWriteSet(ProcID, 0) := '1';
-						ELSIF (CUStatus = "010") THEN
-							ReadWriteSet(ProcID, 1) := '1';
+							ReadWriteSet(TO_INTEGER(ProcID))(0) := '1';
+							--conv_integer(unsigned(
+						ELSIF CUStatus = "010" THEN
+							---ReadWriteSet(ProcID)(1) := '1';
 						END IF;
-						MemBuffer(CurrAddr)(15 DOWNTO 8) <= ReadWriteSet;
+						MemBuffer(CurrAddr)(15 DOWNTO 14) <= ReadWriteSet(3);
+						MemBuffer(CurrAddr)(13 DOWNTO 12) <= ReadWriteSet(2);
+						MemBuffer(CurrAddr)(11 DOWNTO 10) <= ReadWriteSet(1);
+						MemBuffer(CurrAddr)(9 DOWNTO 8) <= ReadWriteSet(0);
 						MemBuffer(CurrAddr)(7 DOWNTO 0) <= Data;
 						
 						QueueMode <= "01";										--Guarda na fila --Adicionar IF só pra fazer nos Writes?
 						QueueMode <= "00";
 							
 					ELSE																--Buffer Hit
-						ReadWriteSet := MemBuffer(CurrAddr)(15 DOWNTO 8);
+						ReadWriteSet(3) := MemBuffer(CurrAddr)(15 DOWNTO 14);
+						ReadWriteSet(2) := MemBuffer(CurrAddr)(13 DOWNTO 12);
+						ReadWriteSet(1) := MemBuffer(CurrAddr)(11 DOWNTO 10);
+						ReadWriteSet(0) := MemBuffer(CurrAddr)(9 DOWNTO 8);
 						
 						IF (CUStatus = "001") THEN								--Read
 							FOR i IN 0 TO 3 LOOP
-								IF (ReadWriteSet(i,1) = '1' AND ProcID /= i) THEN
+								IF (ReadWriteSet(i)(1) = '1' AND ProcID /= i) THEN
 									ConfBufMode <= "00";
 									ConfBufTrID <= ProcID;
 									ConfBufMode <= "01";
@@ -108,13 +120,15 @@ BEGIN
 							END LOOP;
 							
 							IF (AbortFlag = '0') THEN
-								ReadWriteSet := MemBuffer(CurrAddr, 15 DOWNTO 8);
 								IF (CUStatus = "001") THEN
-									ReadWriteSet(ProcID, 0) := '1';
+									---ReadWriteSet(ProcID)(0) := '1';
 								ELSIF (CUStatus = "010") THEN
-									ReadWriteSet(ProcID, 1) := '1';
+									---ReadWriteSet(ProcID)(1) := '1';
 								END IF;
-								MemBuffer(CurrAddr, 15 DOWNTO 8) <= ReadWriteSet;
+								MemBuffer(CurrAddr)(15 DOWNTO 14) <= ReadWriteSet(3);
+								MemBuffer(CurrAddr)(13 DOWNTO 12) <= ReadWriteSet(2);
+								MemBuffer(CurrAddr)(11 DOWNTO 10) <= ReadWriteSet(1);
+								MemBuffer(CurrAddr)(9 DOWNTO 8) <= ReadWriteSet(0);
 								
 							END IF;
 							AbortFlag := '0';
@@ -123,19 +137,21 @@ BEGIN
 							FOR i IN 0 TO 3 LOOP
 								IF (ReadWriteSet(i) /= "00" AND ProcID /= i) THEN
 									ConfBufMode <= "00";
-									ConfBufTrID <= i;
+									---ConfBufTrID <= i;
 									ConfBufMode <= "01";
 								END IF;
 							END LOOP;
 							
-							ReadWriteSet := MemBuffer(CurrAddr, 15 DOWNTO 8);
 							IF (CUStatus = "001") THEN
-								ReadWriteSet(ProcID, 0) := '1';
+								---ReadWriteSet(ProcID)(0) := '1';
 							ELSIF (CUStatus = "010") THEN
-								ReadWriteSet(ProcID, 1) := '1';
+								---ReadWriteSet(ProcID)(1) := '1';
 							END IF;
-							MemBuffer(CurrAddr, 15 DOWNTO 8) <= ReadWriteSet;
-							MemBuffer(CurrAddr, 7 DOWNTO 0) <= Data;
+							MemBuffer(CurrAddr)(15 DOWNTO 14) <= ReadWriteSet(3);
+							MemBuffer(CurrAddr)(13 DOWNTO 12) <= ReadWriteSet(2);
+							MemBuffer(CurrAddr)(11 DOWNTO 10) <= ReadWriteSet(1);
+							MemBuffer(CurrAddr)(9 DOWNTO 8) <= ReadWriteSet(0);
+							MemBuffer(CurrAddr)(7 DOWNTO 0) <= Data;
 							
 							QueueMode <= "01";									--Guarda na fila
 							QueueMode <= "00";
@@ -146,20 +162,23 @@ BEGIN
 				
 			ELSIF (CUStatus = "011") THEN										--Se Status é abort
 				FOR Proc IN 0 TO 3 LOOP																				--Varre Conflict_Buffer
-					ConfBufTrID <= Proc;
+					---ConfBufTrID <= Proc;
 					IF (ConfBufStatus(1) = '1') THEN																--Se Proc está com Internal Abort
 						FOR Addr IN 0 TO 9 LOOP																		--Varre TM_Buffer
-							ReadWriteSet := MemBuffer(Addr, 15 DOWNTO 8);
-							IF ((ReadWriteSet(Proc,0) OR ReadWriteSet(Proc,1)) = '1') THEN					--Se endereço do TM_Buffer tem RW do procesador retornado true
+							ReadWriteSet(3) := MemBuffer(Addr)(15 DOWNTO 14);
+							ReadWriteSet(2) := MemBuffer(Addr)(13 DOWNTO 12);
+							ReadWriteSet(1) := MemBuffer(Addr)(11 DOWNTO 10);
+							ReadWriteSet(0) := MemBuffer(Addr)(9 DOWNTO 8);
+							IF ((ReadWriteSet(Proc)(0) OR ReadWriteSet(Proc)(1)) = '1') THEN					--Se endereço do TM_Buffer tem RW do procesador retornado true
 								ReadWriteSet(Proc) := "00";
 								FOR P IN 0 TO 3 LOOP
-									ProcFlag := ReadWriteSet(P,0) OR ReadWriteSet(P,1) OR ProcFlag;		--Verifica se endereço é usado por outro processador
+									ProcFlag := ReadWriteSet(P)(0) OR ReadWriteSet(P)(1) OR ProcFlag;		--Verifica se endereço é usado por outro processador
 								END LOOP;
 								IF (ProcFlag = '0') THEN
-									MemBuffer(Addr, 24) <= '0';
+									MemBuffer(Addr)(24) <= '0';
 								END IF;
 								ProcFlag := '0';
-								MemBuffer(Addr, 15 DOWNTO 8) <= ReadWriteSet;
+								MemBuffer(Addr)(15 DOWNTO 8) <= ReadWriteSet;
 							END IF;
 						END LOOP;
 						ConfBufMode <= "00";																				--Remove flag de Internal Conflict do Conflict_Buffer
@@ -189,7 +208,7 @@ BEGIN
 					UpdateAddress <= QueueReturn;
 					
 					FOR Addr IN 0 TO 9 LOOP
-						IF MemBuffer(Addr, 23 DOWNTO 16) = UpdateAddress THEN
+						IF MemBuffer(Addr)(23 DOWNTO 16) = UpdateAddress THEN
 							MemoryAddr <= UpdateAddress;								--Atualiza na Memória Principal
 							MemoryData <= MemBuffer(Addr, 7 DOWNTO 0);
 							--Talvez alguma entrada de comunicação, pra dizer se é Fetch ou Post
@@ -197,13 +216,13 @@ BEGIN
 							ReadWriteSet := MemBuffer(Addr, 15 DOWNTO 8);		--Remove/Limpa Buffer depois de atualizado na Memória Principal
 							ReadWriteSet(TransactionID) := "00";
 							FOR P IN 0 TO 3 LOOP
-								ProcFlag := ReadWriteSet(P,0) OR ReadWriteSet(P,1) OR ProcFlag;
+								ProcFlag := ReadWriteSet(P)(0) OR ReadWriteSet(P)(1) OR ProcFlag;
 							END LOOP;
 							IF (ProcFlag = '0') THEN
-								MemBuffer(Addr, 24) <= '0';
+								MemBuffer(Addr)(24) <= '0';
 							END IF;
 							ProcFlag := '0';
-							MemBuffer(Addr, 15 DOWNTO 8) <= ReadWriteSet;
+							MemBuffer(Addr)(15 DOWNTO 8) <= ReadWriteSet;
 						END IF;
 					END LOOP;
 					

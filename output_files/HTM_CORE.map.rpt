@@ -1,5 +1,5 @@
 Analysis & Synthesis report for HTM_CORE
-Fri Jul 07 14:33:44 2023
+Fri Jul 07 15:00:22 2023
 Quartus II 64-Bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -36,7 +36,7 @@ applicable agreement for further details.
 +--------------------------------------------------------------------------------------+
 ; Analysis & Synthesis Summary                                                         ;
 +------------------------------------+-------------------------------------------------+
-; Analysis & Synthesis Status        ; Failed - Fri Jul 07 14:33:44 2023               ;
+; Analysis & Synthesis Status        ; Failed - Fri Jul 07 15:00:22 2023               ;
 ; Quartus II 64-Bit Version          ; 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition ;
 ; Revision Name                      ; HTM_CORE                                        ;
 ; Top-level Entity Name              ; HTM_CORE                                        ;
@@ -155,15 +155,14 @@ Parallel compilation was disabled, but you have multiple processors available. E
 Info: *******************************************************************
 Info: Running Quartus II 64-Bit Analysis & Synthesis
     Info: Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
-    Info: Processing started: Fri Jul 07 14:33:42 2023
+    Info: Processing started: Fri Jul 07 15:00:20 2023
 Info: Command: quartus_map --read_settings_files=on --write_settings_files=off HTM_CORE -c HTM_CORE
 Warning (20028): Parallel compilation is not licensed and has been disabled
 Info (12021): Found 2 design units, including 1 entities, in source file htm_core.vhd
     Info (12022): Found design unit 1: HTM_Core-HTM
     Info (12023): Found entity 1: HTM_Core
-Info (12021): Found 2 design units, including 1 entities, in source file tm_buffer.vhd
-    Info (12022): Found design unit 1: TM_Buffer-SharedData
-    Info (12023): Found entity 1: TM_Buffer
+Error (10500): VHDL syntax error at TM_Buffer.vhd(91) near text "ELSIF";  expecting "(", or "'", or "." File: C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/TM_Buffer.vhd Line: 91
+Info (12021): Found 0 design units, including 0 entities, in source file tm_buffer.vhd
 Info (12021): Found 2 design units, including 1 entities, in source file main_memory.vhd
     Info (12022): Found design unit 1: Main_Memory-Memory
     Info (12023): Found entity 1: Main_Memory
@@ -176,10 +175,9 @@ Info (12021): Found 2 design units, including 1 entities, in source file conflic
 Info (12021): Found 2 design units, including 1 entities, in source file address_queue.vhd
     Info (12022): Found design unit 1: Address_Queue-Queue
     Info (12023): Found entity 1: Address_Queue
-Error (10511): VHDL Qualified Expression error at TM_Buffer.vhd(85): To_StdLogicVector type specified in Qualified Expression must match RW_SET type that is implied for expression by context File: C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/TM_Buffer.vhd Line: 85
 Error: Quartus II 64-Bit Analysis & Synthesis was unsuccessful. 1 error, 1 warning
     Error: Peak virtual memory: 4630 megabytes
-    Error: Processing ended: Fri Jul 07 14:33:44 2023
+    Error: Processing ended: Fri Jul 07 15:00:22 2023
     Error: Elapsed time: 00:00:02
     Error: Total CPU time (on all processors): 00:00:02
 
