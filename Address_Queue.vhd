@@ -1,6 +1,7 @@
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 USE IEEE.STD_LOGIC_UNSIGNED.ALL;
+USE IEEE.NUMERIC_STD.all;
 
 ENTITY Address_Queue IS
 	PORT
@@ -26,6 +27,10 @@ TYPE POINTER IS ARRAY (3 DOWNTO 0) OF STD_LOGIC_VECTOR (3 DOWNTO 0);
 SIGNAL Head, Tail: POINTER;
 SIGNAL ModeStorage: STD_LOGIC_VECTOR (1 DOWNTO 0);
 
+SIGNAL TrIDint: INTEGER := TO_INTEGER(UNSIGNED(TrID));
+--SIGNAL HeadInt: INTEGER := TO_INTEGER(UNSIGNED(Head(TrIDint)));
+--SIGNAL TailInt: INTEGER := TO_INTEGER(UNSIGNED(Tail(TrIDint)));
+
 BEGIN
 	ModeStorage(0) <= ((Mode(0) XOR Mode(1)) AND Mode(0)) OR (NOT(Mode(0) XOR Mode(1)) AND ModeStorage(0));
 	ModeStorage(1) <= ((Mode(0) XOR Mode(1)) AND Mode(1)) OR (NOT(Mode(0) XOR Mode(1)) AND ModeStorage(1));
@@ -36,39 +41,39 @@ BEGIN
 			--Inicializa Head como 1 e tail como 0?
 			--FIFOStatus <= "00";
 			
-		ELSIF (Clock'EVENT AND Clock = '1') THEN
-			--FIFOStatus <= "00";
+--		ELSIF (Clock'EVENT AND Clock = '1') THEN
+--			--FIFOStatus <= "00";
+--			
+--			IF (Head(TrIDint) > Tail(TrIDint)) THEN				--Caso fila vazia
+--				FIFOStatus <= "01";								--Isso ainda tem problema pra quando a lista der overflow	--Tenho que depois ver de mudar pra um sistema de registrador deslocador + contador, pq isso resolveria o problema
+--																																						--Na verdade usar nesse sistema atual usar um contador já poderia ajudar, pq posso verificar além do tamanho de cada tbm ver quantas vezes ele já deu a volta na cadeia - if CountHead = CountTail + 1
+--			ELSIF (ModeStorage = "10") THEN							--PULL
+--				Ret <= MemStorage(TrIDint)(HeadInt);
+--				Head(TrIDint) <= Head(TrIDint) + 1;
+--				ModeStorage <= "00";
+--				IF (Head(TrIDint) > Tail(TrIDint)) THEN				--Testa fila vazia de novo pra deixar Status atualizado
+--					FIFOStatus <= "01";
+--				ELSE
+--					FIFOStatus <= "00";
+--				END IF;
+--					
+--			END IF;
+--			
+--			IF (Tail(TrIDint) = "1111") THEN						--Caso fila cheia
+--				FIFOStatus <= "10";								--Esse daqui não é resolvido pelo de cima, mas um contador que checa se é igual ao tamanho máximo
+--				
+--			ELSIF (ModeStorage = "01") THEN							--PUSH
+--				MemStorage(TrIDint)(TailInt) <= Addr;
+--				Tail(TrIDint) <= Tail(TrIDint) + 1;
+--				ModeStorage <= "00";
+--				IF (Tail(TrIDint) = "1111") THEN						--Testa fila cheia de novo pra deixar Status atualizado
+--					FIFOStatus <= "10";
+--				ELSE
+--					FIFOStatus <= "00";
+--				END IF;	
+--				
+--			END IF;
 			
-	---		IF (Head(TrID) > Tail(TrID)) THEN				--Caso fila vazia
-				FIFOStatus <= "01";								--Isso ainda tem problema pra quando a lista der overflow	--Tenho que depois ver de mudar pra um sistema de registrador deslocador + contador, pq isso resolveria o problema
-																																						--Na verdade usar nesse sistema atual usar um contador já poderia ajudar, pq posso verificar além do tamanho de cada tbm ver quantas vezes ele já deu a volta na cadeia - if CountHead = CountTail + 1
-			ELSIF (ModeStorage = "10") THEN							--PULL
-			---	Ret <= MemStorage(TrID, Head(TrID));
-		---		Head(TrID) <= Head(TrID) + 1;
-				ModeStorage <= "00";
-		---		IF (Head(TrID) > Tail(TrID)) THEN				--Testa fila vazia de novo pra deixar Status atualizado
-					FIFOStatus <= "01";
-		---		ELSE
-					FIFOStatus <= "00";
-		---		END IF;
-					
-			END IF;
-			
-		---	IF (Tail(TrID) = "1111") THEN						--Caso fila cheia
-				FIFOStatus <= "10";								--Esse daqui não é resolvido pelo de cima, mas um contador que checa se é igual ao tamanho máximo
-				
-		---	ELSIF (ModeStorage = "01") THEN							--PUSH
-		---		MemStorage(TrID, Tail(TrID)) <= Addr;
-		---		Tail(TrID) <= Tail(TrID) + 1;
-				ModeStorage <= "00";
-			---	IF (Tail(TrID) = "1111") THEN						--Testa fila cheia de novo pra deixar Status atualizado
-					FIFOStatus <= "10";
-		---		ELSE
-					FIFOStatus <= "00";
-		---		END IF;	
-				
-		---	END IF;
-			
-		---END IF;
+		END IF;
 	END PROCESS;
 END Queue;

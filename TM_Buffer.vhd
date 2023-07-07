@@ -44,14 +44,15 @@ SIGNAL MemBuffer: ALL_DATA;
 
 TYPE RW_SET IS ARRAY (3 DOWNTO 0) OF STD_LOGIC_VECTOR (1 DOWNTO 0);
 
---SIGNAL ProcID: STD_LOGIC_VECTOR (1 DOWNTO 0);
+SIGNAL ProcIDint: INTEGER := TO_INTEGER(UNSIGNED(ProcID));
+SIGNAL TransactionIDint: INTEGER := TO_INTEGER(UNSIGNED(TransactionID));
 
 BEGIN
 
 	PROCESS (Reset, Clock)
 		VARIABLE ReadWriteSet: RW_SET;
 		VARIABLE FrstNonValid: INTEGER := 2147483647;
-		VARIABLE CurrAddr: INTEGER;	--STD_LOGIC_VECTOR (3 DOWNTO 0); Se manter integer mudar pra unsigned?
+		VARIABLE CurrAddr: INTEGER := 0;	--STD_LOGIC_VECTOR (3 DOWNTO 0); Se manter integer mudar pra unsigned?
 		VARIABLE HitFlag, AbortFlag, ProcFlag: STD_LOGIC := '0';
 		VARIABLE UpdateAddress: STD_LOGIC_VECTOR (7 DOWNTO 0);
 	BEGIN
@@ -90,11 +91,11 @@ BEGIN
 						ReadWriteSet(1) := MemBuffer(CurrAddr)(11 DOWNTO 10);
 						ReadWriteSet(0) := MemBuffer(CurrAddr)(9 DOWNTO 8);
 						IF (CUStatus = "001") THEN
-							--ReadWriteSet(TO_INTEGER(ProcID))(0) := '1';
-							ReadWriteSet(TO_INTEGER(UNSIGNED(ProcID)))(0) := '1';
-							--ReadWriteSet(CONV_INTEGER(UNSIGNED(ProcID)))(0) := '1';
+							--ReadWriteSet(TO_INTEGER(UNSIGNED(ProcID)))(0) := '1';
+							ReadWriteSet(ProcIDint)(0) := '1';
 						ELSIF CUStatus = "010" THEN
-							---ReadWriteSet(ProcID)(1) := '1';
+							--ReadWriteSet(TO_INTEGER(UNSIGNED(ProcID)))(1) := '1';
+							ReadWriteSet(ProcIDint)(1) := '1';
 						END IF;
 						MemBuffer(CurrAddr)(15 DOWNTO 14) <= ReadWriteSet(3);
 						MemBuffer(CurrAddr)(13 DOWNTO 12) <= ReadWriteSet(2);
@@ -123,9 +124,9 @@ BEGIN
 							
 							IF (AbortFlag = '0') THEN
 								IF (CUStatus = "001") THEN
-									---ReadWriteSet(ProcID)(0) := '1';
+									ReadWriteSet(ProcIDint)(0) := '1';
 								ELSIF (CUStatus = "010") THEN
-									---ReadWriteSet(ProcID)(1) := '1';
+									ReadWriteSet(ProcIDint)(1) := '1';
 								END IF;
 								MemBuffer(CurrAddr)(15 DOWNTO 14) <= ReadWriteSet(3);
 								MemBuffer(CurrAddr)(13 DOWNTO 12) <= ReadWriteSet(2);
@@ -145,9 +146,9 @@ BEGIN
 							END LOOP;
 							
 							IF (CUStatus = "001") THEN
-								---ReadWriteSet(ProcID)(0) := '1';
+								ReadWriteSet(ProcIDint)(0) := '1';
 							ELSIF (CUStatus = "010") THEN
-								---ReadWriteSet(ProcID)(1) := '1';
+								ReadWriteSet(ProcIDint)(1) := '1';
 							END IF;
 							MemBuffer(CurrAddr)(15 DOWNTO 14) <= ReadWriteSet(3);
 							MemBuffer(CurrAddr)(13 DOWNTO 12) <= ReadWriteSet(2);
@@ -164,7 +165,8 @@ BEGIN
 				
 			ELSIF (CUStatus = "011") THEN										--Se Status é abort
 				FOR Proc IN 0 TO 3 LOOP																				--Varre Conflict_Buffer
-					---ConfBufTrID <= Proc;
+					--ConfBufTrID <= Proc;
+					ConfBufTrID <= STD_LOGIC_VECTOR(TO_UNSIGNED(Proc, ConfBufTrID'length));
 					IF (ConfBufStatus(1) = '1') THEN																--Se Proc está com Internal Abort
 						FOR Addr IN 0 TO 9 LOOP																		--Varre TM_Buffer
 							ReadWriteSet(3) := MemBuffer(Addr)(15 DOWNTO 14);
@@ -180,11 +182,15 @@ BEGIN
 									MemBuffer(Addr)(24) <= '0';
 								END IF;
 								ProcFlag := '0';
-								---MemBuffer(Addr)(15 DOWNTO 8) <= ReadWriteSet;
+								MemBuffer(Addr)(15 DOWNTO 14) <= ReadWriteSet(3);
+								MemBuffer(Addr)(13 DOWNTO 12) <= ReadWriteSet(2);
+								MemBuffer(Addr)(11 DOWNTO 10) <= ReadWriteSet(1);
+								MemBuffer(Addr)(9 DOWNTO 8) <= ReadWriteSet(0);
 							END IF;
 						END LOOP;
 						ConfBufMode <= "00";																				--Remove flag de Internal Conflict do Conflict_Buffer
-						---ConfBufTrID <= Proc;
+						--ConfBufTrID <= Proc;
+						ConfBufTrID <= STD_LOGIC_VECTOR(TO_UNSIGNED(Proc, ConfBufTrID'length));
 						ConfBufMode <= "10";
 					END IF;
 					
@@ -212,11 +218,14 @@ BEGIN
 					FOR Addr IN 0 TO 9 LOOP
 						IF MemBuffer(Addr)(23 DOWNTO 16) = UpdateAddress THEN
 							MemoryAddr <= UpdateAddress;								--Atualiza na Memória Principal
-				---			MemoryData <= MemBuffer(Addr, 7 DOWNTO 0);
+							MemoryData <= MemBuffer(Addr)(7 DOWNTO 0);
 							--Talvez alguma entrada de comunicação, pra dizer se é Fetch ou Post
 						
-			---				ReadWriteSet := MemBuffer(Addr)(15 DOWNTO 8);		--Remove/Limpa Buffer depois de atualizado na Memória Principal
-			---				ReadWriteSet(TransactionID) := "00";
+							ReadWriteSet(3) := MemBuffer(Addr)(15 DOWNTO 14);	--Remove/Limpa Buffer depois de atualizado na Memória Principal
+							ReadWriteSet(2) := MemBuffer(Addr)(13 DOWNTO 12);
+							ReadWriteSet(1) := MemBuffer(Addr)(11 DOWNTO 10);
+							ReadWriteSet(0) := MemBuffer(Addr)(9 DOWNTO 8);
+							ReadWriteSet(TransactionIDint) := "00";
 							FOR P IN 0 TO 3 LOOP
 								ProcFlag := ReadWriteSet(P)(0) OR ReadWriteSet(P)(1) OR ProcFlag;
 							END LOOP;
@@ -224,7 +233,10 @@ BEGIN
 								MemBuffer(Addr)(24) <= '0';
 							END IF;
 							ProcFlag := '0';
-			---				MemBuffer(Addr)(15 DOWNTO 8) <= ReadWriteSet;
+							MemBuffer(Addr)(15 DOWNTO 14) <= ReadWriteSet(3);
+							MemBuffer(Addr)(13 DOWNTO 12) <= ReadWriteSet(2);
+							MemBuffer(Addr)(11 DOWNTO 10) <= ReadWriteSet(1);
+							MemBuffer(Addr)(9 DOWNTO 8) <= ReadWriteSet(0);
 						END IF;
 					END LOOP;
 					

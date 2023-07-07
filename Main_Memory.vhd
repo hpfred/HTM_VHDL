@@ -1,6 +1,7 @@
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 USE IEEE.STD_LOGIC_UNSIGNED.ALL;
+USE IEEE.NUMERIC_STD.all;
 
 ENTITY Main_Memory IS
 	PORT
@@ -17,6 +18,8 @@ ARCHITECTURE Memory OF Main_Memory IS
 TYPE MemStruct IS ARRAY (255 DOWNTO 0) OF STD_LOGIC_VECTOR (7 DOWNTO 0);
 SIGNAL Mem: MemStruct;
 
+SIGNAL AddrInt: INTEGER := TO_INTEGER(UNSIGNED(Addr));
+
 BEGIN
 	PROCESS (Clock, Reset)
 	BEGIN
@@ -24,7 +27,7 @@ BEGIN
 			--Zera memória
 		
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
-	---		Mem(Addr) <= Data;
+			Mem(AddrInt) <= Data;
 			
 		END IF;
 	END PROCESS;

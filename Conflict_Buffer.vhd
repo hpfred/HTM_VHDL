@@ -1,6 +1,7 @@
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 USE IEEE.STD_LOGIC_UNSIGNED.ALL;
+USE IEEE.NUMERIC_STD.all;
 
 ENTITY Conflict_Buffer IS
 	PORT
@@ -19,25 +20,27 @@ ARCHITECTURE  Flags OF Conflict_Buffer IS
 TYPE FlagBuff IS ARRAY (3 DOWNTO 0) OF STD_LOGIC_VECTOR (1 DOWNTO 0);
 SIGNAL ConflictFlag: FlagBuff;
 
+SIGNAL TrIDint: INTEGER := TO_INTEGER(UNSIGNED(TrID));
+
 BEGIN
 
----	Status <= ConflictFlag(TrID);
+	Status <= ConflictFlag(TrIDint);
 	IntAbortStatus <= ConflictFlag(0)(1) OR ConflictFlag(1)(1) OR ConflictFlag(2)(1) OR ConflictFlag(3)(1);
 	
 	PROCESS (Mode)
 	BEGIN
 		CASE Mode IS
 			WHEN "00" =>
-			---	ConflictFlag(TrID) <= ConflictFlag(TrID);
+				ConflictFlag(TrIDint) <= ConflictFlag(TrIDint);
 		
 			WHEN "01" =>
-		---		ConflictFlag(TrID) <= "11";
+				ConflictFlag(TrIDint) <= "11";
 				
 			WHEN "10" =>
-		---		ConflictFlag(TrID) <= "01";
+				ConflictFlag(TrIDint) <= "01";
 				
 			WHEN "11" =>
-		---		ConflictFlag(TrID) <= "00";
+				ConflictFlag(TrIDint) <= "00";
 				
 		END CASE;
 	END PROCESS;
