@@ -4,6 +4,7 @@
 -- 																	| |			Read_Write [15 DOWNTO 8]
 -- 																	| Address [23 DOWNTO 16]
 -- 																	Valid [24]
+
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 USE IEEE.STD_LOGIC_UNSIGNED.ALL;
@@ -31,12 +32,11 @@ END ENTITY TM_Buffer;
 
 ARCHITECTURE  SharedData OF TM_Buffer IS
 TYPE ALL_DATA IS ARRAY (9 DOWNTO 0) OF STD_LOGIC_VECTOR (24 DOWNTO 0);
-SIGNAL MemBuffer: ALL_DATA;		
---TODO: Inicializa tudo zerado
+SIGNAL MemBuffer: ALL_DATA;
 
 TYPE RW_SET IS ARRAY (3 DOWNTO 0) OF STD_LOGIC_VECTOR (1 DOWNTO 0);
 
-SIGNAL BufferAddress: STD_LOGIC_VECTOR (9 DOWNTO 0);
+--SIGNAL BufferAddress: STD_LOGIC_VECTOR (3 DOWNTO 0);
 SIGNAL ProcID: STD_LOGIC_VECTOR (1 DOWNTO 0);
 
 BEGIN
@@ -48,6 +48,7 @@ BEGIN
 		VARIABLE HitFlag, AbortFlag: STD_LOGIC := '0';
 	BEGIN
 		IF (Reset = '1') THEN
+			--TODO: Inicializa tudo zerado
 			--reset : std_logic_vector(N downto 0) <= (others => '0')
 			
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
@@ -97,7 +98,6 @@ BEGIN
 							END LOOP;
 							
 							IF (AbortFlag = '0') THEN
-								--Essa parte do RWSet especificamente eu acho que já dava pra ter atualizado antes até, pq vai ser atualizado em todas situações (até no abort dele mesmo, pq dps o AbortState é quem vai esvaziar isso)
 								ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
 								IF (CUStatus = "001") THEN
 									ReadWriteSet(ProcID, 0) := '1';
@@ -136,15 +136,17 @@ BEGIN
 				END IF;
 				
 			ELSIF (CUStatus = "011") THEN										--Se Status é abort
-				--Pega no Conflict_Buffer qual(is) processadores estão com internal abort e faz a sequencia de abort deles
-				FOR X IN Y LOOP			--Varre Conflict_Buffer
-					IF (X is Conflict) THEN
-						FOR Z IN W LOOP	--Varre TM_Buffer
-							IF (Z equal X) THEN
-								--Limpa Z dos dados de X (verifica se tem mais que X pra ver se limpa total)
+				FOR Proc IN (0 TO 3) LOOP										--Varre Conflict_Buffer
+					ConfBufTrID <= Proc;
+					IF (ConfBufStatus(1) is '1') THEN						--Se Proc está com Internal Abort
+						FOR Addr IN (0 TO 9) LOOP								--Varre TM_Buffer
+							IF ((MemBuffer(Addr,Proc,0) OR MemBuffer(Addr,Proc,1)) = '1') THEN		--Se endereço do TM_Buffer tem RW do procesador retornado true
+								--Limpa os dados do processador retornado daquele endereço do TM_Buffer
+								--Verifica se ele também possui o RW de algum dos outros processadores retornando true
+								--Caso não, então limpa os resto dos dados encontrados no endereço
 							END IF;
 						END LOOP;
-						--Remove Internal Conflict do Z
+						--Remove Internal Conflict do Proc no Conflict_Buffer
 					END IF;
 					
 					--Para de varrer se CU já voltou pro idle (ou seja, garante que já foram todos endereços de Conflict_Buffer com Internal Abort Flag)
@@ -155,7 +157,7 @@ BEGIN
 			
 			ELSIF (CUStatus = "100") THEN										--Se status é Commit
 				ConfBufTrID <= ProcID;
-				IF (ConfBufStatus(1) = '1') THEN
+				IF (ConfBufStatus(0) = '1') THEN
 					BuffStatus <= "100";
 				ELSE
 					BuffStatus <= "011";
