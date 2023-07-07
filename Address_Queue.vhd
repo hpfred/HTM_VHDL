@@ -27,6 +27,7 @@ TYPE POINTER IS ARRAY (3 DOWNTO 0) OF STD_LOGIC_VECTOR (3 DOWNTO 0);
 SIGNAL Head, Tail: POINTER;
 
 BEGIN
+
 	PROCESS (Clock)
 	BEGIN
 		IF (Reset = '1') THEN
@@ -40,7 +41,9 @@ BEGIN
 			ELSIF (Tail(TrID) = "1111") THEN					--Caso fila cheia
 				FIFOStatus <= "10";								--Esse daqui não é resolvido pelo de cima, mas um contador que checa se é igual ao tamanho máximo
 			
-			ELSE
+			--Talvez tbm ver de não adicionar o msm valor duas vezes seguidas (o melhor era nunca colocar valor repetido, mas aí seria mais coisa pra ver depois
+			
+			ELSE	--Aqui tá errado, pq se fila vazia ele pode dar push só não pull, e o contrário com fila cheia
 				IF (Mode = "01") THEN							--PUSH
 					MemStorage(TrID, Tail(TrID)) <= Addr;
 					Tail(TrID) <= Tail(TrID) + 1;

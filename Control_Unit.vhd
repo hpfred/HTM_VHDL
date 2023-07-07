@@ -11,6 +11,8 @@ ENTITY Control_Unit IS
 		BuffStatus:			IN STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: Undefined, 001: Hit, 010: Miss, 011: NotAbort, 100: CommitFail, 101: CommitSuccess
 		CUStatus:			OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: OnIdle, 001: OnRead, 010: OnWrite, 011: OnAbort, 100: OnCommit, 101: OnUpdate
 		
+		TrStatus:			OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--CommitFail, CommitSucces, etc
+		
 		Reset:				IN STD_LOGIC;
 		Clock:				IN STD_LOGIC
 	);
@@ -61,7 +63,6 @@ BEGIN
 				
 				WHEN AbortState =>
 					CUStatus <= "011";
-					--No TM buffer ele vai consultar o conflict buffer daquele endereço quais processadores estão em conflito e executar a sequencia de abort (limpando/atualizando o buffer)
 					IF (IntAbortStatus = '0') THEN
 						NextStateIs <= IdleState;
 					END IF;
@@ -85,7 +86,8 @@ BEGIN
 					--IF (QueueStatus = [Commit]) THEN
 					--END IF;
 					
-					IF (BuffStatus = CommitSuccess) THEN
+					IF (BuffStatus = "101") THEN
+						--Informa que CommitSuccess
 						NextStateIs <= IdleState;
 					END IF;
 				

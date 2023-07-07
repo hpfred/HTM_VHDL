@@ -23,6 +23,10 @@ ENTITY TM_Buffer IS
 		ConfBufTrID:	OUT STD_LOGIC_VECTOR (1 DOWNTO 0);
 		ConfBufStatus:	IN STD_LOGIC_VECTOR (1 DOWNTO 0);
 		
+		QueueMode:		OUT STD_LOGIC_VECTOR (1 DOWNTO 0);
+		QueueStatus:	IN STD_LOGIC_VECTOR (1 DOWNTO 0);
+		QueueReturn:	IN STD_LOGIC_VECTOR (7 DOWNTO 0);
+		
 		BuffStatus:		OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: Undefined, 001: Hit, 010: Miss, 011: NotAbort, 100: CommitFail, 101: CommitSuccess
 		
 		Reset:	IN STD_LOGIC;
@@ -46,12 +50,14 @@ BEGIN
 		VARIABLE FrstNonValid: INTEGER := 2147483647;
 		VARIABLE CurrAddr: INTEGER;
 		VARIABLE HitFlag, AbortFlag, ProcFlag: STD_LOGIC := '0';
+		VARIABLE UpdateAddress: STD_LOGIC_VECTOR (7 DOWNTO 0);
 	BEGIN
 		IF (Reset = '1') THEN
 			--TODO: Inicializa tudo zerado
 			--reset : std_logic_vector(N downto 0) <= (others => '0')
 			
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
+			QueueMode <= "00";
 			--Zera BuffStatus no inicio de cada execução?
 		
 			IF (CUStatus = "001" OR CUStatus = "010") THEN				--Se Status é Read ou Write
@@ -84,6 +90,11 @@ BEGIN
 						MemBuffer(CurrAddr, 15 DOWNTO 8) <= ReadWriteSet;
 						MemBuffer(CurrAddr, 7 DOWNTO 0) <= Data;
 						
+						--Guarda na fila? --Guarda na fila só se for Write?
+						QueueAddr <= MemAddress;		--MemBuffer(CurrAddr, 23 DOWNTO 16);
+						QueueTrID <= TransactionID;
+						QueueMode <= "01";
+							
 					ELSE THEN														--Buffer Hit
 						ReadWriteSet := MemBuffer(CurrAddr, , 15 DOWNTO 8);
 						
@@ -106,10 +117,9 @@ BEGIN
 								END IF;
 								MemBuffer(CurrAddr, 15 DOWNTO 8) <= ReadWriteSet;
 								
-								--Guarda na fila?
-								
 							END IF;
 							AbortFlag := '0';
+							--Não to colocando na fila aqui pq imagino que não faça sentido. Só usa a fila pra ver oq atualizar na memória(?)
 							
 						ELSIF (CUStatus = "010") THEN							--Write
 							FOR i IN (0 TO 3) LOOP
@@ -130,39 +140,40 @@ BEGIN
 							MemBuffer(CurrAddr, 7 DOWNTO 0) <= Data;
 							
 							--Guarda na fila?
+							QueueAddr <= MemAddress;
+							QueueTrID <= TransactionID;
+							QueueMode <= "01";
 							
 						END IF;
 					END IF;
 				END IF;
 				
 			ELSIF (CUStatus = "011") THEN										--Se Status é abort
-				FOR Proc IN (0 TO 3) LOOP										--Varre Conflict_Buffer
+				FOR Proc IN (0 TO 3) LOOP																				--Varre Conflict_Buffer
 					ConfBufTrID <= Proc;
-					IF (ConfBufStatus(1) is '1') THEN						--Se Proc está com Internal Abort
-						FOR Addr IN (0 TO 9) LOOP								--Varre TM_Buffer
+					IF (ConfBufStatus(1) is '1') THEN																--Se Proc está com Internal Abort
+						FOR Addr IN (0 TO 9) LOOP																		--Varre TM_Buffer
 							ReadWriteSet := MemBuffer(Addr, 15 DOWNTO 8);
-							IF ((ReadWriteSet(Proc,0) OR ReadWriteSet(Proc,1)) = '1') THEN		--Se endereço do TM_Buffer tem RW do procesador retornado true
-								--Limpa os dados do processador retornado daquele endereço do TM_Buffer
+							IF ((ReadWriteSet(Proc,0) OR ReadWriteSet(Proc,1)) = '1') THEN					--Se endereço do TM_Buffer tem RW do procesador retornado true
 								ReadWriteSet(Proc) := "00";
-								--Verifica se ele também possui o RW de algum dos outros processadores retornando true
 								FOR P IN (0 TO 3) LOOP
-									ProcFlag := ReadWriteSet(P,0) OR ReadWriteSet(P,1) OR ProcFlag;
+									ProcFlag := ReadWriteSet(P,0) OR ReadWriteSet(P,1) OR ProcFlag;		--Verifica se endereço é usado por outro processador
 								END LOOP;
 								IF (ProcFlag = '0') THEN
-									--Caso não, então limpa os resto dos dados encontrados no endereço
 									MemBuffer(Addr, 24) <= '0';
 								END IF;
+								ProcFlag := '0';
 								MemBuffer(Addr, 15 DOWNTO 8) <= ReadWriteSet;
 							END IF;
 						END LOOP;
-						--Remove Internal Conflict do Proc no Conflict_Buffer
-						ConfBufMode <= "00";
+						ConfBufMode <= "00";																				--Remove flag de Internal Conflict do Conflict_Buffer
 						ConfBufTrID <= Proc;
 						ConfBufMode <= "10";
 					END IF;
 					
-					--Para de varrer se CU já voltou pro idle (ou seja, garante que já foram todos endereços de Conflict_Buffer com Internal Abort Flag)
-					IF (CUStatus /= "100") THEN
+					--Remove tudo da fila na sequencia de abort?
+					
+					IF (CUStatus /= "100") THEN								--Para de varrer se CU já voltou pro idle
 						EXIT;
 					END IF;
 				END LOOP;
@@ -178,7 +189,14 @@ BEGIN
 			ELSIF (CUStatus = "101") THEN										--Se Status é MemUpdate
 				--Processo de MemUpdate
 				--Vai fazendo pull de Address_Queue do processo que commitou e passando pro Main_Memory
+				IF (QueueStatus /= "01") THEN
+					QueueTrID <= TransactionID;
+					UpdateAddress <= QueueReturn;
+					QueueMode <= "10";
+				
 				--Quando receber retorno de que a FIFO está vazia o processo é finalizado e retorno Commit Succes pra CU
+				ELSE
+				END IF;
 			
 			END IF;
 			
