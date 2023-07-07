@@ -1,3 +1,11 @@
 db/
 
 *.bak
+
+#\/ Arquivos da Compilação \/#
+
+incremental_db/
+
+output_files/
+
+simulation/
