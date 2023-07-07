@@ -18,7 +18,6 @@ ENTITY Address_Queue IS
 END ENTITY Address_Queue;
 
 ARCHITECTURE  Queue OF Address_Queue IS
---Assumindo X do tamanho da fila como 10 também
 TYPE TRANS_ADDR_MEM IS ARRAY (9 DOWNTO 0) OF STD_LOGIC_VECTOR (7 DOWNTO 0);
 TYPE ALL_DATA IS ARRAY (3 DOWNTO 0) OF TRANS_ADDR_MEM;
 SIGNAL MemStorage: ALL_DATA;
@@ -28,7 +27,6 @@ SIGNAL Head, Tail: POINTER;
 SIGNAL ModeStorage: STD_LOGIC_VECTOR (1 DOWNTO 0);
 
 BEGIN
-	--Fiz esse ModeStorage pra não ter problema de precisar esperar o Clock pra continuar no TM_Buffer, e também resolver o problema de ter Push e Pull não desejados em cada pulso de Clock
 	ModeStorage(0) <= ((Mode(0) XOR Mode(1)) AND Mode(0)) OR (NOT(Mode(0) XOR Mode(1)) AND ModeStorage(0));
 	ModeStorage(1) <= ((Mode(0) XOR Mode(1)) AND Mode(1)) OR (NOT(Mode(0) XOR Mode(1)) AND ModeStorage(1));
 	

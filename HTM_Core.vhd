@@ -11,7 +11,7 @@ ENTITY HTM_Core IS
 		ProcID:			IN STD_LOGIC_VECTOR (1 DOWNTO 0);				--Limite de 4 Cores/Processadores
 		TransactionID:	IN STD_LOGIC_VECTOR (1 DOWNTO 0);				--Limite de 4 transações (1 por processador)
 		
-		TransactionStatus:	OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--6 status do HTM_Core que informam o processador -(OnRead, OnWrite, OnAbort, OnCommit, CommitFail, CommitSucc)? -Talvez seja interessante só o resultado de Commit?
+		TransactionStatus:	OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--6 status do HTM_Core que informam o processador - 000: Undefined, 001: Hit, 010: Miss, 011: NotAbort, 100: CommitFail, 101: CommitSuccess
 		
 		Reset:	IN STD_LOGIC;
 		Clock:	IN STD_LOGIC
@@ -26,7 +26,6 @@ COMPONENT Control_Unit IS
 		IntAbortStatus:	IN STD_LOGIC;
 		BuffStatus:			IN STD_LOGIC_VECTOR (2 DOWNTO 0);
 		CUStatus:			OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
-		--TrStatus:			OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
 		Reset:				IN STD_LOGIC;
 		Clock:				IN STD_LOGIC
 	);
@@ -93,21 +92,13 @@ SIGNAL QueueReturn, MemoryAddr, MemoryData: STD_LOGIC_VECTOR (7 DOWNTO 0);
 
 BEGIN
 
-		--<= Action;
-		--<= MemAddress;
-		--<= Data;
-		--<= ProcID;
-		--<= TransactionID;
 		TransactionStatus <= BuffStatus;
-		--<= Reset;
-		--<= Clock;
 		
 		CU: Control_Unit PORT MAP (
 									Action=>Action,
 									IntAbortStatus=>IntAbortStatus,
 									BuffStatus=>BuffStatus,
 									CUStatus=>CUStatus,
-									--TrStatus=>[X],
 									Reset=>Reset,
 									Clock=>Clock
 								);

@@ -43,7 +43,6 @@ SIGNAL MemBuffer: ALL_DATA;
 
 TYPE RW_SET IS ARRAY (3 DOWNTO 0) OF STD_LOGIC_VECTOR (1 DOWNTO 0);
 
---SIGNAL BufferAddress: STD_LOGIC_VECTOR (3 DOWNTO 0);
 SIGNAL ProcID: STD_LOGIC_VECTOR (1 DOWNTO 0);
 
 BEGIN
@@ -92,8 +91,7 @@ BEGIN
 						MemBuffer(CurrAddr, 15 DOWNTO 8) <= ReadWriteSet;
 						MemBuffer(CurrAddr, 7 DOWNTO 0) <= Data;
 						
-						--Guarda na fila? --Guarda na fila só se for Write?
-						QueueMode <= "01";
+						QueueMode <= "01";										--Guarda na fila --Adicionar IF só pra fazer nos Writes?
 						QueueMode <= "00";
 							
 					ELSE THEN														--Buffer Hit
@@ -120,7 +118,6 @@ BEGIN
 								
 							END IF;
 							AbortFlag := '0';
-							--Não to colocando na fila aqui pq imagino que não faça sentido. Só usa a fila pra ver oq atualizar na memória(?)
 							
 						ELSIF (CUStatus = "010") THEN							--Write
 							FOR i IN (0 TO 3) LOOP
@@ -140,8 +137,7 @@ BEGIN
 							MemBuffer(CurrAddr, 15 DOWNTO 8) <= ReadWriteSet;
 							MemBuffer(CurrAddr, 7 DOWNTO 0) <= Data;
 							
-							--Guarda na fila?
-							QueueMode <= "01";
+							QueueMode <= "01";									--Guarda na fila
 							QueueMode <= "00";
 							
 						END IF;
@@ -187,22 +183,18 @@ BEGIN
 				END IF;
 			
 			ELSIF (CUStatus = "101") THEN										--Se Status é MemUpdate
-				--Processo de MemUpdate
-				--Vai fazendo pull de Address_Queue do processo que commitou e passando pro Main_Memory
-				IF (QueueStatus /= "01") THEN
+				IF (QueueStatus /= "01") THEN									--Se fila não vazia faz pull da FIFO
 					QueueMode <= "10";
 					QueueMode <= "00";
 					UpdateAddress <= QueueReturn;
 					
 					FOR Addr IN (0 TO 9) LOOP
 						IF (MemBuffer(Addr, (23 DOWNTO 16)) = UpdateAddress) THEN
-							--Passa pra memória principal agora
-							MemoryAddr <= UpdateAddress;
+							MemoryAddr <= UpdateAddress;								--Atualiza na Memória Principal
 							MemoryData <= MemBuffer(Addr, (7 DOWNTO 0));
-							--Talvez alguma entrada de comunicação, pra dizer se é Fetch ou Post. Mas como não to focando na Memória principal, vou ver isso conforme for, só adicionando se necessário.
+							--Talvez alguma entrada de comunicação, pra dizer se é Fetch ou Post
 						
-							--Limpa do Buffer
-							ReadWriteSet := MemBuffer(Addr, 15 DOWNTO 8);
+							ReadWriteSet := MemBuffer(Addr, 15 DOWNTO 8);		--Remove/Limpa Buffer depois de atualizado na Memória Principal
 							ReadWriteSet(TransactionID) := "00";
 							FOR P IN (0 TO 3) LOOP
 								ProcFlag := ReadWriteSet(P,0) OR ReadWriteSet(P,1) OR ProcFlag;
@@ -215,9 +207,12 @@ BEGIN
 						END IF;
 					END LOOP;
 					
-				--Quando receber retorno de que a FIFO está vazia o processo é finalizado e retorno Commit Succes pra CU
-				ELSE
+				ELSE																			--Se a FIFO está vazia o processo é finalizado e retorna Commit Succes
 					BuffStatus <= "101";
+
+					ConfBufMode <= "00";													--Deassert da Conflict Flag Externa
+					ConfBufTrID <= TransactionID;
+					ConfBufMode <= "11";
 				END IF;
 			
 			END IF;

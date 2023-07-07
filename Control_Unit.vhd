@@ -11,8 +11,6 @@ ENTITY Control_Unit IS
 		BuffStatus:			IN STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: Undefined, 001: Hit, 010: Miss, 011: NotAbort, 100: CommitFail, 101: CommitSuccess
 		CUStatus:			OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: OnIdle, 001: OnRead, 010: OnWrite, 011: OnAbort, 100: OnCommit, 101: OnUpdate
 		
-		--TrStatus:			OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--CommitFail, CommitSucces, etc
-		
 		Reset:				IN STD_LOGIC;
 		Clock:				IN STD_LOGIC
 	);
@@ -72,23 +70,13 @@ BEGIN
 					CUStatus <= "100";
 					IF (BuffStatus = "100") THEN
 						NextStateIs <= IdleState;
-						--Informa que CommitFail
 					ELSIF (BuffStatus = "011") THEN
 						NextStateIs <= MemoryUpdateState;
 					END IF;
 				
 				WHEN MemoryUpdateState =>
 					CUStatus <= "101";
-					--Informa o TM buffer que está em status de atualizar, e passa qual a transação
-					--No TM buffer ele vai chamando da fila (da transação especifica) um por um, achando o endereço retornado no buffer e passando o dado guardado à memória principal
-					--e simultaneamente limpando/atualizando o buffer
-					--E no fim ele retorna um Status de Commit bem sucedido
-					
-					--IF (QueueStatus = [Commit]) THEN
-					--END IF;
-					
 					IF (BuffStatus = "101") THEN
-						--Informa que CommitSuccess
 						NextStateIs <= IdleState;
 					END IF;
 				
