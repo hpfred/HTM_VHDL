@@ -13,6 +13,7 @@ ENTITY HTM_Core IS
 		
 		TransactionStatus:	OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--6 status do HTM_Core que informam o processador -(OnRead, OnWrite, OnAbort, OnCommit, CommitFail, CommitSucc)? -Talvez seja interessante só o resultado de Commit?
 		
+		Reset:	IN STD_LOGIC;
 		Clock:	IN STD_LOGIC
 	);
 END ENTITY HTM_Core;	
@@ -21,14 +22,13 @@ ARCHITECTURE  HTM OF HTM_Core IS
 COMPONENT Control_Unit IS
 	PORT
 	(
-		Action:					IN STD_LOGIC_VECTOR (1 DOWNTO 0);
-		MemAddress:				IN STD_LOGIC_VECTOR (7 DOWNTO 0);
-		Data:						IN STD_LOGIC_VECTOR (7 DOWNTO 0);
-		ProcID:					IN STD_LOGIC_VECTOR (1 DOWNTO 0);
-		TransactionID:			IN STD_LOGIC_VECTOR (1 DOWNTO 0);
-		TransactionStatus:	OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
-		Reset:					IN STD_LOGIC;
-		Clock:					IN STD_LOGIC
+		Action:				IN STD_LOGIC_VECTOR (1 DOWNTO 0);
+		IntAbortStatus:	IN STD_LOGIC;
+		BuffStatus:			IN STD_LOGIC_VECTOR (2 DOWNTO 0);
+		CUStatus:			OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
+		--TrStatus:			OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
+		Reset:				IN STD_LOGIC;
+		Clock:				IN STD_LOGIC
 	);
 END COMPONENT;
 
@@ -39,8 +39,16 @@ COMPONENT TM_Buffer IS
 		Data:				IN STD_LOGIC_VECTOR (7 DOWNTO 0);
 		ProcID:			IN STD_LOGIC_VECTOR (1 DOWNTO 0);
 		TransactionID:	IN STD_LOGIC_VECTOR (1 DOWNTO 0);
-		Status:			IN STD_LOGIC_VECTOR (2 DOWNTO 0);
-		RetStatus:		OUT STD_LOGIC_VECTOR ();
+		CUStatus:		IN STD_LOGIC_VECTOR (2 DOWNTO 0);
+		ConfBufMode:	OUT STD_LOGIC_VECTOR (1 DOWNTO 0);
+		ConfBufTrID:	OUT STD_LOGIC_VECTOR (1 DOWNTO 0);
+		ConfBufStatus:	IN STD_LOGIC_VECTOR (1 DOWNTO 0);
+		QueueMode:		OUT STD_LOGIC_VECTOR (1 DOWNTO 0);
+		QueueStatus:	IN STD_LOGIC_VECTOR (1 DOWNTO 0);
+		QueueReturn:	IN STD_LOGIC_VECTOR (7 DOWNTO 0);
+		MemoryAddr:		OUT STD_LOGIC_VECTOR (7 DOWNTO 0);
+		MemoryData:		OUT STD_LOGIC_VECTOR (7 DOWNTO 0);
+		BuffStatus:		OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
 		Reset:			IN STD_LOGIC;
 		Clock:			IN STD_LOGIC
 	);
@@ -48,10 +56,11 @@ COMPONENT TM_Buffer IS
 COMPONENT Conflict_Buffer IS
 	PORT
 	(
-		TrID:		IN STD_LOGIC_VECTOR (1 DOWNTO 0);
-		Mode:		IN STD_LOGIC_VECTOR (1 DOWNTO 0);
-		Status:	OUT STD_LOGIC;
-		Clock:	IN STD_LOGIC
+		TrID:					IN STD_LOGIC_VECTOR (1 DOWNTO 0);
+		Mode:					IN STD_LOGIC_VECTOR (1 DOWNTO 0);
+		Status:				OUT STD_LOGIC_VECTOR (1 DOWNTO 0);
+		IntAbortStatus:	OUT STD_LOGIC;
+		Reset:				IN STD_LOGIC
 	);
 
 COMPONENT Address_Queue IS
@@ -60,6 +69,7 @@ COMPONENT Address_Queue IS
 		Mode: 	IN STD_LOGIC_VECTOR (1 DOWNTO 0);
 		Addr:		IN STD_LOGIC_VECTOR (7 DOWNTO 0);
 		TrID:		IN STD_LOGIC_VECTOR (1 DOWNTO 0);
+		FIFOStatus:	OUT STD_LOGIC_VECTOR (1 DOWNTO 0);
 		Ret:		OUT STD_LOGIC_VECTOR (7 DOWNTO 0);
 		Reset:	IN STD_LOGIC;
 		Clock:	IN STD_LOGIC
@@ -75,15 +85,29 @@ COMPONENT Main_Memory IS
 	);
 END COMPONENT;
 
+SIGNAL IntAbortStatus: STD_LOGIC;
+SIGNAL ConfBufMode, ConfBufTrID, ConfBufStatus: STD_LOGIC_VECTOR (1 DOWNTO 0);
+SIGNAL QueueStatus, QueueMode: STD_LOGIC_VECTOR (1 DOWNTO 0);
+SIGNAL CUStatus, BuffStatus: STD_LOGIC_VECTOR (2 DOWNTO 0);
+SIGNAL QueueReturn, MemoryAddr, MemoryData: STD_LOGIC_VECTOR (7 DOWNTO 0);
+
 BEGIN
 
+		--<= Action;
+		--<= MemAddress;
+		--<= Data;
+		--<= ProcID;
+		--<= TransactionID;
+		TransactionStatus <= BuffStatus;
+		--<= Reset;
+		--<= Clock;
+		
 		CU: Control_Unit PORT MAP (
 									Action=>Action,
-									MemAddress=>MemAddress,
-									Data=>Data,
-									ProcID=>ProcID,
-									TransactionID=>TransactionID,
-									TransactionStatus=>TransactionStatus,
+									IntAbortStatus=>IntAbortStatus,
+									BuffStatus=>BuffStatus,
+									CUStatus=>CUStatus,
+									--TrStatus=>[X],
 									Reset=>Reset,
 									Clock=>Clock
 								);
@@ -93,29 +117,55 @@ BEGIN
 								 Data=>Data,
 								 ProcID=>ProcID,
 								 TransactionID=>TransactionID,
-								 Status=>[X],
-								 RetStatus=>[X],
+								 CUStatus=>CUStatus,
+								 ConfBufMode=>ConfBufMode,
+								 ConfBufTrID=>ConfBufTrID,
+								 ConfBufStatus=>ConfBufStatus,
+								 QueueMode=>QueueMode,
+								 QueueStatus=>QueueStatus,
+								 QueueReturn=>QueueReturn,
+								 MemoryAddr=>MemoryAddr,
+								 MemoryData=>MemoryData,
+								 BuffStatus=>BuffStatus,
 								 Reset=>Reset,
 								 Clock=>Clock
 							 );
 						
 		Abort: Conflict_Buffer PORT MAP (
-											TrID=>TransactionID,
-											Mode=>[X],
-											Status=>[X],
-											Clock=>Clock
-										);
+										  TrID=>ConfBufTrID,
+										  Mode=>ConfBufMode,
+										  Status=>ConfBufStatus,
+										  IntAbortStatus=>IntAbortStatus,
+										  Reset=>Reset
+									  );
 						
 		Commit: Address_Queue PORT MAP (
-										 Mode=>[X],
+										 Mode=>QueueMode,
 										 Addr=>MemAddress,
 										 TrID=>TransactionID,
-										 Ret=>[X],
+										 FIFOStatus=>QueueStatus,
+										 Ret=>QueueReturn,
 										 Reset=>Reset,
 										 Clock=>Clock
 									 );
 						
 		Memory: Main_Memory PORT MAP (
-									 );
+									  Addr=>MemoryAddr,
+									  Data=>MemoryData,
+									  Reset=>Reset,
+									  Clock=>Clock
+								  );
 
 END HTM;
+
+
+
+
+
+
+
+
+
+
+
+

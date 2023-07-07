@@ -32,8 +32,8 @@ ENTITY TM_Buffer IS
 		
 		BuffStatus:		OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: Undefined, 001: Hit, 010: Miss, 011: NotAbort, 100: CommitFail, 101: CommitSuccess
 		
-		Reset:	IN STD_LOGIC;
-		Clock:	IN STD_LOGIC
+		Reset:			IN STD_LOGIC;
+		Clock:			IN STD_LOGIC
 	);
 END ENTITY TM_Buffer;
 
@@ -227,43 +227,3 @@ BEGIN
 	END PROCESS;
 	
 END SharedData;
-
-	
-	--Ok, se ele recebe as informações todas aqui oq vai ser feito?
--- Tenho que ver de talvez o primeiro passo ser verificar com o Conflict Buffer se a Transação é zumbi
-	--Primeiro faz um varrimento do Buffer Address de 0 até o fim, ou até encontrar o primeiro Valid Flag 0
-	--Nesse primeiro varrimento ele compara o endereço recebido com os endereços de armazenados, se ele encontrar um caso de igualdade isso será um Hit, se concluir sem Hit será um Miss (posteriormente terei que tratar de causar erro/abort para Miss em memória cheia)
-	--No acontecimento de Miss, ele pega o valor onde parou por encontrar Valid Flag 0 e preenche (validflag=1, address=addres, (procid, read or write)=1, data=data)
-	--No acontecimento de um Hit ele para o loop e verifica conflito
-	--Ele também adicionará na fila de endereços o endereço dessa instrução recebida
-	--=> Aqui ele tbm retorna do estado read/write pro estado idle no Controle
-	
-	--=> E aqui embaixo quando o caso é de conflito verificado ele muda para o estado abort no Controle
-	--A lógica atacante x defensor é utilizada para determinar se ele existe, aka identifica se o atacante é write, e se há alguma RW flag com Write habilitado, caso sim a regra determinará se o atacante e ou defensores terão que ser identificados para abort
-	-- > Aqui tbm tenho que ver de fazer o Internal Abort e External Abort, acho até q é pq é a forma de informar o Controle pra mudar pro estado Abort
-	--Os casos de conflito "chamam" o módulo conflict flag (que é um array de flags), que aramazenará/fará um assert na flag do id da transacao
-	--Logo em seguida as flags do processador com conflito são zeradas, e sendo o caso do conflito ser para todos os processadores usando aquele endereço, zera a entry todas (zera a entry na verdade só precisa zerar os flags e o valid flag)
-	--Já para o caso de nenhum conflito ser verificado
-	
-	--=>Quando commit é bem sucedido o TM buffer será acionado de novo
-	--Ele irá puxar da fila de endereços e atualizando eles na memória principal (e se ele for o único processador usando aquele endereço ele remove a entry, se não for, somente as flags daquele processador são zeradas)
-	--Quando ele tiver informado ao processador a falha do commit tem que lembrar de zerar o indicador externo de abort
-	--Ele também irá infromar ao processador o sucesso do commit após ter feito a atualização completa da memória principal
-	
-	--Uma outra coisa que tá me travando um pouco na lógica é marcar os conflitos das transações que já estavam como leitura, pq não tenho como identificar elas, somente de que processador elas vieram
-	--Além da minha confusão de o que é e como é usado o Internal e External Abort Flags no Artigo, mas essa parte pelo menos acredito que consigo resolver do meu jeito (só talvez tendo um comportamento diferente tbm)
-	--A lógica que eu to chegando é de que se abortar uma transação do processador aborta todo processador, se depois eu descobrir sempre posso voltar e mudar ou repensar
-	
-	
-	--Verifica Conflito
-						--Atk: R, Def: R  >>  Atk: Nc, Def: Nc
-						--Atk: R, Def: W  >>  Atk: C, Def: Nc
-						--Atk: W, Def: R  >>  Atk: Nc, Def: C
-						--Atk: W, Def: W  >>  Atk: Nc, Def: C
-						
-						--Tem que ignorar o RWSet do Processador Atacante
-						--Atk 00
-						--Def 00 00 00
-						--
-						--Atk = (CUStatus = "001") e (CUStatus = "010")
-						--Def = RWSet - RWSet(ProcID)

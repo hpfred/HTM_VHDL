@@ -11,7 +11,7 @@ ENTITY Control_Unit IS
 		BuffStatus:			IN STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: Undefined, 001: Hit, 010: Miss, 011: NotAbort, 100: CommitFail, 101: CommitSuccess
 		CUStatus:			OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: OnIdle, 001: OnRead, 010: OnWrite, 011: OnAbort, 100: OnCommit, 101: OnUpdate
 		
-		TrStatus:			OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--CommitFail, CommitSucces, etc
+		--TrStatus:			OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--CommitFail, CommitSucces, etc
 		
 		Reset:				IN STD_LOGIC;
 		Clock:				IN STD_LOGIC
