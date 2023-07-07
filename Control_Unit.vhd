@@ -36,6 +36,7 @@ BEGIN
 			CurrStateIs <= NextStateIs;
 		
 			CASE CurrStateIs IS
+				--Ando pensando sobre questão do valores recebidos na entrada do HTM_Core, com certeza teria um sistema de fila pra organizar os pedidos que vão chegando do processador, mas aqui pensei que talvez fosse interessante garantir ao menos que os valores novos só fossem atualizados em tudo quando está no estado idle(?)
 				WHEN IdleState =>
 					CUStatus <= "000";
 					

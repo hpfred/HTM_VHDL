@@ -25,36 +25,41 @@ SIGNAL MemStorage: ALL_DATA;
 
 TYPE POINTER IS ARRAY (3 DOWNTO 0) OF STD_LOGIC_VECTOR (3 DOWNTO 0);
 SIGNAL Head, Tail: POINTER;
+SIGNAL ModeStorage: STD_LOGIC_VECTOR (1 DOWNTO 0);
 
 BEGIN
-
+	
+	--MUX, se 00 ou 11 coloca ModeStorage no ModeStorage, se outro coloca Mode no ModeStorage
+	ModeStorage <= ((Mode(0) XOR Mode(1)) AND Mode) OR (NOT(Mode(0) XOR Mode(1)) AND ModeStorage);
+	
 	PROCESS (Clock)
 	BEGIN
 		IF (Reset = '1') THEN
 			--Inicializa Head como 1 e tail como 0?
 			
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
+			FIFOStatus <= "00";
+			
 			IF (Head(TrID) > Tail(TrID)) THEN				--Caso fila vazia
 				FIFOStatus <= "01";								--Isso ainda tem problema pra quando a lista der overflow	--Tenho que depois ver de mudar pra um sistema de registrador deslocador + contador, pq isso resolveria o problema
 																																						--Na verdade usar nesse sistema atual usar um contador já poderia ajudar, pq posso verificar além do tamanho de cada tbm ver quantas vezes ele já deu a volta na cadeia - if CountHead = CountTail + 1
+			ELSIF (Mode = "10") THEN							--PULL
+				Ret <= MemStorage(TrID, Head(TrID));
+				Head(TrID) <= Head(TrID) + 1;
+					
+			END IF;
 			
-			ELSIF (Tail(TrID) = "1111") THEN					--Caso fila cheia
+			IF (Tail(TrID) = "1111") THEN						--Caso fila cheia
 				FIFOStatus <= "10";								--Esse daqui não é resolvido pelo de cima, mas um contador que checa se é igual ao tamanho máximo
+				
+			ELSIF (Mode = "01") THEN							--PUSH
+				MemStorage(TrID, Tail(TrID)) <= Addr;
+				Tail(TrID) <= Tail(TrID) + 1;
+					
+			END IF;
 			
 			--Talvez tbm ver de não adicionar o msm valor duas vezes seguidas (o melhor era nunca colocar valor repetido, mas aí seria mais coisa pra ver depois
 			
-			ELSE	--Aqui tá errado, pq se fila vazia ele pode dar push só não pull, e o contrário com fila cheia
-				IF (Mode = "01") THEN							--PUSH
-					MemStorage(TrID, Tail(TrID)) <= Addr;
-					Tail(TrID) <= Tail(TrID) + 1;
-					
-				ELSIF (Mode = "10") THEN						--PULL
-					Ret <= MemStorage(TrID, Head(TrID));
-					Head(TrID) <= Head(TrID) + 1;
-					
-				END IF;
-				
-			END IF;
 		END IF;
 	END PROCESS;
 END Queue;

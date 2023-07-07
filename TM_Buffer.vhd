@@ -57,7 +57,7 @@ BEGIN
 			--reset : std_logic_vector(N downto 0) <= (others => '0')
 			
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
-			QueueMode <= "00";
+			--QueueMode <= "00";
 			--Zera BuffStatus no inicio de cada execução?
 		
 			IF (CUStatus = "001" OR CUStatus = "010") THEN				--Se Status é Read ou Write
@@ -91,8 +91,6 @@ BEGIN
 						MemBuffer(CurrAddr, 7 DOWNTO 0) <= Data;
 						
 						--Guarda na fila? --Guarda na fila só se for Write?
-						QueueAddr <= MemAddress;		--MemBuffer(CurrAddr, 23 DOWNTO 16);
-						QueueTrID <= TransactionID;
 						QueueMode <= "01";
 							
 					ELSE THEN														--Buffer Hit
@@ -140,8 +138,6 @@ BEGIN
 							MemBuffer(CurrAddr, 7 DOWNTO 0) <= Data;
 							
 							--Guarda na fila?
-							QueueAddr <= MemAddress;
-							QueueTrID <= TransactionID;
 							QueueMode <= "01";
 							
 						END IF;
@@ -190,9 +186,8 @@ BEGIN
 				--Processo de MemUpdate
 				--Vai fazendo pull de Address_Queue do processo que commitou e passando pro Main_Memory
 				IF (QueueStatus /= "01") THEN
-					QueueTrID <= TransactionID;
-					UpdateAddress <= QueueReturn;
 					QueueMode <= "10";
+					UpdateAddress <= QueueReturn;
 				
 				--Quando receber retorno de que a FIFO está vazia o processo é finalizado e retorno Commit Succes pra CU
 				ELSE
