@@ -39,7 +39,8 @@ BEGIN
 			WHEN "10" =>
 				ConflictFlag(TrIDint) <= "01";
 				
-			WHEN "11" =>
+			--WHEN "11" =>			--4 out of 81 cases (U, X, etc)
+			WHEN others =>
 				ConflictFlag(TrIDint) <= "00";
 				
 		END CASE;
