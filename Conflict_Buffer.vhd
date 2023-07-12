@@ -50,11 +50,4 @@ BEGIN
 		END CASE;
 	END PROCESS;
 	
-	--PROCESS (Reset)
-	--BEGIN
-	--	IF (Reset = '1') THEN
-	--		ConflictFlag <= (others=>(others=>'0'));
-	--	END IF;
-	--END PROCESS;
-	
 END Flags;

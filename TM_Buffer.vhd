@@ -52,31 +52,19 @@ BEGIN
 	PROCESS (Reset, Clock)
 		VARIABLE ReadWriteSet: RW_SET;
 		VARIABLE FrstNonValid: INTEGER := 2147483647;
-		VARIABLE CurrAddr: INTEGER := 0;	--STD_LOGIC_VECTOR (3 DOWNTO 0); Se manter integer mudar pra unsigned?
+		VARIABLE CurrAddr: INTEGER := 0;					--STD_LOGIC_VECTOR (3 DOWNTO 0); Se manter integer mudar pra unsigned?
 		VARIABLE HitFlag, AbortFlag, ProcFlag: STD_LOGIC := '0';
 		VARIABLE UpdateAddress: STD_LOGIC_VECTOR (7 DOWNTO 0);
 	BEGIN
 		IF (Reset = '1') THEN
-			--TODO: Inicializa tudo zerado
-			--reset : std_logic_vector(N downto 0) <= (others => '0')
-			--(others => '0')
-			--(others=>(Others=>'0'))
 			MemBuffer <= (others=>(Others=>'0'));
 			--
-			BuffStatus <= (others => '0');	--"000";
-			ConfBufMode <= (others => '0');	--"00";
-			ConfBufTrID <= (others => '0');	--"00";
-			QueueMode <= (others => '0');		--"00";
-			MemoryAddr <= (others => '0');	--"00000000";
-			MemoryData <= (others => '0');	--"00000000";
-			--
-			--ReadWriteSet <= "00000000";
-			--FrstNonValid <= 
-			--CurrAddr
-			--HitFlag
-			--AbortFlag
-			--ProcFlag
-			--UpdateAddress
+			BuffStatus <= (others => '0');
+			ConfBufMode <= (others => '0');
+			ConfBufTrID <= (others => '0');
+			QueueMode <= (others => '0');
+			MemoryAddr <= (others => '0');
+			MemoryData <= (others => '0');
 			
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
 			--Zera BuffStatus no inicio de cada execução?
@@ -99,6 +87,9 @@ BEGIN
 					--IF (CurrAddr = 9) THEN OVERFLOW.MISS
 					
 					IF (HitFlag = '0') THEN										--Buffer Miss
+						BuffStatus <= "010";
+						QueueMode <= "01";
+						
 						MemBuffer(CurrAddr)(24) <= '1';
 						MemBuffer(CurrAddr)(23 DOWNTO 16) <= MemAddress;
 						
@@ -107,10 +98,8 @@ BEGIN
 						ReadWriteSet(1) := MemBuffer(CurrAddr)(11 DOWNTO 10);
 						ReadWriteSet(0) := MemBuffer(CurrAddr)(9 DOWNTO 8);
 						IF (CUStatus = "001") THEN
-							--ReadWriteSet(TO_INTEGER(UNSIGNED(ProcID)))(0) := '1';
 							ReadWriteSet(ProcIDint)(0) := '1';
 						ELSIF CUStatus = "010" THEN
-							--ReadWriteSet(TO_INTEGER(UNSIGNED(ProcID)))(1) := '1';
 							ReadWriteSet(ProcIDint)(1) := '1';
 						END IF;
 						MemBuffer(CurrAddr)(15 DOWNTO 14) <= ReadWriteSet(3);
@@ -119,10 +108,13 @@ BEGIN
 						MemBuffer(CurrAddr)(9 DOWNTO 8) <= ReadWriteSet(0);
 						MemBuffer(CurrAddr)(7 DOWNTO 0) <= Data;
 						
-						QueueMode <= "01";										--Guarda na fila --Adicionar IF só pra fazer nos Writes?
+						--QueueMode <= "01";										--Guarda na fila --Adicionar IF só pra fazer nos Writes?
 						QueueMode <= "00";
+						--Esse método não está servindo, a síntese provavelmente tá simplificando, vou tentar levar pro início talvez?
 							
 					ELSE																--Buffer Hit
+						BuffStatus <= "001";
+						
 						ReadWriteSet(3) := MemBuffer(CurrAddr)(15 DOWNTO 14);
 						ReadWriteSet(2) := MemBuffer(CurrAddr)(13 DOWNTO 12);
 						ReadWriteSet(1) := MemBuffer(CurrAddr)(11 DOWNTO 10);
@@ -153,6 +145,7 @@ BEGIN
 							AbortFlag := '0';
 							
 						ELSIF (CUStatus = "010") THEN							--Write
+							QueueMode <= "01";
 							FOR i IN 0 TO 3 LOOP
 								IF (ReadWriteSet(i) /= "00" AND ProcID /= i) THEN
 									ConfBufMode <= "00";
@@ -172,7 +165,7 @@ BEGIN
 							MemBuffer(CurrAddr)(9 DOWNTO 8) <= ReadWriteSet(0);
 							MemBuffer(CurrAddr)(7 DOWNTO 0) <= Data;
 							
-							QueueMode <= "01";									--Guarda na fila
+							--QueueMode <= "01";									--Guarda na fila
 							QueueMode <= "00";
 							
 						END IF;
@@ -229,7 +222,10 @@ BEGIN
 				IF (QueueStatus /= "01") THEN									--Se fila não vazia faz pull da FIFO
 					QueueMode <= "10";
 					QueueMode <= "00";
+					--while(QueueUpdated /= 0) - ou algo assim pra garantir só depois de atualizar?
 					UpdateAddress := QueueReturn;
+					--Aqui também deve dar problema, pq o modo só altera no clock, então oq tá retornando de QueueReturn não é oq se deseja
+					--Não só o modo, mas retorno da saída é alterado no puslo de clock também
 					
 					FOR Addr IN 0 TO 9 LOOP
 						IF MemBuffer(Addr)(23 DOWNTO 16) = UpdateAddress THEN

@@ -33,7 +33,7 @@ BEGIN
 	Clock <= NOT Clock AFTER 5 ns;
 	PROCESS
 	BEGIN
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '0' ;
 		Reset <= '0';
 		Action <= "01";
 		MemAddress <= "00000001";

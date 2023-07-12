@@ -31,27 +31,21 @@ SIGNAL ModeStorage: STD_LOGIC_VECTOR (1 DOWNTO 0);
 SIGNAL ResetMode:	STD_LOGIC;
 
 SIGNAL TrIDint: INTEGER := TO_INTEGER(UNSIGNED(TrID));
---SIGNAL HeadInt: INTEGER := TO_INTEGER(UNSIGNED(Head(TrIDint)));
---SIGNAL TailInt: INTEGER := TO_INTEGER(UNSIGNED(Tail(TrIDint)));
 
 BEGIN
 	
-	--ModeStorage(0) <= ((Mode(0) XOR Mode(1)) AND Mode(0)) OR (NOT(Mode(0) XOR Mode(1)) AND ModeStorage(0));
-	--ModeStorage(1) <= ((Mode(0) XOR Mode(1)) AND Mode(1)) OR (NOT(Mode(0) XOR Mode(1)) AND ModeStorage(1));
 	ModeLatest <= Mode WHEN (Mode /= "00") ELSE ModeLatest;
 	ModeStorage <= ModeLatest WHEN (ResetMode = '0') ELSE "00";
 	
 	PROCESS (Reset, Clock)
 	BEGIN
 		IF (Reset = '1') THEN
-			--Inicializa Head como 1 e tail como 0?
-			FIFOStatus <= (others=>'0');	--"00";
-			Ret <= (others=>'0');			--"00000000";
+			--FIFOStatus <= (others=>'0');
+			FIFOStatus <= "01";
+			Ret <= (others=>'0');
 			MemStorage <= (others=>(others=>(others=>'0')));
 			Head <= (others=>"0001");
 			Tail <= (others=>"0000");
-			--ModeLatest
-			--ModeStorage
 			ResetMode <= '0';
 			
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
