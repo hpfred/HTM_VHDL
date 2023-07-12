@@ -27,8 +27,12 @@ BEGIN
 	Status <= ConflictFlag(TrIDint);
 	IntAbortStatus <= ConflictFlag(0)(1) OR ConflictFlag(1)(1) OR ConflictFlag(2)(1) OR ConflictFlag(3)(1);
 	
-	PROCESS (Mode)
+	PROCESS (Mode, Reset)
 	BEGIN
+		IF (Reset = '1') THEN
+			ConflictFlag <= (others=>(others=>'0'));
+		END IF;
+	
 		CASE Mode IS
 			WHEN "00" =>
 				ConflictFlag(TrIDint) <= ConflictFlag(TrIDint);
@@ -45,4 +49,12 @@ BEGIN
 				
 		END CASE;
 	END PROCESS;
+	
+	--PROCESS (Reset)
+	--BEGIN
+	--	IF (Reset = '1') THEN
+	--		ConflictFlag <= (others=>(others=>'0'));
+	--	END IF;
+	--END PROCESS;
+	
 END Flags;

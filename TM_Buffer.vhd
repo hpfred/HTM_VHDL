@@ -61,6 +61,22 @@ BEGIN
 			--reset : std_logic_vector(N downto 0) <= (others => '0')
 			--(others => '0')
 			--(others=>(Others=>'0'))
+			MemBuffer <= (others=>(Others=>'0'));
+			--
+			BuffStatus <= (others => '0');	--"000";
+			ConfBufMode <= (others => '0');	--"00";
+			ConfBufTrID <= (others => '0');	--"00";
+			QueueMode <= (others => '0');		--"00";
+			MemoryAddr <= (others => '0');	--"00000000";
+			MemoryData <= (others => '0');	--"00000000";
+			--
+			--ReadWriteSet <= "00000000";
+			--FrstNonValid <= 
+			--CurrAddr
+			--HitFlag
+			--AbortFlag
+			--ProcFlag
+			--UpdateAddress
 			
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
 			--Zera BuffStatus no inicio de cada execução?

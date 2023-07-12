@@ -25,6 +25,7 @@ BEGIN
 	BEGIN
 		IF (Reset = '1') THEN
 			--Zera memória
+			Mem <= (others=>(others=>'0'));
 		
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
 			Mem(AddrInt) <= Data;

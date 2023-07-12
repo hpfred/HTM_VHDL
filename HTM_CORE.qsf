@@ -68,8 +68,8 @@ set_global_assignment -name EDA_DESIGN_INSTANCE_NAME NA -section_id Testbench_HT
 set_global_assignment -name EDA_TEST_BENCH_RUN_SIM_FOR "10 us" -section_id Testbench_HTM_Core
 set_global_assignment -name EDA_TEST_BENCH_MODULE_NAME Testbench_HTM_Core -section_id Testbench_HTM_Core
 set_global_assignment -name EDA_TEST_BENCH_FILE Testbench_HTM_Core.vhd -section_id Testbench_HTM_Core
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name VECTOR_WAVEFORM_FILE simulation/modelsim/Waveform.vwf
 set_global_assignment -name INCREMENTAL_VECTOR_INPUT_SOURCE "C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/simulation/modelsim/Waveform.vwf"
 set_global_assignment -name SIMULATION_MODE FUNCTIONAL
 set_global_assignment -name EDA_GENERATE_FUNCTIONAL_NETLIST ON -section_id eda_simulation
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

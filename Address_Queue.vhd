@@ -45,7 +45,14 @@ BEGIN
 	BEGIN
 		IF (Reset = '1') THEN
 			--Inicializa Head como 1 e tail como 0?
-			--FIFOStatus <= "00";
+			FIFOStatus <= (others=>'0');	--"00";
+			Ret <= (others=>'0');			--"00000000";
+			MemStorage <= (others=>(others=>(others=>'0')));
+			Head <= (others=>"0001");
+			Tail <= (others=>"0000");
+			--ModeLatest
+			--ModeStorage
+			ResetMode <= '0';
 			
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
 			--FIFOStatus <= "00";
