@@ -1,0 +1,120 @@
+$comment
+	File created using the following command:
+		vcd file HTM_CORE.msim.vcd -direction
+$end
+$date
+	Tue Jul 11 01:47:38 2023
+$end
+$version
+	ModelSim Version 10.1d
+$end
+$timescale
+	1ps
+$end
+$scope module HTM_Core_vlg_vec_tst $end
+$var reg 2 ! Action [1:0] $end
+$var reg 1 " Clock $end
+$var reg 8 # Data [7:0] $end
+$var reg 8 $ MemAddress [7:0] $end
+$var reg 2 % ProcID [1:0] $end
+$var reg 1 & Reset $end
+$var reg 2 ' TransactionID [1:0] $end
+$var wire 1 ( TransactionStatus [2] $end
+$var wire 1 ) TransactionStatus [1] $end
+$var wire 1 * TransactionStatus [0] $end
+$var wire 1 + sampler $end
+$scope module i1 $end
+$var wire 1 , gnd $end
+$var wire 1 - vcc $end
+$var wire 1 . unknown $end
+$var tri1 1 / devclrn $end
+$var tri1 1 0 devpor $end
+$var tri1 1 1 devoe $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+#0
+$dumpvars
+b0 !
+0"
+b11111111 #
+b1 $
+b0 %
+1&
+b0 '
+0*
+0)
+1(
+x+
+0,
+1-
+x.
+1/
+10
+11
+$end
+#50000
+1"
+0+
+#100000
+b1 !
+0&
+0"
+1+
+#150000
+1"
+0+
+#200000
+0"
+1+
+#250000
+1"
+0+
+#300000
+b11 !
+b10 !
+0"
+1+
+#350000
+1"
+0+
+#400000
+0"
+1+
+#450000
+1"
+0+
+#500000
+b11 !
+0"
+1+
+#550000
+1"
+0+
+#600000
+0"
+1+
+#650000
+1"
+0+
+#700000
+b1 !
+b0 !
+0"
+1+
+#750000
+1"
+0+
+#800000
+0"
+1+
+#850000
+1"
+0+
+#900000
+0"
+1+
+#950000
+1"
+0+
+#1000000

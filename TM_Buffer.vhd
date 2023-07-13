@@ -70,6 +70,7 @@ BEGIN
 			
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
 			--Zera BuffStatus no inicio de cada execução?
+			QueueMode <= QueueModeTemp;
 		
 			IF (CUStatus = "001" OR CUStatus = "010") THEN				--Se Status é Read ou Write
 				ConfBufTrID <= TransactionID;
@@ -90,7 +91,6 @@ BEGIN
 					
 					IF (HitFlag = '0') THEN										--Buffer Miss
 						BuffStatus <= "010";
-						--QueueMode <= "01";
 						QueueModeTemp := "01";
 						
 						MemBuffer(CurrAddr)(24) <= '1';
@@ -111,10 +111,8 @@ BEGIN
 						MemBuffer(CurrAddr)(9 DOWNTO 8) <= ReadWriteSet(0);
 						MemBuffer(CurrAddr)(7 DOWNTO 0) <= Data;
 						
-						--QueueMode <= "01";										--Guarda na fila --Adicionar IF só pra fazer nos Writes?
-						--QueueMode <= "00";
+						--Guarda na fila --Adicionar IF só pra fazer nos Writes?
 						QueueModeTemp := "00";
-						--Esse método não está servindo, a síntese provavelmente tá simplificando, vou tentar levar pro início talvez?
 							
 					ELSE																--Buffer Hit
 						BuffStatus <= "001";
@@ -149,7 +147,6 @@ BEGIN
 							AbortFlag := '0';
 							
 						ELSIF (CUStatus = "010") THEN							--Write
-							--QueueMode <= "01";
 							QueueModeTemp := "01";
 							FOR i IN 0 TO 3 LOOP
 								IF (ReadWriteSet(i) /= "00" AND ProcID /= i) THEN
@@ -170,8 +167,7 @@ BEGIN
 							MemBuffer(CurrAddr)(9 DOWNTO 8) <= ReadWriteSet(0);
 							MemBuffer(CurrAddr)(7 DOWNTO 0) <= Data;
 							
-							--QueueMode <= "01";									--Guarda na fila
-							--QueueMode <= "00";
+							--Guarda na fila
 							QueueModeTemp := "00";
 							
 						END IF;
@@ -226,8 +222,6 @@ BEGIN
 			
 			ELSIF (CUStatus = "101") THEN										--Se Status é MemUpdate
 				IF (QueueStatus /= "01") THEN									--Se fila não vazia faz pull da FIFO
-					--QueueMode <= "10";
-					--QueueMode <= "00";
 					QueueModeTemp := "10";
 					QueueModeTemp := "00";
 					--while(QueueUpdated /= 0) - ou algo assim pra garantir só depois de atualizar?

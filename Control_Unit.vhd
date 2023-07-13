@@ -9,7 +9,7 @@ ENTITY Control_Unit IS
 		IntAbortStatus:	IN STD_LOGIC;
 		
 		BuffStatus:			IN STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: Undefined, 001: Hit, 010: Miss, 011: NotAbort, 100: CommitFail, 101: CommitSuccess
-		CUStatus:			OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: OnIdle, 001: OnRead, 010: OnWrite, 011: OnAbort, 100: OnCommit, 101: OnUpdate
+		CUStatus:			OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: OnIdle, 001: OnRead, 010: OnWrite, 011: OnAbort, 100: OnCommit, 101: OnUpdate--, 110: OnPush, 111: OnPull
 		
 		Reset:				IN STD_LOGIC;
 		Clock:				IN STD_LOGIC
@@ -28,15 +28,14 @@ BEGIN
 		IF (Reset = '1') THEN
 			CurrStateIs <= IdleState;
 			NextStateIs <= IdleState;
-			CUStatus <= "111";
+			CUStatus <= "000";
 		
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
-			CurrStateIs <= NextStateIs;
+			--CurrStateIs <= NextStateIs;
 		
 			CASE CurrStateIs IS
 				WHEN IdleState =>
 					CUStatus <= "000";
-					
 					IF (IntAbortStatus = '1') THEN	--AbortCmd
 						NextStateIs <= AbortState;
 					ELSIF (Action = "01") THEN			--ReadCmd
@@ -80,6 +79,8 @@ BEGIN
 					END IF;
 				
 			END CASE;
+			CurrStateIs <= NextStateIs; --Não é pra fazer diferença, mas quero testar uma coisa
+			--Aaah, também tem aquela coisa de que isso é signal e signal só atualiza no clock
 		END IF;
 	END PROCESS;
 

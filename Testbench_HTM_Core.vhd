@@ -37,11 +37,12 @@ BEGIN
 		Reset <= '0';
 		Action <= "01";
 		MemAddress <= "00000001";
-		Data <= "00000000";				--No Read, tanto faz o Dado
-		ID <= "00";
-		--OUT TransactionStatus;
+		Data <= "00000001";--
+		ID <= "01";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
---Error: Process Statement must contain only one Wait Statement --O testbench de exemplo que peguei dos professores tinha vários assim, e acho que cheguei a testar aquele e ver ele funcionar também. Não sei direito, mas não vou poder ver isso agora (tenho que parar pq tá no horário de uma aula e ainda nem almocei também).
+		--Uma das outras coisas que também to tendo problema é que como ele tá sincornizado no clock, no pulso ele altera tudo, mas no pulso ele executa tudo, então só tá afetando as modificações no próximo pulso (?)
+		
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		--Wait Until TransactionStatus is Hit or Miss (?)
 		
@@ -49,19 +50,15 @@ BEGIN
 		Action <= "10";
 		MemAddress <= "00000001";
 		Data <= "11111111";
-		ID <= "00";
-		--OUT TransactionStatus;
+		ID <= "01";
 		
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		Action <= "11";
-		MemAddress <= "00000000";		--No Commit, tanto faz o Endereço
-		Data <= "00000000";				--No Commit, tanto faz o Dado
-		ID <= "00";
-		--OUT TransactionStatus;
-		
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		MemAddress <= "00000001";--
+		Data <= "00000001";--
+		ID <= "01";
 		
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;

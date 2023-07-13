@@ -1,0 +1,85 @@
+m255
+K3
+13
+cModel Technology
+Z0 dC:\Users\frepa\OneDrive\Documents\UFPel\Mestrado\Aluno-Especial_1\PTSD\Atividades\Projeto\VHDL\simulation\qsim
+vHTM_Core
+Z1 I]mfKNi6XW<8L_>zOG5LGc3
+Z2 V[C9nQK185Xe_mJP<YeHoB0
+Z3 dC:\Users\frepa\OneDrive\Documents\UFPel\Mestrado\Aluno-Especial_1\PTSD\Atividades\Projeto\VHDL\simulation\qsim
+Z4 w1689050847
+Z5 8HTM_CORE.vo
+Z6 FHTM_CORE.vo
+L0 31
+Z7 OV;L;10.1d;51
+r1
+31
+Z8 o-work work -O0
+Z9 n@h@t@m_@core
+!i10b 1
+Z10 !s100 7:z4o59GFl[RIE=9Y;6^F0
+!s85 0
+Z11 !s108 1689050854.720000
+Z12 !s107 HTM_CORE.vo|
+Z13 !s90 -work|work|HTM_CORE.vo|
+!s101 -O0
+vHTM_Core_vlg_check_tst
+!i10b 1
+!s100 DgWe`oWa4b`Z[GNa?EdI80
+IzURm48fk9>R;j_I7>DEZB3
+VJQn>B>`dTj_F8@T7<Cg@Y3
+R3
+Z14 w1689050845
+Z15 8HTM_CORE.vt
+Z16 FHTM_CORE.vt
+L0 69
+R7
+r1
+!s85 0
+31
+Z17 !s108 1689050855.490000
+Z18 !s107 HTM_CORE.vt|
+Z19 !s90 -work|work|HTM_CORE.vt|
+!s101 -O0
+R8
+n@h@t@m_@core_vlg_check_tst
+vHTM_Core_vlg_sample_tst
+!i10b 1
+!s100 SH[EcLcm=KZ2Y;>ZhS56K2
+IH^QJAO_W:QbZzC;5@C^la0
+V7jog=dABY@a:^V]:6LVgz0
+R3
+R14
+R15
+R16
+L0 29
+R7
+r1
+!s85 0
+31
+R17
+R18
+R19
+!s101 -O0
+R8
+n@h@t@m_@core_vlg_sample_tst
+vHTM_Core_vlg_vec_tst
+!i10b 1
+!s100 81`DdM_i^fklgE3zez^zE2
+IhlGU1QGGM2;^>oVgK<GG]3
+V4mO0O`zLf2hTV>fY0M2nm2
+R3
+R14
+R15
+R16
+L0 199
+R7
+r1
+!s85 0
+31
+R17
+R18
+R19
+!s101 -O0
+R8
+n@h@t@m_@core_vlg_vec_tst
