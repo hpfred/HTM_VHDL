@@ -37,7 +37,7 @@ BEGIN
 	ModeLatest <= Mode WHEN (Mode /= "00") ELSE ModeLatest;
 	ModeStorage <= ModeLatest WHEN (ResetMode = '0') ELSE "00";
 	
-	PROCESS (Reset, Clock)
+	PROCESS (Reset, Clock)	--Mode no lugar de clock?
 	BEGIN
 		IF (Reset = '1') THEN
 			--FIFOStatus <= (others=>'0');
@@ -48,7 +48,7 @@ BEGIN
 			Tail <= (others=>"0000");
 			ResetMode <= '0';
 			
-		ELSIF (Clock'EVENT AND Clock = '1') THEN
+		ELSIF (Clock'EVENT AND Clock = '1') THEN	--Mode'EVENT? Mode /= 00?
 			--FIFOStatus <= "00";
 			
 			IF (Head(TrIDint) > Tail(TrIDint)) THEN				--Caso fila vazia

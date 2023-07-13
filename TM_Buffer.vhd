@@ -55,6 +55,7 @@ BEGIN
 		VARIABLE CurrAddr: INTEGER := 0;					--STD_LOGIC_VECTOR (3 DOWNTO 0); Se manter integer mudar pra unsigned?
 		VARIABLE HitFlag, AbortFlag, ProcFlag: STD_LOGIC := '0';
 		VARIABLE UpdateAddress: STD_LOGIC_VECTOR (7 DOWNTO 0);
+		VARIABLE QueueModeTemp: STD_LOGIC_VECTOR (1 DOWNTO 0);
 	BEGIN
 		IF (Reset = '1') THEN
 			MemBuffer <= (others=>(Others=>'0'));
@@ -63,6 +64,7 @@ BEGIN
 			ConfBufMode <= (others => '0');
 			ConfBufTrID <= (others => '0');
 			QueueMode <= (others => '0');
+			QueueModeTemp := (others => '0');
 			MemoryAddr <= (others => '0');
 			MemoryData <= (others => '0');
 			
@@ -88,7 +90,8 @@ BEGIN
 					
 					IF (HitFlag = '0') THEN										--Buffer Miss
 						BuffStatus <= "010";
-						QueueMode <= "01";
+						--QueueMode <= "01";
+						QueueModeTemp := "01";
 						
 						MemBuffer(CurrAddr)(24) <= '1';
 						MemBuffer(CurrAddr)(23 DOWNTO 16) <= MemAddress;
@@ -109,7 +112,8 @@ BEGIN
 						MemBuffer(CurrAddr)(7 DOWNTO 0) <= Data;
 						
 						--QueueMode <= "01";										--Guarda na fila --Adicionar IF só pra fazer nos Writes?
-						QueueMode <= "00";
+						--QueueMode <= "00";
+						QueueModeTemp := "00";
 						--Esse método não está servindo, a síntese provavelmente tá simplificando, vou tentar levar pro início talvez?
 							
 					ELSE																--Buffer Hit
@@ -145,7 +149,8 @@ BEGIN
 							AbortFlag := '0';
 							
 						ELSIF (CUStatus = "010") THEN							--Write
-							QueueMode <= "01";
+							--QueueMode <= "01";
+							QueueModeTemp := "01";
 							FOR i IN 0 TO 3 LOOP
 								IF (ReadWriteSet(i) /= "00" AND ProcID /= i) THEN
 									ConfBufMode <= "00";
@@ -166,7 +171,8 @@ BEGIN
 							MemBuffer(CurrAddr)(7 DOWNTO 0) <= Data;
 							
 							--QueueMode <= "01";									--Guarda na fila
-							QueueMode <= "00";
+							--QueueMode <= "00";
+							QueueModeTemp := "00";
 							
 						END IF;
 					END IF;
@@ -220,8 +226,10 @@ BEGIN
 			
 			ELSIF (CUStatus = "101") THEN										--Se Status é MemUpdate
 				IF (QueueStatus /= "01") THEN									--Se fila não vazia faz pull da FIFO
-					QueueMode <= "10";
-					QueueMode <= "00";
+					--QueueMode <= "10";
+					--QueueMode <= "00";
+					QueueModeTemp := "10";
+					QueueModeTemp := "00";
 					--while(QueueUpdated /= 0) - ou algo assim pra garantir só depois de atualizar?
 					UpdateAddress := QueueReturn;
 					--Aqui também deve dar problema, pq o modo só altera no clock, então oq tá retornando de QueueReturn não é oq se deseja
@@ -261,6 +269,8 @@ BEGIN
 				END IF;
 			
 			END IF;
+			
+			QueueMode <= QueueModeTemp;
 			
 		END IF;
 		
