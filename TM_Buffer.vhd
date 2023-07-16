@@ -56,6 +56,7 @@ BEGIN
 		VARIABLE HitFlag, AbortFlag, ProcFlag: STD_LOGIC := '0';
 		VARIABLE UpdateAddress: STD_LOGIC_VECTOR (7 DOWNTO 0);
 		VARIABLE QueueModeTemp: STD_LOGIC_VECTOR (1 DOWNTO 0);
+		VARIABLE StateMachineCount: INTEGER := 0
 	BEGIN
 		IF (Reset = '1') THEN
 			MemBuffer <= (others=>(Others=>'0'));
@@ -67,16 +68,20 @@ BEGIN
 			QueueModeTemp := (others => '0');
 			MemoryAddr <= (others => '0');
 			MemoryData <= (others => '0');
+			StateMachineCount := 0;
 			
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
 			--Zera BuffStatus no inicio de cada execução?
 			QueueMode <= QueueModeTemp;
 			
-			--Fora o problema com a FIFO, e diminuindo o tempo na CU, ainda tenho um Clock aqui que vai executar extra/errado
 			--Então provavelmente tenho que resolver com um contador, ou algum flag que só reseta quando o CUStatus mudar (?)
-			IF (CUStatus = "001" OR CUStatus = "010") THEN				--Se Status é Read ou Write
+			IF (CUStatus = "000") THEN
+				StateMachineCount := 0;
+			
+			ELSIF ((CUStatus = "001" OR CUStatus = "010") AND StateMachineCount = 0) THEN				--Se Status é Read ou Write
 				ConfBufTrID <= TransactionID;
 				IF (ConfBufStatus(0) = '0') THEN									--Verifica com Conflict_Buffer se é transação zumbi
+				--Da forma que está agora ele também nunca retornaria para Idle quando encontrar uma transação zumbi
 					FOR CurrAddr IN 0 TO 9 LOOP	--'length-1
 						IF (MemBuffer(CurrAddr)(24) = '0' AND FrstNonValid > CurrAddr) THEN
 							FrstNonValid := CurrAddr;
