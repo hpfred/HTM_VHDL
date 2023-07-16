@@ -28,14 +28,14 @@ BEGIN
 		IF (Reset = '1') THEN
 			CurrStateIs <= IdleState;
 			NextStateIs <= IdleState;
-			CUStatus <= "000";
+			CUStatus := "000";
 		
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
 			--CurrStateIs <= NextStateIs;
 		
 			CASE CurrStateIs IS
 				WHEN IdleState =>
-					CUStatus <= "000";
+					CUStatus := "000";
 					IF (IntAbortStatus = '1') THEN	--AbortCmd
 						NextStateIs <= AbortState;
 					ELSIF (Action = "01") THEN			--ReadCmd
@@ -47,25 +47,25 @@ BEGIN
 					END IF;
 				
 				WHEN ReadState =>
-					CUStatus <= "001";
-					IF (BuffStatus = "01" OR BuffStatus = "10") THEN
+					CUStatus := "001";
+					IF (BuffStatus = "001" OR BuffStatus = "010") THEN
 						NextStateIs <= IdleState;
 					END IF;
 				
 				WHEN WriteState =>
-					CUStatus <= "010";
-					IF (BuffStatus = "01" OR BuffStatus = "10") THEN
+					CUStatus := "010";
+					IF (BuffStatus = "001" OR BuffStatus = "010") THEN
 						NextStateIs <= IdleState;
 					END IF;
 				
 				WHEN AbortState =>
-					CUStatus <= "011";
+					CUStatus := "011";
 					IF (IntAbortStatus = '0') THEN
 						NextStateIs <= IdleState;
 					END IF;
 				
 				WHEN CommitState =>
-					CUStatus <= "100";
+					CUStatus := "100";
 					IF (BuffStatus = "100") THEN
 						NextStateIs <= IdleState;
 					ELSIF (BuffStatus = "011") THEN
@@ -73,7 +73,7 @@ BEGIN
 					END IF;
 				
 				WHEN MemoryUpdateState =>
-					CUStatus <= "101";
+					CUStatus := "101";
 					IF (BuffStatus = "101") THEN
 						NextStateIs <= IdleState;
 					END IF;
