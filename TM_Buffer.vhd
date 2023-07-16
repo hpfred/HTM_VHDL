@@ -71,7 +71,9 @@ BEGIN
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
 			--Zera BuffStatus no inicio de cada execução?
 			QueueMode <= QueueModeTemp;
-		
+			
+			--Fora o problema com a FIFO, e diminuindo o tempo na CU, ainda tenho um Clock aqui que vai executar extra/errado
+			--Então provavelmente tenho que resolver com um contador, ou algum flag que só reseta quando o CUStatus mudar (?)
 			IF (CUStatus = "001" OR CUStatus = "010") THEN				--Se Status é Read ou Write
 				ConfBufTrID <= TransactionID;
 				IF (ConfBufStatus(0) = '0') THEN									--Verifica com Conflict_Buffer se é transação zumbi

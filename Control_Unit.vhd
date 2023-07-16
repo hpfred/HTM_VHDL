@@ -19,68 +19,82 @@ END ENTITY Control_Unit;
 		
 ARCHITECTURE  Controle OF Control_Unit IS
 TYPE STATE_TYPE IS (IdleState, ReadState, WriteState, AbortState, CommitState, MemoryUpdateState);
-SIGNAL CurrStateIs, NextStateIs: STATE_TYPE;
+--SIGNAL CurrStateIs, NextStateIs: STATE_TYPE;
+SIGNAL CurrStateIs: STATE_TYPE;
 
 BEGIN
 
 	PROCESS (Clock, Reset)
+	VARIABLE NextStateIs: STATE_TYPE;
+	VARIABLE Status: STD_LOGIC_VECTOR (2 DOWNTO 0);
 	BEGIN
 		IF (Reset = '1') THEN
 			CurrStateIs <= IdleState;
-			NextStateIs <= IdleState;
-			CUStatus := "000";
+			NextStateIs := IdleState;
+			Status := "000";
 		
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
-			--CurrStateIs <= NextStateIs;
 		
 			CASE CurrStateIs IS
 				WHEN IdleState =>
-					CUStatus := "000";
+					--CUStatus := "000";
 					IF (IntAbortStatus = '1') THEN	--AbortCmd
-						NextStateIs <= AbortState;
+						NextStateIs := AbortState;
+						Status := "011";
 					ELSIF (Action = "01") THEN			--ReadCmd
-						NextStateIs <= ReadState;
+						NextStateIs := ReadState;
+						Status := "001";
 					ELSIF (Action = "10") THEN			--WriteCmd
-						NextStateIs <= WriteState;
+						NextStateIs := WriteState;
+						Status := "010";
 					ELSIF (Action = "11") THEN			--CommitCmd
-						NextStateIs <= CommitState;
+						NextStateIs := CommitState;
+						Status := "100";
 					END IF;
 				
 				WHEN ReadState =>
-					CUStatus := "001";
+					--CUStatus := "001";
 					IF (BuffStatus = "001" OR BuffStatus = "010") THEN
-						NextStateIs <= IdleState;
+						NextStateIs := IdleState;
+						Status := "000";
 					END IF;
 				
 				WHEN WriteState =>
-					CUStatus := "010";
+					--CUStatus := "010";
 					IF (BuffStatus = "001" OR BuffStatus = "010") THEN
-						NextStateIs <= IdleState;
+						NextStateIs := IdleState;
+						Status := "000";
 					END IF;
 				
 				WHEN AbortState =>
-					CUStatus := "011";
+					--CUStatus := "011";
 					IF (IntAbortStatus = '0') THEN
-						NextStateIs <= IdleState;
+						NextStateIs := IdleState;
+						Status := "000";
 					END IF;
 				
 				WHEN CommitState =>
-					CUStatus := "100";
+					--CUStatus := "100";
 					IF (BuffStatus = "100") THEN
-						NextStateIs <= IdleState;
+						NextStateIs := IdleState;
+						Status := "000";
 					ELSIF (BuffStatus = "011") THEN
-						NextStateIs <= MemoryUpdateState;
+						NextStateIs := MemoryUpdateState;
+						Status := "101";
 					END IF;
 				
 				WHEN MemoryUpdateState =>
-					CUStatus := "101";
+					--CUStatus := "101";
 					IF (BuffStatus = "101") THEN
-						NextStateIs <= IdleState;
+						NextStateIs := IdleState;
+						Status := "000";
 					END IF;
 				
 			END CASE;
-			CurrStateIs <= NextStateIs; --Não é pra fazer diferença, mas quero testar uma coisa
-			--Aaah, também tem aquela coisa de que isso é signal e signal só atualiza no clock
+			
+			CurrStateIs <= NextStateIs;
+			CUStatus <= Status;
+			
 		END IF;
 	END PROCESS;
 
