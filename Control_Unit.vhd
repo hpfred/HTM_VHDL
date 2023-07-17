@@ -9,7 +9,7 @@ ENTITY Control_Unit IS
 		IntAbortStatus:	IN STD_LOGIC;
 		
 		BuffStatus:			IN STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: Undefined, 001: Hit, 010: Miss, 011: NotAbort, 100: CommitFail, 101: CommitSuccess
-		CUStatus:			OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: OnIdle, 001: OnRead, 010: OnWrite, 011: OnAbort, 100: OnCommit, 101: OnUpdate--, 110: OnPush, 111: OnPull
+		CUStatus:			OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: OnIdle, 001: OnRead, 010: OnWrite, 011: OnAbort, 100: OnCommit, 101: OnUpdate	--Não precisei > 110: OnPush, 111: OnPull > Ao menos não o OnPush, talvez Pull, na real
 		
 		Reset:				IN STD_LOGIC;
 		Clock:				IN STD_LOGIC

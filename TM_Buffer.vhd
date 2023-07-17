@@ -32,8 +32,7 @@ ENTITY TM_Buffer IS
 		MemoryAddr:		OUT STD_LOGIC_VECTOR (7 DOWNTO 0);
 		MemoryData:		OUT STD_LOGIC_VECTOR (7 DOWNTO 0);
 		
-		BuffStatus:		OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: Undefined, 001: Hit, 010: Miss, 011: NotAbort, 100: CommitFail, 101: CommitSuccess
-																				--xxx: NoInternalAborts(?)
+		BuffStatus:		OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: Undefined, 001: Hit, 010: Miss, 011: NotAbort, 100: CommitFail, 101: CommitSuccess,.. 110: NoInternalAborts	--Talvez reordenar a numeração, mas vejo isso depois (pouco importante)
 		Reset:			IN STD_LOGIC;
 		Clock:			IN STD_LOGIC
 	);
@@ -233,7 +232,6 @@ BEGIN
 			ELSIF (CUStatus = "100") THEN										--Se status é Commit
 				ConfBufTrID <= ProcID;
 				
-				--Outro lugar que preciso esperar o retorno do ConfBuff, e vou ter que arrumar usando o FSMClockCount
 				IF (FSMClockCount < 2) THEN
 					FSMClockCount := FSMClockCount + 1;
 				ELSE
@@ -246,16 +244,24 @@ BEGIN
 			
 			---------------------------------------------------------------------------------------------------------------
 			ELSIF (CUStatus = "101") THEN										--Se Status é MemUpdate
-				IF (QueueStatus /= "01") THEN									--Se fila não vazia faz pull da FIFO
-					QueueModeTemp := "10";
-					QueueModeTemp := "00";
-					--while(QueueUpdated /= 0) - ou algo assim pra garantir só depois de atualizar?
-					--Agora com o FSMClockCount talvez faça a solução do problema da FIFO com ele também?
-					UpdateAddress := QueueReturn;
-					--Aqui também deve dar problema, pq o modo só altera no clock, então oq tá retornando de QueueReturn não é oq se deseja
-					--Não só o modo, mas retorno da saída é alterado no puslo de clock também
+				--IF (FSMClockCount = 0) THEN				
+				IF (FSMClockCount < 2) THEN				
+					IF (QueueStatus /= "01") THEN									--Se fila não vazia faz pull da FIFO
+						QueueModeTemp := "10";
+						FSMClockCount := FSMClockCount + 1;
+						AddrTemp := 0;
+					ELSE																			--Se a FIFO está vazia o processo é finalizado e retorna Commit Succes
+						BuffStatusTemp := "101";
+
+						--Deassert da Conflict Flag Externa		--Na verdade agora eu to em dúvida, acho que não seria aqui, por mais que seja oq o artigo parece indicar. Eu acho que fazer o deassert deve ser após o commit fail
+						ConfBufTrID <= TransactionID;
+						ConfBufModeTemp := "11";
+					END IF;	
 					
-					FOR Addr IN 0 TO 9 LOOP
+				ELSE
+					UpdateAddress := QueueReturn;
+					
+					WHILE AddrTemp <= 9 LOOP
 						IF MemBuffer(Addr)(23 DOWNTO 16) = UpdateAddress THEN
 							MemoryAddr <= UpdateAddress;								--Atualiza na Memória Principal
 							MemoryData <= MemBuffer(Addr)(7 DOWNTO 0);
@@ -266,28 +272,28 @@ BEGIN
 							ReadWriteSet(1) := MemBuffer(Addr)(11 DOWNTO 10);
 							ReadWriteSet(0) := MemBuffer(Addr)(9 DOWNTO 8);
 							ReadWriteSet(TransactionIDint) := "00";
+							ProcFlag := '0';
 							FOR P IN 0 TO 3 LOOP
 								ProcFlag := ReadWriteSet(P)(0) OR ReadWriteSet(P)(1) OR ProcFlag;
 							END LOOP;
 							IF (ProcFlag = '0') THEN
 								MemBuffer(Addr)(24) <= '0';
 							END IF;
-							ProcFlag := '0';
 							MemBuffer(Addr)(15 DOWNTO 14) <= ReadWriteSet(3);
 							MemBuffer(Addr)(13 DOWNTO 12) <= ReadWriteSet(2);
 							MemBuffer(Addr)(11 DOWNTO 10) <= ReadWriteSet(1);
 							MemBuffer(Addr)(9 DOWNTO 8) <= ReadWriteSet(0);
+							
+							EXIT;
 						END IF;
+						
+						AddrTemp := AddrTemp + 1;
 					END LOOP;
-					
-				ELSE																			--Se a FIFO está vazia o processo é finalizado e retorna Commit Succes
-					BuffStatusTemp := "101";
-
-					--Deassert da Conflict Flag Externa		--Na verdade agora eu to em dúvida, acho que não seria aqui, por mais que seja oq o artigo parece indicar. Eu acho que fazer o deassert deve ser após o commit fail
-					ConfBufTrID <= TransactionID;
-					ConfBufModeTemp := "11";
+					IF (AddrTemp > 9) THEN
+						FSMClockCount := 0;
+					END IF;
 				END IF;
-			
+					
 			END IF;
 			
 			QueueMode <= QueueModeTemp;
