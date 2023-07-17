@@ -39,27 +39,43 @@ BEGIN
 		MemAddress <= "00000001";
 		Data <= "00000001";--
 		ID <= "01";
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
 		--Uma das outras coisas que também to tendo problema é que como ele tá sincornizado no clock, no pulso ele altera tudo, mas no pulso ele executa tudo, então só tá afetando as modificações no próximo pulso (?)
-		
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		--Wait Until TransactionStatus is Hit or Miss (?)
 		
+		--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		Action <= "10";
 		MemAddress <= "00000001";
 		Data <= "11111111";
 		ID <= "01";
 		
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--Tenho que ver aqui de novo quantos waits de clock entre cada um tenho que colocar, agora que to conseguindo visualizar melhor a execução e tenhho a sincronização melhor estabelecida
+		--O numero de pulsos entre o read e o write parece mais ou menos certo, mas entre write e commit não, e nem sei 100% como ele funcionou certo nesse quesito
 		
+		--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		Action <= "11";
 		MemAddress <= "00000001";--
 		Data <= "00000001";--
 		ID <= "01";
 		
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
