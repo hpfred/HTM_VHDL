@@ -82,6 +82,16 @@ END TEST;
 --TransactionID <= "XX";
 ---OUT TransactionStatus;
 
+--Numero de Clocks necessarios para cada ação:
+--Read	> 2 ou 3?
+--			> wait until TStat = ...
+--Write	> 2 ou 3?
+--			> wait until TStat = ...
+--Abort	> Depende quantos aborts (e se eu mudar o buffer)
+--			> wait until TStat = ...
+--Commit > Depende ainda mais de diversos fatores
+--			> wait until TStat = ...
+
 
 --Pra fazer o Testbench era uma boa ideia ter uma forma padronizada de como os valores vão ser enviados
 --Uma primeira coisa que seria boa é fazer um código falso/teórico de C, e quais as instruções que o compilador geraria e enviaria pro HTM_Core

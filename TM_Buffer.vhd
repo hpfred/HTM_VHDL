@@ -23,6 +23,7 @@ ENTITY TM_Buffer IS
 		ConfBufMode:	OUT STD_LOGIC_VECTOR (1 DOWNTO 0);
 		ConfBufTrID:	OUT STD_LOGIC_VECTOR (1 DOWNTO 0);
 		ConfBufStatus:	IN STD_LOGIC_VECTOR (1 DOWNTO 0);
+		CBProcStatus:	IN STD_LOGIC_VECTOR (2 DOWNTO 0);
 		
 		QueueMode:		OUT STD_LOGIC_VECTOR (1 DOWNTO 0);
 		QueueStatus:	IN STD_LOGIC_VECTOR (1 DOWNTO 0);
@@ -44,8 +45,8 @@ SIGNAL MemBuffer: ALL_DATA;
 
 TYPE RW_SET IS ARRAY (3 DOWNTO 0) OF STD_LOGIC_VECTOR (1 DOWNTO 0);
 
-SIGNAL ProcIDint: INTEGER := TO_INTEGER(UNSIGNED(ProcID));
-SIGNAL TransactionIDint: INTEGER := TO_INTEGER(UNSIGNED(TransactionID));
+--SIGNAL ProcIDint: INTEGER := TO_INTEGER(UNSIGNED(ProcID));
+--SIGNAL TransactionIDint: INTEGER := TO_INTEGER(UNSIGNED(TransactionID));
 
 BEGIN
 
@@ -57,9 +58,14 @@ BEGIN
 		VARIABLE UpdateAddress: STD_LOGIC_VECTOR (7 DOWNTO 0);
 		VARIABLE QueueModeTemp: STD_LOGIC_VECTOR (1 DOWNTO 0);
 		
+		VARIABLE ProcIDint: INTEGER := 0;
+		VARIABLE TransactionIDint: INTEGER := 0;
+		
 		VARIABLE FSMClockCount: INTEGER := 0;
 		VARIABLE TempBuffEntry: STD_LOGIC_VECTOR (24 DOWNTO 0);
 		VARIABLE BuffStatusTemp: STD_LOGIC_VECTOR (2 DOWNTO 0);
+		VARIABLE ConfBufModeTemp: STD_LOGIC_VECTOR (1 DOWNTO 0);
+		VARIABLE ProcStatus: INTEGER := 7;
 	BEGIN
 		IF (Reset = '1') THEN
 			MemBuffer <= (others=>(Others=>'0'));
@@ -67,17 +73,23 @@ BEGIN
 			BuffStatus <= (others => '0');
 			BuffStatusTemp := (others => '0');
 			ConfBufMode <= (others => '0');
+			ConfBufModeTemp := (others => '0');
 			ConfBufTrID <= (others => '0');
 			QueueMode <= (others => '0');
 			QueueModeTemp := (others => '0');
 			MemoryAddr <= (others => '0');
 			MemoryData <= (others => '0');
 			FSMClockCount := 0;
+			ProcStatus := 7;
 			
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
 			QueueModeTemp := "00";
 			BuffStatusTemp := "000";
+			ConfBufModeTemp := "00";
+			ProcIDint := TO_INTEGER(UNSIGNED(ProcID));
+			TransactionIDint := TO_INTEGER(UNSIGNED(TransactionID));
 			
+			---------------------------------------------------------------------------------------------------------------
 			IF (CUStatus = "000") THEN												--Se Status é Idle
 				FSMClockCount := 0;
 				
@@ -111,7 +123,7 @@ BEGIN
 						BuffStatusTemp := "010";
 						
 						TempBuffEntry(24) := '1';
-						TempBuffEntry(23 DOWNTO 16) := MemAddress
+						TempBuffEntry(23 DOWNTO 16) := MemAddress;
 						TempBuffEntry(7 DOWNTO 0) := Data;
 						
 						IF (CUStatus = "001") THEN
@@ -130,9 +142,8 @@ BEGIN
 						IF (CUStatus = "001") THEN								--Read
 							FOR i IN 0 TO 3 LOOP
 								IF (ReadWriteSet(i)(1) = '1' AND ProcID /= i) THEN
-									ConfBufMode <= "00";--------------------------------Problema com ciclo
 									ConfBufTrID <= ProcID;
-									ConfBufMode <= "01";--------------------------------Problema com ciclo
+									ConfBufModeTemp := "01";
 									AbortFlag := '1';
 								END IF;
 							END LOOP;
@@ -154,9 +165,8 @@ BEGIN
 						ELSIF (CUStatus = "010") THEN							--Write
 							FOR i IN 0 TO 3 LOOP
 								IF (ReadWriteSet(i) /= "00" AND ProcID /= i) THEN
-									ConfBufMode <= "00";--------------------------------Problema com ciclo
 									---ConfBufTrID <= i;
-									ConfBufMode <= "01";--------------------------------Problema com ciclo
+									ConfBufModeTemp := "01";
 								END IF;
 							END LOOP;
 							
@@ -184,90 +194,54 @@ BEGIN
 			
 			---------------------------------------------------------------------------------------------------------------	
 			ELSIF (CUStatus = "011") THEN										--Se Status é abort
-				ProcStatus := TO_INTEGER(UNSIGNED(CBProcStatus));
-				IF (ProcStatus > 3) THEN
-					--nenhum conflito
-				END IF;
-				--ELSE
-				--Também faz IF diferente do Proc do ciclo anterior, ou FSMClockCount = 0 que reseta quando ProcStatus mudar?
-				FOR Addr IN 0 TO 9 LOOP																	--Varre TM_Buffer				
-					ReadWriteSet(3) := MemBuffer(Addr)(15 DOWNTO 14);
-					ReadWriteSet(2) := MemBuffer(Addr)(13 DOWNTO 12);
-					ReadWriteSet(1) := MemBuffer(Addr)(11 DOWNTO 10);
-					ReadWriteSet(0) := MemBuffer(Addr)(9 DOWNTO 8);
-					IF ((ReadWriteSet(ProcStatus)(0) OR ReadWriteSet(ProcStatus)(1)) = '1') THEN					--Se endereço do TM_Buffer tem RW do procesador retornado true
-						ReadWriteSet(ProcStatus) := "00";
-						ProcFlag := '0';
-						FOR P IN 0 TO 3 LOOP
-							ProcFlag := ReadWriteSet(P)(0) OR ReadWriteSet(P)(1) OR ProcFlag;		--Verifica se endereço é usado por outro processador
-						END LOOP;
-						IF (ProcFlag = '0') THEN
-							MemBuffer(Addr)(24) <= '0';
-						END IF;
-						MemBuffer(Addr)(15 DOWNTO 14) <= ReadWriteSet(3);
-						MemBuffer(Addr)(13 DOWNTO 12) <= ReadWriteSet(2);
-						MemBuffer(Addr)(11 DOWNTO 10) <= ReadWriteSet(1);
-						MemBuffer(Addr)(9 DOWNTO 8) <= ReadWriteSet(0);			--Se for atualizar varios endereços em um clock isso provavelmente daria problema, então mudar pra var ou sei lá
-					END IF;
-				END LOOP;
-				ConfBufTrID <= CBProcStatus;
-				ConfBufMode <= "10";--------------------------------Problema com ciclo
-			
-			
-			
-			
-				FOR Proc IN 0 TO 3 LOOP																				--Varre Conflict_Buffer
-					--ConfBufTrID <= Proc;
-					ConfBufTrID <= STD_LOGIC_VECTOR(TO_UNSIGNED(Proc, ConfBufTrID'length));
-					
-					--Aqui vou ter que usar o FSMClockCount, pq ele precisa esperar o retorno do ConfBuff pra saber se ter Internal Abort
-					--Talvez possa fazer uma estratégia meio transacional que nem to fazendo no read e write, de executar tudo independente se tem Internal Abort (naquele caso independente se Zumbi), e somente atualizar os dados depois de confirmado, mas já com tudo executado
-					
-					IF (ConfBufStatus(1) = '1') THEN																--Se Proc está com Internal Abort
-						FOR Addr IN 0 TO 9 LOOP																		--Varre TM_Buffer
+				--Só pra ter algo pra debuggar depois vou adicionar esse contador aqui, pelo menos por enquanto
+				FSMClockCount := FSMClockCount + 1;
+				IF (TO_INTEGER(UNSIGNED(CBProcStatus)) /= ProcStatus) THEN	--Porém, se eu inicializar ProcStatus como 0, isso poderia dar problema, não? --Inicializa 111 então
+					ProcStatus := TO_INTEGER(UNSIGNED(CBProcStatus));
+					IF (ProcStatus > 3) THEN
+						--nenhum conflito
+						BuffStatusTemp := "110";
+						
+					ELSE
+						FOR Addr IN 0 TO 9 LOOP																	--Varre TM_Buffer				
 							ReadWriteSet(3) := MemBuffer(Addr)(15 DOWNTO 14);
 							ReadWriteSet(2) := MemBuffer(Addr)(13 DOWNTO 12);
 							ReadWriteSet(1) := MemBuffer(Addr)(11 DOWNTO 10);
 							ReadWriteSet(0) := MemBuffer(Addr)(9 DOWNTO 8);
-							IF ((ReadWriteSet(Proc)(0) OR ReadWriteSet(Proc)(1)) = '1') THEN					--Se endereço do TM_Buffer tem RW do procesador retornado true
-								ReadWriteSet(Proc) := "00";
+							IF ((ReadWriteSet(ProcStatus)(0) OR ReadWriteSet(ProcStatus)(1)) = '1') THEN					--Se endereço do TM_Buffer tem RW do procesador retornado true
+								ReadWriteSet(ProcStatus) := "00";
+								ProcFlag := '0';
 								FOR P IN 0 TO 3 LOOP
 									ProcFlag := ReadWriteSet(P)(0) OR ReadWriteSet(P)(1) OR ProcFlag;		--Verifica se endereço é usado por outro processador
 								END LOOP;
 								IF (ProcFlag = '0') THEN
 									MemBuffer(Addr)(24) <= '0';
 								END IF;
-								ProcFlag := '0';
 								MemBuffer(Addr)(15 DOWNTO 14) <= ReadWriteSet(3);
 								MemBuffer(Addr)(13 DOWNTO 12) <= ReadWriteSet(2);
 								MemBuffer(Addr)(11 DOWNTO 10) <= ReadWriteSet(1);
-								MemBuffer(Addr)(9 DOWNTO 8) <= ReadWriteSet(0);
+								MemBuffer(Addr)(9 DOWNTO 8) <= ReadWriteSet(0);			--Se for atualizar varios endereços em um clock isso provavelmente daria problema, então mudar pra var ou sei lá
 							END IF;
 						END LOOP;
-						ConfBufMode <= "00";																				--Remove flag de Internal Conflict do Conflict_Buffer
-						--------------------------------Problema com ciclo
-						--ConfBufTrID <= Proc;
-						ConfBufTrID <= STD_LOGIC_VECTOR(TO_UNSIGNED(Proc, ConfBufTrID'length));
-						ConfBufMode <= "10";--------------------------------Problema com ciclo
+						ConfBufTrID <= STD_LOGIC_VECTOR(TO_UNSIGNED(ProcStatus, ConfBufTrID'length));
+						--ConfBufTrID <= ProcStatus(1 DOWNTO 0);
+						ConfBufModeTemp := "10";
 					END IF;
-					
-					--Remove tudo da fila na sequencia de abort?
-					
-					IF (CUStatus /= "100") THEN								--Para de varrer se CU já voltou pro idle (economizar tempo, energia, sei lá)
-						EXIT;
-					END IF;
-				END LOOP;
+				END IF;
 			
 			---------------------------------------------------------------------------------------------------------------
 			ELSIF (CUStatus = "100") THEN										--Se status é Commit
 				ConfBufTrID <= ProcID;
 				
 				--Outro lugar que preciso esperar o retorno do ConfBuff, e vou ter que arrumar usando o FSMClockCount
-				
-				IF (ConfBufStatus(0) = '1') THEN					--AQUI que acho que deveria ir deassert da flag externa
-					BuffStatusTemp := "100";
-				ELS
-					BuffStatusTemp := "011";
+				IF (FSMClockCount < 2) THEN
+					FSMClockCount := FSMClockCount + 1;
+				ELSE
+					IF (ConfBufStatus(0) = '1') THEN					--AQUI que acho que deveria ir deassert da flag externa
+						BuffStatusTemp := "100";
+					ELSE
+						BuffStatusTemp := "011";
+					END IF;
 				END IF;
 			
 			---------------------------------------------------------------------------------------------------------------
@@ -309,16 +283,16 @@ BEGIN
 				ELSE																			--Se a FIFO está vazia o processo é finalizado e retorna Commit Succes
 					BuffStatusTemp := "101";
 
-					ConfBufMode <= "00";													--Deassert da Conflict Flag Externa		--Na verdade agora eu to em dúvida, acho que não seria aqui, por mais que seja oq o artigo parece indicar. Eu acho que fazer o deassert deve ser após o commit fail
-					--------------------------------Problema com ciclo
+					--Deassert da Conflict Flag Externa		--Na verdade agora eu to em dúvida, acho que não seria aqui, por mais que seja oq o artigo parece indicar. Eu acho que fazer o deassert deve ser após o commit fail
 					ConfBufTrID <= TransactionID;
-					ConfBufMode <= "11";--------------------------------Problema com ciclo
+					ConfBufModeTemp := "11";
 				END IF;
 			
 			END IF;
 			
 			QueueMode <= QueueModeTemp;
 			BuffStatus <= BuffStatusTemp;
+			ConfBufMode <= ConfBufModeTemp;
 			
 		END IF;
 		

@@ -18,15 +18,17 @@ ARCHITECTURE Memory OF Main_Memory IS
 TYPE MemStruct IS ARRAY (255 DOWNTO 0) OF STD_LOGIC_VECTOR (7 DOWNTO 0);
 SIGNAL Mem: MemStruct;
 
-SIGNAL AddrInt: INTEGER := TO_INTEGER(UNSIGNED(Addr));
+--SIGNAL AddrInt: INTEGER := TO_INTEGER(UNSIGNED(Addr));
 
 BEGIN
 	PROCESS (Clock, Reset)
+		VARIABLE AddrInt: INTEGER := TO_INTEGER(UNSIGNED(Addr));
 	BEGIN
 		IF (Reset = '1') THEN
 			Mem <= (others=>(others=>'0'));
 		
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
+			AddrInt := TO_INTEGER(UNSIGNED(Addr));
 			Mem(AddrInt) <= Data;
 			
 		END IF;

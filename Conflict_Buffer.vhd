@@ -10,7 +10,7 @@ ENTITY Conflict_Buffer IS
 		Mode:					IN STD_LOGIC_VECTOR (1 DOWNTO 0);		--00: Idle, 01: Set, 10: Reset Internal, 11: Reset Abort
 		
 		Status:				OUT STD_LOGIC_VECTOR (1 DOWNTO 0);		--Array(InternalAbortFlag, ExternalAbortFlag)
-		ProcStatus:			OUT STD_LOGIC_VECTOR (1 DOWNTO 0);		--Retorna só o processador --ou retorna o processador + as duas flags (Não optei, mas aí seria 3 downto 0)
+		ProcStatus:			OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--1 DOWNTO 0: TrID com InternalConflict, 2: '1' quando nenhum InternalConflict
 		IntAbortStatus:	OUT STD_LOGIC;
 		
 		Reset:				IN STD_LOGIC
@@ -19,20 +19,21 @@ END ENTITY Conflict_Buffer;
 
 ARCHITECTURE  Flags OF Conflict_Buffer IS
 TYPE FlagBuff IS ARRAY (3 DOWNTO 0) OF STD_LOGIC_VECTOR (1 DOWNTO 0);
-SIGNAL ConflictFlag: FlagBuff;		--Todas minha memórias/buffers são feitas com signal, mas me pergunto se com variable seria má prática
+SIGNAL ConflictFlag: FlagBuff;
+--Todas minha memórias/buffers são feitas com signal, mas me pergunto se com variable seria má prática
 
 SIGNAL TrIDint: INTEGER := TO_INTEGER(UNSIGNED(TrID));
 
 BEGIN
-
-	Status <= ConflictFlag(TrIDint);
+	
+	Status <= ConflictFlag(TO_INTEGER(UNSIGNED(TrID)));
 	IntAbortStatus <= ConflictFlag(0)(1) OR ConflictFlag(1)(1) OR ConflictFlag(2)(1) OR ConflictFlag(3)(1);
 	
-	ProcStatus <= "00" WHEN ConflictFlag(0)(1) = '1' ELSE		--Posso mudar pra 3 bits, pq ele já ta converttendo pra Int msm, e aí faria 100 indicar nenhum conflito
-					  "01" WHEN ConflictFlag(1)(1) = '1' ELSE
-					  "10" WHEN ConflictFlag(2)(1) = '1' ELSE
-					  "11" WHEN ConflictFlag(3)(1) = '1' ELSE
-					  (others => 'x'); --Nunca deve acontecer
+	ProcStatus <= "000" WHEN ConflictFlag(0)(1) = '1' ELSE
+					  "001" WHEN ConflictFlag(1)(1) = '1' ELSE
+					  "010" WHEN ConflictFlag(2)(1) = '1' ELSE
+					  "011" WHEN ConflictFlag(3)(1) = '1' ELSE
+					  (others => '1');
 	
 	PROCESS (Mode, Reset)		--Fiz sem clock, mas acho que no final dá na mesma. Tenho que ver
 	BEGIN

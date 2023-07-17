@@ -26,11 +26,12 @@ SIGNAL MemStorage: ALL_DATA;
 TYPE POINTER IS ARRAY (3 DOWNTO 0) OF STD_LOGIC_VECTOR (3 DOWNTO 0);
 --SIGNAL Head, Tail: POINTER;		--Troquei pra VAR pq como Signal espera até o Clock pra atualizar, parecia pedindo pra dar problema
 
-SIGNAL TrIDint: INTEGER := TO_INTEGER(UNSIGNED(TrID));
+--SIGNAL TrIDint: INTEGER := TO_INTEGER(UNSIGNED(TrID));
 
 BEGIN
 	PROCESS (Reset, Clock)
 		VARIABLE Head, Tail: POINTER;
+		VARIABLE TrIDint: INTEGER := TO_INTEGER(UNSIGNED(TrID));
 	BEGIN
 		IF (Reset = '1') THEN
 			FIFOStatus <= "01";
@@ -39,7 +40,8 @@ BEGIN
 			Head := (others=>"0001");
 			Tail := (others=>"0000");
 			
-		ELSIF (Clock'EVENT AND Clock = '1') THEN			
+		ELSIF (Clock'EVENT AND Clock = '1') THEN
+			TrIDint := TO_INTEGER(UNSIGNED(TrID));
 			IF (Head(TrIDint) > Tail(TrIDint)) THEN				--Caso fila vazia
 				FIFOStatus <= "01";								--Isso ainda tem problema pra quando a lista der overflow	--Tenho que depois ver de mudar pra um sistema de registrador deslocador + contador, pq isso resolveria o problema
 																																						--Na verdade usar nesse sistema atual usar um contador já poderia ajudar, pq posso verificar além do tamanho de cada tbm ver quantas vezes ele já deu a volta na cadeia - if CountHead = CountTail + 1

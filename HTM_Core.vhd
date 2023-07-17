@@ -42,6 +42,7 @@ COMPONENT TM_Buffer IS
 		ConfBufMode:	OUT STD_LOGIC_VECTOR (1 DOWNTO 0);
 		ConfBufTrID:	OUT STD_LOGIC_VECTOR (1 DOWNTO 0);
 		ConfBufStatus:	IN STD_LOGIC_VECTOR (1 DOWNTO 0);
+		CBProcStatus:	IN STD_LOGIC_VECTOR (2 DOWNTO 0);
 		QueueMode:		OUT STD_LOGIC_VECTOR (1 DOWNTO 0);
 		QueueStatus:	IN STD_LOGIC_VECTOR (1 DOWNTO 0);
 		QueueReturn:	IN STD_LOGIC_VECTOR (7 DOWNTO 0);
@@ -59,6 +60,7 @@ COMPONENT Conflict_Buffer IS
 		TrID:					IN STD_LOGIC_VECTOR (1 DOWNTO 0);
 		Mode:					IN STD_LOGIC_VECTOR (1 DOWNTO 0);
 		Status:				OUT STD_LOGIC_VECTOR (1 DOWNTO 0);
+		ProcStatus:			OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
 		IntAbortStatus:	OUT STD_LOGIC;
 		Reset:				IN STD_LOGIC
 	);
@@ -92,6 +94,7 @@ SIGNAL ConfBufMode, ConfBufTrID, ConfBufStatus: STD_LOGIC_VECTOR (1 DOWNTO 0);
 SIGNAL QueueStatus, QueueMode: STD_LOGIC_VECTOR (1 DOWNTO 0);
 SIGNAL CUStatus, BuffStatus: STD_LOGIC_VECTOR (2 DOWNTO 0);
 SIGNAL QueueReturn, MemoryAddr, MemoryData: STD_LOGIC_VECTOR (7 DOWNTO 0);
+SIGNAL CBProcStatus: STD_LOGIC_VECTOR (2 DOWNTO 0);
 
 BEGIN
 
@@ -115,6 +118,7 @@ BEGIN
 								 ConfBufMode=>ConfBufMode,
 								 ConfBufTrID=>ConfBufTrID,
 								 ConfBufStatus=>ConfBufStatus,
+								 CBProcStatus=>CBProcStatus,
 								 QueueMode=>QueueMode,
 								 QueueStatus=>QueueStatus,
 								 QueueReturn=>QueueReturn,
@@ -129,6 +133,7 @@ BEGIN
 										  TrID=>ConfBufTrID,
 										  Mode=>ConfBufMode,
 										  Status=>ConfBufStatus,
+										  ProcStatus=>CBProcStatus,
 										  IntAbortStatus=>IntAbortStatus,
 										  Reset=>Reset
 									  );
