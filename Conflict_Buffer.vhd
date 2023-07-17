@@ -27,7 +27,7 @@ BEGIN
 	Status <= ConflictFlag(TrIDint);
 	IntAbortStatus <= ConflictFlag(0)(1) OR ConflictFlag(1)(1) OR ConflictFlag(2)(1) OR ConflictFlag(3)(1);
 	
-	PROCESS (Mode, Reset)
+	PROCESS (Mode, Reset)		--Fiz sem clock, mas acho que no final dá na mesma. Tenho que ver
 	BEGIN
 		IF (Reset = '1') THEN
 			ConflictFlag <= (others=>(others=>'0'));

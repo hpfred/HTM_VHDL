@@ -25,8 +25,8 @@ SIGNAL CurrStateIs: STATE_TYPE;
 BEGIN
 
 	PROCESS (Clock, Reset)
-	VARIABLE NextStateIs: STATE_TYPE;
-	VARIABLE Status: STD_LOGIC_VECTOR (2 DOWNTO 0);
+		VARIABLE NextStateIs: STATE_TYPE;
+		VARIABLE Status: STD_LOGIC_VECTOR (2 DOWNTO 0);
 	BEGIN
 		IF (Reset = '1') THEN
 			CurrStateIs <= IdleState;

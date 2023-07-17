@@ -107,14 +107,10 @@ BEGIN
 					TempBuffEntry := MemBuffer(CurrAddr);
 					
 					IF (HitFlag = '0') THEN										--Buffer Miss
-						--BuffStatus <= "010";
 						BuffStatusTemp := "010";
 						
-						--MemBuffer(CurrAddr)(24) <= '1';
 						TempBuffEntry(24) := '1';
-						--MemBuffer(CurrAddr)(23 DOWNTO 16) <= MemAddress;
-						TempBuffEntry(23 DOWNTO 16) := MemAddress;
-						--MemBuffer(CurrAddr)(7 DOWNTO 0) <= Data;
+						TempBuffEntry(23 DOWNTO 16) := MemAddress
 						TempBuffEntry(7 DOWNTO 0) := Data;
 						
 						IF (CUStatus = "001") THEN
@@ -122,17 +118,12 @@ BEGIN
 						ELSIF CUStatus = "010" THEN
 							ReadWriteSet(ProcIDint)(1) := '1';
 						END IF;
-						--MemBuffer(CurrAddr)(15 DOWNTO 14) <= ReadWriteSet(3);
 						TempBuffEntry(15 DOWNTO 14) := ReadWriteSet(3);
-						--MemBuffer(CurrAddr)(13 DOWNTO 12) <= ReadWriteSet(2);
 						TempBuffEntry(13 DOWNTO 12) := ReadWriteSet(2);
-						--MemBuffer(CurrAddr)(11 DOWNTO 10) <= ReadWriteSet(1);
 						TempBuffEntry(11 DOWNTO 10) := ReadWriteSet(1);
-						--MemBuffer(CurrAddr)(9 DOWNTO 8) <= ReadWriteSet(0);
 						TempBuffEntry(9 DOWNTO 8) := ReadWriteSet(0);
 							
 					ELSE																--Buffer Hit
-						--BuffStatus <= "001";
 						BuffStatusTemp := "001";
 						
 						IF (CUStatus = "001") THEN								--Read
@@ -151,13 +142,9 @@ BEGIN
 								ELSIF (CUStatus = "010") THEN
 									ReadWriteSet(ProcIDint)(1) := '1';
 								END IF;
-								--MemBuffer(CurrAddr)(15 DOWNTO 14) <= ReadWriteSet(3);
 								TempBuffEntry(15 DOWNTO 14) := ReadWriteSet(3);
-								--MemBuffer(CurrAddr)(13 DOWNTO 12) <= ReadWriteSet(2);
 								TempBuffEntry(13 DOWNTO 12) := ReadWriteSet(2);
-								--MemBuffer(CurrAddr)(11 DOWNTO 10) <= ReadWriteSet(1);
 								TempBuffEntry(11 DOWNTO 10) := ReadWriteSet(1);
-								--MemBuffer(CurrAddr)(9 DOWNTO 8) <= ReadWriteSet(0);
 								TempBuffEntry(9 DOWNTO 8) := ReadWriteSet(0);
 								
 							END IF;
@@ -177,15 +164,10 @@ BEGIN
 							ELSIF (CUStatus = "010") THEN
 								ReadWriteSet(ProcIDint)(1) := '1';
 							END IF;
-							--MemBuffer(CurrAddr)(15 DOWNTO 14) <= ReadWriteSet(3);
 							TempBuffEntry(15 DOWNTO 14) := ReadWriteSet(3);
-							--MemBuffer(CurrAddr)(13 DOWNTO 12) <= ReadWriteSet(2);
 							TempBuffEntry(13 DOWNTO 12) := ReadWriteSet(2);
-							--MemBuffer(CurrAddr)(11 DOWNTO 10) <= ReadWriteSet(1);
 							TempBuffEntry(11 DOWNTO 10) := ReadWriteSet(1);
-							--MemBuffer(CurrAddr)(9 DOWNTO 8) <= ReadWriteSet(0);
 							TempBuffEntry(9 DOWNTO 8) := ReadWriteSet(0);
-							--MemBuffer(CurrAddr)(7 DOWNTO 0) <= Data;
 							TempBuffEntry(7 DOWNTO 0) := Data;
 								
 						END IF;
@@ -247,10 +229,8 @@ BEGIN
 				--Outro lugar que preciso esperar o retorno do ConfBuff, e vou ter que arrumar usando o FSMClockCount
 				
 				IF (ConfBufStatus(0) = '1') THEN					--AQUI que acho que deveria ir deassert da flag externa
-					--BuffStatus <= "100";
 					BuffStatusTemp := "100";
-				ELSE
-					--BuffStatus <= "011";
+				ELS
 					BuffStatusTemp := "011";
 				END IF;
 			
@@ -290,7 +270,6 @@ BEGIN
 					END LOOP;
 					
 				ELSE																			--Se a FIFO está vazia o processo é finalizado e retorna Commit Succes
-					--BuffStatus <= "101";
 					BuffStatusTemp := "101";
 
 					ConfBufMode <= "00";													--Deassert da Conflict Flag Externa		--Na verdade agora eu to em dúvida, acho que não seria aqui, por mais que seja oq o artigo parece indicar. Eu acho que fazer o deassert deve ser após o commit fail
