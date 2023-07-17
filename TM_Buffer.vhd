@@ -32,7 +32,7 @@ ENTITY TM_Buffer IS
 		MemoryData:		OUT STD_LOGIC_VECTOR (7 DOWNTO 0);
 		
 		BuffStatus:		OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: Undefined, 001: Hit, 010: Miss, 011: NotAbort, 100: CommitFail, 101: CommitSuccess
-		
+																				--xxx: NoInternalAborts(?)
 		Reset:			IN STD_LOGIC;
 		Clock:			IN STD_LOGIC
 	);
@@ -78,9 +78,10 @@ BEGIN
 			QueueModeTemp := "00";
 			BuffStatusTemp := "000";
 			
-			IF (CUStatus = "000") THEN
+			IF (CUStatus = "000") THEN												--Se Status é Idle
 				FSMClockCount := 0;
-			
+				
+			---------------------------------------------------------------------------------------------------------------
 			ELSIF (CUStatus = "001" OR CUStatus = "010") THEN				--Se Status é Read ou Write
 				IF (FSMClockCount = 0) THEN
 					ConfBufTrID <= TransactionID;
@@ -129,9 +130,9 @@ BEGIN
 						IF (CUStatus = "001") THEN								--Read
 							FOR i IN 0 TO 3 LOOP
 								IF (ReadWriteSet(i)(1) = '1' AND ProcID /= i) THEN
-									ConfBufMode <= "00";
+									ConfBufMode <= "00";--------------------------------Problema com ciclo
 									ConfBufTrID <= ProcID;
-									ConfBufMode <= "01";
+									ConfBufMode <= "01";--------------------------------Problema com ciclo
 									AbortFlag := '1';
 								END IF;
 							END LOOP;
@@ -153,9 +154,9 @@ BEGIN
 						ELSIF (CUStatus = "010") THEN							--Write
 							FOR i IN 0 TO 3 LOOP
 								IF (ReadWriteSet(i) /= "00" AND ProcID /= i) THEN
-									ConfBufMode <= "00";
+									ConfBufMode <= "00";--------------------------------Problema com ciclo
 									---ConfBufTrID <= i;
-									ConfBufMode <= "01";
+									ConfBufMode <= "01";--------------------------------Problema com ciclo
 								END IF;
 							END LOOP;
 							
@@ -180,8 +181,41 @@ BEGIN
 						END IF;
 					END IF;
 				END IF;
-				
+			
+			---------------------------------------------------------------------------------------------------------------	
 			ELSIF (CUStatus = "011") THEN										--Se Status é abort
+				ProcStatus := TO_INTEGER(UNSIGNED(CBProcStatus));
+				IF (ProcStatus > 3) THEN
+					--nenhum conflito
+				END IF;
+				--ELSE
+				--Também faz IF diferente do Proc do ciclo anterior, ou FSMClockCount = 0 que reseta quando ProcStatus mudar?
+				FOR Addr IN 0 TO 9 LOOP																	--Varre TM_Buffer				
+					ReadWriteSet(3) := MemBuffer(Addr)(15 DOWNTO 14);
+					ReadWriteSet(2) := MemBuffer(Addr)(13 DOWNTO 12);
+					ReadWriteSet(1) := MemBuffer(Addr)(11 DOWNTO 10);
+					ReadWriteSet(0) := MemBuffer(Addr)(9 DOWNTO 8);
+					IF ((ReadWriteSet(ProcStatus)(0) OR ReadWriteSet(ProcStatus)(1)) = '1') THEN					--Se endereço do TM_Buffer tem RW do procesador retornado true
+						ReadWriteSet(ProcStatus) := "00";
+						ProcFlag := '0';
+						FOR P IN 0 TO 3 LOOP
+							ProcFlag := ReadWriteSet(P)(0) OR ReadWriteSet(P)(1) OR ProcFlag;		--Verifica se endereço é usado por outro processador
+						END LOOP;
+						IF (ProcFlag = '0') THEN
+							MemBuffer(Addr)(24) <= '0';
+						END IF;
+						MemBuffer(Addr)(15 DOWNTO 14) <= ReadWriteSet(3);
+						MemBuffer(Addr)(13 DOWNTO 12) <= ReadWriteSet(2);
+						MemBuffer(Addr)(11 DOWNTO 10) <= ReadWriteSet(1);
+						MemBuffer(Addr)(9 DOWNTO 8) <= ReadWriteSet(0);			--Se for atualizar varios endereços em um clock isso provavelmente daria problema, então mudar pra var ou sei lá
+					END IF;
+				END LOOP;
+				ConfBufTrID <= CBProcStatus;
+				ConfBufMode <= "10";--------------------------------Problema com ciclo
+			
+			
+			
+			
 				FOR Proc IN 0 TO 3 LOOP																				--Varre Conflict_Buffer
 					--ConfBufTrID <= Proc;
 					ConfBufTrID <= STD_LOGIC_VECTOR(TO_UNSIGNED(Proc, ConfBufTrID'length));
@@ -211,9 +245,10 @@ BEGIN
 							END IF;
 						END LOOP;
 						ConfBufMode <= "00";																				--Remove flag de Internal Conflict do Conflict_Buffer
+						--------------------------------Problema com ciclo
 						--ConfBufTrID <= Proc;
 						ConfBufTrID <= STD_LOGIC_VECTOR(TO_UNSIGNED(Proc, ConfBufTrID'length));
-						ConfBufMode <= "10";
+						ConfBufMode <= "10";--------------------------------Problema com ciclo
 					END IF;
 					
 					--Remove tudo da fila na sequencia de abort?
@@ -223,6 +258,7 @@ BEGIN
 					END IF;
 				END LOOP;
 			
+			---------------------------------------------------------------------------------------------------------------
 			ELSIF (CUStatus = "100") THEN										--Se status é Commit
 				ConfBufTrID <= ProcID;
 				
@@ -234,6 +270,7 @@ BEGIN
 					BuffStatusTemp := "011";
 				END IF;
 			
+			---------------------------------------------------------------------------------------------------------------
 			ELSIF (CUStatus = "101") THEN										--Se Status é MemUpdate
 				IF (QueueStatus /= "01") THEN									--Se fila não vazia faz pull da FIFO
 					QueueModeTemp := "10";
@@ -273,8 +310,9 @@ BEGIN
 					BuffStatusTemp := "101";
 
 					ConfBufMode <= "00";													--Deassert da Conflict Flag Externa		--Na verdade agora eu to em dúvida, acho que não seria aqui, por mais que seja oq o artigo parece indicar. Eu acho que fazer o deassert deve ser após o commit fail
+					--------------------------------Problema com ciclo
 					ConfBufTrID <= TransactionID;
-					ConfBufMode <= "11";
+					ConfBufMode <= "11";--------------------------------Problema com ciclo
 				END IF;
 			
 			END IF;
