@@ -34,6 +34,7 @@ SIGNAL TrIDint: INTEGER := TO_INTEGER(UNSIGNED(TrID));
 
 BEGIN
 	
+	--Acredito que agora eu não precise mais dessa gambiarra, então removo assim que resolver o resto
 	ModeLatest <= Mode WHEN (Mode /= "00") ELSE ModeLatest;
 	ModeStorage <= ModeLatest WHEN (ResetMode = '0') ELSE "00";
 	

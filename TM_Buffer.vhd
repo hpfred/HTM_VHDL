@@ -56,7 +56,9 @@ BEGIN
 		VARIABLE HitFlag, AbortFlag, ProcFlag: STD_LOGIC := '0';
 		VARIABLE UpdateAddress: STD_LOGIC_VECTOR (7 DOWNTO 0);
 		VARIABLE QueueModeTemp: STD_LOGIC_VECTOR (1 DOWNTO 0);
-		VARIABLE StateMachineCount: INTEGER := 0
+		
+		VARIABLE FSMClockCount: INTEGER := 0;
+		VARIABLE TempBuffEntry: STD_LOGIC_VECTOR (24 DOWNTO 0);
 	BEGIN
 		IF (Reset = '1') THEN
 			MemBuffer <= (others=>(Others=>'0'));
@@ -68,20 +70,20 @@ BEGIN
 			QueueModeTemp := (others => '0');
 			MemoryAddr <= (others => '0');
 			MemoryData <= (others => '0');
-			StateMachineCount := 0;
+			FSMClockCount := 0;
 			
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
 			--Zera BuffStatus no inicio de cada execução?
-			QueueMode <= QueueModeTemp;
+			QueueModeTemp := "00";
 			
-			--Então provavelmente tenho que resolver com um contador, ou algum flag que só reseta quando o CUStatus mudar (?)
 			IF (CUStatus = "000") THEN
-				StateMachineCount := 0;
+				FSMClockCount := 0;
 			
-			ELSIF ((CUStatus = "001" OR CUStatus = "010") AND StateMachineCount = 0) THEN				--Se Status é Read ou Write
-				ConfBufTrID <= TransactionID;
-				IF (ConfBufStatus(0) = '0') THEN									--Verifica com Conflict_Buffer se é transação zumbi
-				--Da forma que está agora ele também nunca retornaria para Idle quando encontrar uma transação zumbi
+			ELSIF (CUStatus = "001" OR CUStatus = "010") THEN				--Se Status é Read ou Write
+				IF (FSMClockCount = 0) THEN
+					ConfBufTrID <= TransactionID;
+					FSMClockCount := FSMClockCount + 1;
+					
 					FOR CurrAddr IN 0 TO 9 LOOP	--'length-1
 						IF (MemBuffer(CurrAddr)(24) = '0' AND FrstNonValid > CurrAddr) THEN
 							FrstNonValid := CurrAddr;
@@ -95,39 +97,39 @@ BEGIN
 					END LOOP;
 					--TODO: Caso de MISS por Overflow
 					--IF (CurrAddr = 9) THEN OVERFLOW.MISS
+						
+					ReadWriteSet(3) := MemBuffer(CurrAddr)(15 DOWNTO 14);
+					ReadWriteSet(2) := MemBuffer(CurrAddr)(13 DOWNTO 12);
+					ReadWriteSet(1) := MemBuffer(CurrAddr)(11 DOWNTO 10);
+					ReadWriteSet(0) := MemBuffer(CurrAddr)(9 DOWNTO 8);
+					TempBuffEntry := MemBuffer(CurrAddr);
 					
 					IF (HitFlag = '0') THEN										--Buffer Miss
-						BuffStatus <= "010";
-						QueueModeTemp := "01";
+						BuffStatus <= "010";	--Fazer uma var status?
 						
-						MemBuffer(CurrAddr)(24) <= '1';
-						MemBuffer(CurrAddr)(23 DOWNTO 16) <= MemAddress;
+						--MemBuffer(CurrAddr)(24) <= '1';
+						TempBuffEntry(24) := '1';
+						--MemBuffer(CurrAddr)(23 DOWNTO 16) <= MemAddress;
+						TempBuffEntry(23 DOWNTO 16) := MemAddress;
+						--MemBuffer(CurrAddr)(7 DOWNTO 0) <= Data;
+						TempBuffEntry(7 DOWNTO 0) := Data;
 						
-						ReadWriteSet(3) := MemBuffer(CurrAddr)(15 DOWNTO 14);
-						ReadWriteSet(2) := MemBuffer(CurrAddr)(13 DOWNTO 12);
-						ReadWriteSet(1) := MemBuffer(CurrAddr)(11 DOWNTO 10);
-						ReadWriteSet(0) := MemBuffer(CurrAddr)(9 DOWNTO 8);
 						IF (CUStatus = "001") THEN
 							ReadWriteSet(ProcIDint)(0) := '1';
 						ELSIF CUStatus = "010" THEN
 							ReadWriteSet(ProcIDint)(1) := '1';
 						END IF;
-						MemBuffer(CurrAddr)(15 DOWNTO 14) <= ReadWriteSet(3);
-						MemBuffer(CurrAddr)(13 DOWNTO 12) <= ReadWriteSet(2);
-						MemBuffer(CurrAddr)(11 DOWNTO 10) <= ReadWriteSet(1);
-						MemBuffer(CurrAddr)(9 DOWNTO 8) <= ReadWriteSet(0);
-						MemBuffer(CurrAddr)(7 DOWNTO 0) <= Data;
-						
-						--Guarda na fila --Adicionar IF só pra fazer nos Writes?
-						QueueModeTemp := "00";
+						--MemBuffer(CurrAddr)(15 DOWNTO 14) <= ReadWriteSet(3);
+						TempBuffEntry(15 DOWNTO 14) := ReadWriteSet(3);
+						--MemBuffer(CurrAddr)(13 DOWNTO 12) <= ReadWriteSet(2);
+						TempBuffEntry(13 DOWNTO 12) := ReadWriteSet(2);
+						--MemBuffer(CurrAddr)(11 DOWNTO 10) <= ReadWriteSet(1);
+						TempBuffEntry(11 DOWNTO 10) := ReadWriteSet(1);
+						--MemBuffer(CurrAddr)(9 DOWNTO 8) <= ReadWriteSet(0);
+						TempBuffEntry(9 DOWNTO 8) := ReadWriteSet(0);
 							
 					ELSE																--Buffer Hit
 						BuffStatus <= "001";
-						
-						ReadWriteSet(3) := MemBuffer(CurrAddr)(15 DOWNTO 14);
-						ReadWriteSet(2) := MemBuffer(CurrAddr)(13 DOWNTO 12);
-						ReadWriteSet(1) := MemBuffer(CurrAddr)(11 DOWNTO 10);
-						ReadWriteSet(0) := MemBuffer(CurrAddr)(9 DOWNTO 8);
 						
 						IF (CUStatus = "001") THEN								--Read
 							FOR i IN 0 TO 3 LOOP
@@ -145,16 +147,19 @@ BEGIN
 								ELSIF (CUStatus = "010") THEN
 									ReadWriteSet(ProcIDint)(1) := '1';
 								END IF;
-								MemBuffer(CurrAddr)(15 DOWNTO 14) <= ReadWriteSet(3);
-								MemBuffer(CurrAddr)(13 DOWNTO 12) <= ReadWriteSet(2);
-								MemBuffer(CurrAddr)(11 DOWNTO 10) <= ReadWriteSet(1);
-								MemBuffer(CurrAddr)(9 DOWNTO 8) <= ReadWriteSet(0);
+								--MemBuffer(CurrAddr)(15 DOWNTO 14) <= ReadWriteSet(3);
+								TempBuffEntry(15 DOWNTO 14) := ReadWriteSet(3);
+								--MemBuffer(CurrAddr)(13 DOWNTO 12) <= ReadWriteSet(2);
+								TempBuffEntry(13 DOWNTO 12) := ReadWriteSet(2);
+								--MemBuffer(CurrAddr)(11 DOWNTO 10) <= ReadWriteSet(1);
+								TempBuffEntry(11 DOWNTO 10) := ReadWriteSet(1);
+								--MemBuffer(CurrAddr)(9 DOWNTO 8) <= ReadWriteSet(0);
+								TempBuffEntry(9 DOWNTO 8) := ReadWriteSet(0);
 								
 							END IF;
 							AbortFlag := '0';
 							
 						ELSIF (CUStatus = "010") THEN							--Write
-							QueueModeTemp := "01";
 							FOR i IN 0 TO 3 LOOP
 								IF (ReadWriteSet(i) /= "00" AND ProcID /= i) THEN
 									ConfBufMode <= "00";
@@ -168,15 +173,24 @@ BEGIN
 							ELSIF (CUStatus = "010") THEN
 								ReadWriteSet(ProcIDint)(1) := '1';
 							END IF;
-							MemBuffer(CurrAddr)(15 DOWNTO 14) <= ReadWriteSet(3);
-							MemBuffer(CurrAddr)(13 DOWNTO 12) <= ReadWriteSet(2);
-							MemBuffer(CurrAddr)(11 DOWNTO 10) <= ReadWriteSet(1);
-							MemBuffer(CurrAddr)(9 DOWNTO 8) <= ReadWriteSet(0);
-							MemBuffer(CurrAddr)(7 DOWNTO 0) <= Data;
-							
-							--Guarda na fila
-							QueueModeTemp := "00";
-							
+							--MemBuffer(CurrAddr)(15 DOWNTO 14) <= ReadWriteSet(3);
+							TempBuffEntry(15 DOWNTO 14) := ReadWriteSet(3);
+							--MemBuffer(CurrAddr)(13 DOWNTO 12) <= ReadWriteSet(2);
+							TempBuffEntry(13 DOWNTO 12) := ReadWriteSet(2);
+							--MemBuffer(CurrAddr)(11 DOWNTO 10) <= ReadWriteSet(1);
+							TempBuffEntry(11 DOWNTO 10) := ReadWriteSet(1);
+							--MemBuffer(CurrAddr)(9 DOWNTO 8) <= ReadWriteSet(0);
+							TempBuffEntry(9 DOWNTO 8) := ReadWriteSet(0);
+							--MemBuffer(CurrAddr)(7 DOWNTO 0) <= Data;
+							TempBuffEntry(7 DOWNTO 0) := Data;
+								
+						END IF;
+					END IF;
+				ELSE																	--FSMClockCount > 0
+					IF (ConfBufStatus(0) = '0') THEN							--Verifica com Conflict_Buffer se é transação zumbi, e atualiza os dados somente se não for
+						MemBuffer(CurrAddr) <= TempBuffEntry;
+						IF (CUStatus = "010") THEN
+							QueueModeTemp := "01";								--Guarda na fila quando Write
 						END IF;
 					END IF;
 				END IF;
@@ -185,6 +199,10 @@ BEGIN
 				FOR Proc IN 0 TO 3 LOOP																				--Varre Conflict_Buffer
 					--ConfBufTrID <= Proc;
 					ConfBufTrID <= STD_LOGIC_VECTOR(TO_UNSIGNED(Proc, ConfBufTrID'length));
+					
+					--Aqui vou ter que usar o FSMClockCount, pq ele precisa esperar o retorno do ConfBuff pra saber se ter Internal Abort
+					--Talvez possa fazer uma estratégia meio transacional que nem to fazendo no read e write, de executar tudo independente se tem Internal Abort (naquele caso independente se Zumbi), e somente atualizar os dados depois de confirmado, mas já com tudo executado
+					
 					IF (ConfBufStatus(1) = '1') THEN																--Se Proc está com Internal Abort
 						FOR Addr IN 0 TO 9 LOOP																		--Varre TM_Buffer
 							ReadWriteSet(3) := MemBuffer(Addr)(15 DOWNTO 14);
@@ -214,13 +232,16 @@ BEGIN
 					
 					--Remove tudo da fila na sequencia de abort?
 					
-					IF (CUStatus /= "100") THEN								--Para de varrer se CU já voltou pro idle
+					IF (CUStatus /= "100") THEN								--Para de varrer se CU já voltou pro idle (economizar tempo, energia, sei lá)
 						EXIT;
 					END IF;
 				END LOOP;
 			
 			ELSIF (CUStatus = "100") THEN										--Se status é Commit
 				ConfBufTrID <= ProcID;
+				
+				--Outro lugar que preciso esperar o retorno do ConfBuff, e vou ter que arrumar usando o FSMClockCount
+				
 				IF (ConfBufStatus(0) = '1') THEN					--AQUI que acho que deveria ir deassert da flag externa
 					BuffStatus <= "100";
 				ELSE
@@ -232,6 +253,7 @@ BEGIN
 					QueueModeTemp := "10";
 					QueueModeTemp := "00";
 					--while(QueueUpdated /= 0) - ou algo assim pra garantir só depois de atualizar?
+					--Agora com o FSMClockCount talvez faça a solução do problema da FIFO com ele também?
 					UpdateAddress := QueueReturn;
 					--Aqui também deve dar problema, pq o modo só altera no clock, então oq tá retornando de QueueReturn não é oq se deseja
 					--Não só o modo, mas retorno da saída é alterado no puslo de clock também
