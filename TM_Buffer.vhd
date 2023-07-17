@@ -59,11 +59,13 @@ BEGIN
 		
 		VARIABLE FSMClockCount: INTEGER := 0;
 		VARIABLE TempBuffEntry: STD_LOGIC_VECTOR (24 DOWNTO 0);
+		VARIABLE BuffStatusTemp: STD_LOGIC_VECTOR (2 DOWNTO 0);
 	BEGIN
 		IF (Reset = '1') THEN
 			MemBuffer <= (others=>(Others=>'0'));
 			--
 			BuffStatus <= (others => '0');
+			BuffStatusTemp := (others => '0');
 			ConfBufMode <= (others => '0');
 			ConfBufTrID <= (others => '0');
 			QueueMode <= (others => '0');
@@ -73,8 +75,8 @@ BEGIN
 			FSMClockCount := 0;
 			
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
-			--Zera BuffStatus no inicio de cada execução?
 			QueueModeTemp := "00";
+			BuffStatusTemp := "000";
 			
 			IF (CUStatus = "000") THEN
 				FSMClockCount := 0;
@@ -105,7 +107,8 @@ BEGIN
 					TempBuffEntry := MemBuffer(CurrAddr);
 					
 					IF (HitFlag = '0') THEN										--Buffer Miss
-						BuffStatus <= "010";	--Fazer uma var status?
+						--BuffStatus <= "010";
+						BuffStatusTemp := "010";
 						
 						--MemBuffer(CurrAddr)(24) <= '1';
 						TempBuffEntry(24) := '1';
@@ -129,7 +132,8 @@ BEGIN
 						TempBuffEntry(9 DOWNTO 8) := ReadWriteSet(0);
 							
 					ELSE																--Buffer Hit
-						BuffStatus <= "001";
+						--BuffStatus <= "001";
+						BuffStatusTemp := "001";
 						
 						IF (CUStatus = "001") THEN								--Read
 							FOR i IN 0 TO 3 LOOP
@@ -243,9 +247,11 @@ BEGIN
 				--Outro lugar que preciso esperar o retorno do ConfBuff, e vou ter que arrumar usando o FSMClockCount
 				
 				IF (ConfBufStatus(0) = '1') THEN					--AQUI que acho que deveria ir deassert da flag externa
-					BuffStatus <= "100";
+					--BuffStatus <= "100";
+					BuffStatusTemp := "100";
 				ELSE
-					BuffStatus <= "011";
+					--BuffStatus <= "011";
+					BuffStatusTemp := "011";
 				END IF;
 			
 			ELSIF (CUStatus = "101") THEN										--Se Status é MemUpdate
@@ -284,7 +290,8 @@ BEGIN
 					END LOOP;
 					
 				ELSE																			--Se a FIFO está vazia o processo é finalizado e retorna Commit Succes
-					BuffStatus <= "101";
+					--BuffStatus <= "101";
+					BuffStatusTemp := "101";
 
 					ConfBufMode <= "00";													--Deassert da Conflict Flag Externa		--Na verdade agora eu to em dúvida, acho que não seria aqui, por mais que seja oq o artigo parece indicar. Eu acho que fazer o deassert deve ser após o commit fail
 					ConfBufTrID <= TransactionID;
@@ -294,6 +301,7 @@ BEGIN
 			END IF;
 			
 			QueueMode <= QueueModeTemp;
+			BuffStatus <= BuffStatusTemp;
 			
 		END IF;
 		
