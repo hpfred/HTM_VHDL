@@ -242,21 +242,19 @@ BEGIN
 						BuffStatusTemp := "100";
 					ELSE
 						BuffStatusTemp := "011";
+						FSMClockCount := 0;
 					END IF;
 				END IF;
 			
 			---------------------------------------------------------------------------------------------------------------
 			ELSIF (CUStatus = "101") THEN										--Se Status é MemUpdate
-				--IF (FSMClockCount = 0) THEN				
-				IF (FSMClockCount < 2) THEN				
-					--QueueStatus está funcionando errado. E mesmo depois de eu arrumar, ainda assim ele deve só atualizar depois de um clock com o TrID certo, então vou ter que rever isso
-					IF (QueueStatus /= "01") THEN									--Se fila não vazia faz pull da FIFO
+				IF (FSMClockCount < 2) THEN
+					IF (QueueStatus /= "01") THEN								--Se fila não vazia faz pull da FIFO
 						QueueModeTemp := "10";
 						FSMClockCount := FSMClockCount + 1;
-					ELSE																			--Se a FIFO está vazia o processo é finalizado e retorna Commit Succes
+					ELSE																--Se a FIFO está vazia o processo é finalizado e retorna Commit Succes
 						BuffStatusTemp := "101";
-
-						--Deassert da Conflict Flag Externa		--Na verdade agora eu to em dúvida, acho que não seria aqui, por mais que seja oq o artigo parece indicar. Eu acho que fazer o deassert deve ser após o commit fail
+						
 						ConfBufTrID <= TransactionID;
 						ConfBufModeTemp := "11";
 					END IF;	

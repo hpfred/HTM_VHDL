@@ -3,64 +3,284 @@ K3
 13
 cModel Technology
 Z0 dC:\Users\frepa\OneDrive\Documents\UFPel\Mestrado\Aluno-Especial_1\PTSD\Atividades\Projeto\VHDL\simulation\modelsim
-Ehtm_core
-Z1 w1689563037
-Z2 DPx4 ieee 15 std_logic_arith 0 22 4`Y?g_lkdn;7UL9IiJck01
-Z3 DPx4 ieee 18 std_logic_unsigned 0 22 RYmj;=TK`k=k>D@Cz`zoB3
-Z4 DPx3 std 6 textio 0 22 5>J:;AW>W0[[dW0I6EN1Q0
-Z5 DPx4 ieee 14 std_logic_1164 0 22 5=aWaoGZSMWIcH0i^f`XF1
-Z6 dC:\Users\frepa\OneDrive\Documents\UFPel\Mestrado\Aluno-Especial_1\PTSD\Atividades\Projeto\VHDL\simulation\modelsim
-Z7 8C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/HTM_Core.vhd
-Z8 FC:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/HTM_Core.vhd
+Eaddress_queue
+Z1 w1689652754
+Z2 DPx4 ieee 11 numeric_std 0 22 O3PF8EB`?j9=z7KT`fn941
+Z3 DPx4 ieee 15 std_logic_arith 0 22 4`Y?g_lkdn;7UL9IiJck01
+Z4 DPx4 ieee 18 std_logic_unsigned 0 22 RYmj;=TK`k=k>D@Cz`zoB3
+Z5 DPx3 std 6 textio 0 22 5>J:;AW>W0[[dW0I6EN1Q0
+Z6 DPx4 ieee 14 std_logic_1164 0 22 5=aWaoGZSMWIcH0i^f`XF1
+Z7 dC:\Users\frepa\OneDrive\Documents\UFPel\Mestrado\Aluno-Especial_1\PTSD\Atividades\Projeto\VHDL\simulation\modelsim
+Z8 8C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Address_Queue.vhd
+Z9 FC:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Address_Queue.vhd
 l0
-L5
-VXd:ZXEUgnB2Jz]zN5YK4R0
-Z9 OV;C;10.1d;51
+L6
+V^To@mmJLOLX]W1l:Q]<l61
+Z10 OV;C;10.1d;51
 31
-Z10 !s108 1689649415.215000
-Z11 !s90 -reportprogress|300|-93|-work|work|C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/HTM_Core.vhd|
-Z12 !s107 C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/HTM_Core.vhd|
-Z13 o-93 -work work -O0
-Z14 tExplicit 1
-!s100 ZFdZbz[D9_jhA6ISM@4k`3
+Z11 !s108 1689653540.301000
+Z12 !s90 -reportprogress|300|-93|-work|work|C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Address_Queue.vhd|
+Z13 !s107 C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Address_Queue.vhd|
+Z14 o-93 -work work -O0
+Z15 tExplicit 1
+!s100 Vn5[2cB]lP^Dfh2S^m?Je0
 !i10b 1
-Ahtm
-R2
-R3
-R4
-R5
-DEx4 work 8 htm_core 0 22 Xd:ZXEUgnB2Jz]zN5YK4R0
-l99
-L21
-VncL3Sm;[kokST2<R=>=XV3
-R9
-31
-R10
-R11
-R12
-R13
-R14
-!s100 g>k:=NRa__HNgI4gT?`0C1
-!i10b 1
-Etm_buffer
-w1689569122
-Z15 DPx4 ieee 11 numeric_std 0 22 O3PF8EB`?j9=z7KT`fn941
+Aqueue
 R2
 R3
 R4
 R5
 R6
-8C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/TM_Buffer.vhd
-FC:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/TM_Buffer.vhd
+DEx4 work 13 address_queue 0 22 ^To@mmJLOLX]W1l:Q]<l61
+l31
+L21
+VE5Z:_D?McH?:b]3YGCin13
+R10
+31
+R11
+R12
+R13
+R14
+R15
+!s100 H=O0RGIGMa21[VEYIfgEG1
+!i10b 1
+Econflict_buffer
+Z16 w1689566255
+R2
+R3
+R4
+R5
+R6
+R7
+Z17 8C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Conflict_Buffer.vhd
+Z18 FC:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Conflict_Buffer.vhd
+l0
+L6
+VWCEP6LeHEJRa6Vf^dZ>i`3
+R10
+31
+Z19 !s108 1689653539.860000
+Z20 !s90 -reportprogress|300|-93|-work|work|C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Conflict_Buffer.vhd|
+Z21 !s107 C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Conflict_Buffer.vhd|
+R14
+R15
+!s100 Ug2DUiK17hjI?dO@JaVVK3
+!i10b 1
+Aflags
+R2
+R3
+R4
+R5
+R6
+DEx4 work 15 conflict_buffer 0 22 WCEP6LeHEJRa6Vf^dZ>i`3
+l27
+L20
+V0868ldfc^JNLkJ[K`MkHl3
+R10
+31
+R19
+R20
+R21
+R14
+R15
+!s100 AD:K41KLmjPUSQ:4LQFJc1
+!i10b 1
+Econtrol_unit
+Z22 w1689567449
+R3
+R4
+R5
+R6
+R7
+Z23 8C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Control_Unit.vhd
+Z24 FC:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Control_Unit.vhd
+l0
+L5
+VicR6njVM0;9@?QkN:_7GE0
+R10
+31
+Z25 !s108 1689653539.528000
+Z26 !s90 -reportprogress|300|-93|-work|work|C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Control_Unit.vhd|
+Z27 !s107 C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Control_Unit.vhd|
+R14
+R15
+!s100 R4b]C`]WzeXVF8TXU9l533
+!i10b 1
+Acontrole
+R3
+R4
+R5
+R6
+DEx4 work 12 control_unit 0 22 icR6njVM0;9@?QkN:_7GE0
+l25
+L20
+VEofONC43<3E]AGz595Bl>1
+R10
+31
+R25
+R26
+R27
+R14
+R15
+!s100 HcYGo43k=KMcD]>U[hQlH1
+!i10b 1
+Ehtm_core
+Z28 w1689563037
+R3
+R4
+R5
+R6
+R7
+Z29 8C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/HTM_Core.vhd
+Z30 FC:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/HTM_Core.vhd
+l0
+L5
+VXd:ZXEUgnB2Jz]zN5YK4R0
+R10
+31
+Z31 !s108 1689653538.551000
+Z32 !s90 -reportprogress|300|-93|-work|work|C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/HTM_Core.vhd|
+Z33 !s107 C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/HTM_Core.vhd|
+R14
+R15
+!s100 ZFdZbz[D9_jhA6ISM@4k`3
+!i10b 1
+Ahtm
+R3
+R4
+R5
+R6
+DEx4 work 8 htm_core 0 22 Xd:ZXEUgnB2Jz]zN5YK4R0
+l99
+L21
+VncL3Sm;[kokST2<R=>=XV3
+R10
+31
+R31
+R32
+R33
+R14
+R15
+!s100 g>k:=NRa__HNgI4gT?`0C1
+!i10b 1
+Emain_memory
+Z34 w1689566115
+R2
+R3
+R4
+R5
+R6
+R7
+Z35 8C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Main_Memory.vhd
+Z36 FC:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Main_Memory.vhd
+l0
+L6
+V>cElM[`M:fcPUV]R]KlM63
+R10
+31
+Z37 !s108 1689653539.023000
+Z38 !s90 -reportprogress|300|-93|-work|work|C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Main_Memory.vhd|
+Z39 !s107 C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Main_Memory.vhd|
+R14
+R15
+!s100 H6Y`n;l90ZoBK`7g:cEXi3
+!i10b 1
+Amemory
+R2
+R3
+R4
+R5
+R6
+DEx4 work 11 main_memory 0 22 >cElM[`M:fcPUV]R]KlM63
+l23
+L17
+VW]j7h9aK@3XXRnXnU02YJ3
+R10
+31
+R37
+R38
+R39
+R14
+R15
+!s100 ZBbD@<[ABAU2D_:@[N@PQ3
+!i10b 1
+Etestbench_htm_core
+Z40 w1689569326
+R3
+R4
+R5
+R6
+R7
+Z41 8C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Testbench_HTM_Core.vhd
+Z42 FC:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Testbench_HTM_Core.vhd
+l0
+L5
+V^og`FoCmUL5hKi_VGnIcK2
+!s100 K3Fh<Z8=h0hVJ=@YVMCDW0
+R10
+31
+!i10b 1
+Z43 !s108 1689653540.747000
+Z44 !s90 -reportprogress|300|-93|-work|work|C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Testbench_HTM_Core.vhd|
+Z45 !s107 C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Testbench_HTM_Core.vhd|
+R14
+R15
+Atest
+R3
+R4
+R5
+R6
+DEx4 work 18 testbench_htm_core 0 22 ^og`FoCmUL5hKi_VGnIcK2
+l32
+L10
+VIa@Zi]iU6z<NofS]N>DP`1
+!s100 =iJd8CR0DRMF[jdnFJSjk2
+R10
+31
+!i10b 1
+R43
+R44
+R45
+R14
+R15
+Etm_buffer
+Z46 w1689653158
+R2
+R3
+R4
+R5
+R6
+R7
+Z47 8C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/TM_Buffer.vhd
+Z48 FC:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/TM_Buffer.vhd
 l0
 L13
 Vl1Uj^V7XeP>njALcjGMS^1
-!s100 zknC>29dcoWiGXz2i4=cb0
-R9
+R10
 31
-!i10b 1
-!s108 1689649415.656000
-!s90 -reportprogress|300|-93|-work|work|C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/TM_Buffer.vhd|
-!s107 C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/TM_Buffer.vhd|
-R13
+Z49 !s108 1689653538.674000
+Z50 !s90 -reportprogress|300|-93|-work|work|C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/TM_Buffer.vhd|
+Z51 !s107 C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/TM_Buffer.vhd|
 R14
+R15
+!s100 zknC>29dcoWiGXz2i4=cb0
+!i10b 1
+Ashareddata
+R2
+R3
+R4
+R5
+R6
+DEx4 work 9 tm_buffer 0 22 l1Uj^V7XeP>njALcjGMS^1
+l50
+L41
+V1[BL@J`VeE_Q0z9=kSdYa0
+R10
+31
+R49
+R50
+R51
+R14
+R15
+!s100 Ajh^=VCD5Ed7R0Pnhok[A1
+!i10b 1

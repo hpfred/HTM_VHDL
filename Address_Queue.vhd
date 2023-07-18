@@ -32,9 +32,11 @@ BEGIN
 	PROCESS (Reset, Clock)
 		VARIABLE Head, Tail: POINTER;
 		VARIABLE TrIDint: INTEGER := TO_INTEGER(UNSIGNED(TrID));
+		VARIABLE Status: STD_LOGIC_VECTOR (1 DOWNTO 0);
 	BEGIN
 		IF (Reset = '1') THEN
 			FIFOStatus <= "01";
+			Status := "01";
 			Ret <= (others=>'0');
 			MemStorage <= (others=>(others=>(others=>'0')));
 			Head := (others=>"0001");
@@ -43,34 +45,24 @@ BEGIN
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
 			TrIDint := TO_INTEGER(UNSIGNED(TrID));
 			IF (Head(TrIDint) > Tail(TrIDint)) THEN				--Caso fila vazia
-				FIFOStatus <= "01";								--Isso ainda tem problema pra quando a lista der overflow	--Tenho que depois ver de mudar pra um sistema de registrador deslocador + contador, pq isso resolveria o problema
-																																						--Na verdade usar nesse sistema atual usar um contador já poderia ajudar, pq posso verificar além do tamanho de cada tbm ver quantas vezes ele já deu a volta na cadeia - if CountHead = CountTail + 1
-			ELSIF (Mode = "10") THEN							--PULL
+				Status := "01";									--Isso ainda tem problema pra quando a lista der overflow	--Tenho que depois ver de mudar pra um sistema de registrador deslocador + contador, pq isso resolveria o problema
+			ELSIF (Tail(TrIDint) = "1111") THEN						--Caso fila cheia
+				Status := "10";									--Esse daqui não é resolvido pelo de cima, mas um contador que checa se é igual ao tamanho máximo
+			ELSE																																		--Na verdade usar nesse sistema atual usar um contador já poderia ajudar, pq posso verificar além do tamanho de cada tbm ver quantas vezes ele já deu a volta na cadeia - if CountHead = CountTail + 1
+				Status := "00";
+			END IF;
+			
+			IF (Mode = "10" AND Status /= "01") THEN								--PULL
 				Ret <= MemStorage(TrIDint)(TO_INTEGER(UNSIGNED(Head(TrIDint))));
 				Head(TrIDint) := Head(TrIDint) + 1;
-				IF (Head(TrIDint) > Tail(TrIDint)) THEN				--Testa fila vazia de novo pra deixar Status atualizado
-					FIFOStatus <= "01";
-				ELSE
-					FIFOStatus <= "00";
-				END IF;
-					
-			END IF;
-			
-			IF (Tail(TrIDint) = "1111") THEN						--Caso fila cheia
-				FIFOStatus <= "10";								--Esse daqui não é resolvido pelo de cima, mas um contador que checa se é igual ao tamanho máximo
 				
-			ELSIF (Mode = "01") THEN							--PUSH
+			ELSIF (Mode = "01" AND Status /= "10") THEN							--PUSH
 				MemStorage(TrIDint)(TO_INTEGER(UNSIGNED(Tail(TrIDint)))) <= Addr;
 				Tail(TrIDint) := Tail(TrIDint) + 1;
-				IF (Tail(TrIDint) = "1111") THEN						--Testa fila cheia de novo pra deixar Status atualizado
-					FIFOStatus <= "10";
-				ELSE
-					FIFOStatus <= "00";
-				END IF;	
 				
 			END IF;
 			
-			--Adicionar FIFOStatusTemp como var, e sempre inicializa 00?
+			FIFOStatus <= Status;
 			
 		END IF;
 	END PROCESS;
