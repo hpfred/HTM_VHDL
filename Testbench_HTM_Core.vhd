@@ -40,7 +40,6 @@ BEGIN
 		Data <= "00000001";--
 		ID <= "01";
 		
-		--Uma das outras coisas que também to tendo problema é que como ele tá sincornizado no clock, no pulso ele altera tudo, mas no pulso ele executa tudo, então só tá afetando as modificações no próximo pulso (?)
 		--Wait Until TransactionStatus is Hit or Miss (?)
 		
 		--WAIT UNTIL Clock'EVENT AND Clock = '1' ;

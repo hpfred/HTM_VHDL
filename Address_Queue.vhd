@@ -70,6 +70,8 @@ BEGIN
 				
 			END IF;
 			
+			--Adicionar FIFOStatusTemp como var, e sempre inicializa 00?
+			
 		END IF;
 	END PROCESS;
 END Queue;

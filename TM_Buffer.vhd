@@ -65,6 +65,7 @@ BEGIN
 		VARIABLE BuffStatusTemp: STD_LOGIC_VECTOR (2 DOWNTO 0);
 		VARIABLE ConfBufModeTemp: STD_LOGIC_VECTOR (1 DOWNTO 0);
 		VARIABLE ProcStatus: INTEGER := 7;
+		VARIABLE AddrTemp: INTEGER := 0;
 	BEGIN
 		IF (Reset = '1') THEN
 			MemBuffer <= (others=>(Others=>'0'));
@@ -80,6 +81,7 @@ BEGIN
 			MemoryData <= (others => '0');
 			FSMClockCount := 0;
 			ProcStatus := 7;
+			AddrTemp := 0;
 			
 		ELSIF (Clock'EVENT AND Clock = '1') THEN
 			QueueModeTemp := "00";
@@ -185,9 +187,10 @@ BEGIN
 				ELSE																	--FSMClockCount > 0
 					IF (ConfBufStatus(0) = '0') THEN							--Verifica com Conflict_Buffer se é transação zumbi, e atualiza os dados somente se não for
 						MemBuffer(CurrAddr) <= TempBuffEntry;
-						IF (CUStatus = "010") THEN
-							QueueModeTemp := "01";								--Guarda na fila quando Write
-						END IF;
+						--Guarda na fila no write E no READ --precisa guardar o Read pra no commit ele também remover os reads no Buffer
+						--IF (CUStatus = "010") THEN							--Guarda na fila quando Write
+						QueueModeTemp := "01";
+						--END IF;
 					END IF;
 				END IF;
 			
@@ -246,10 +249,10 @@ BEGIN
 			ELSIF (CUStatus = "101") THEN										--Se Status é MemUpdate
 				--IF (FSMClockCount = 0) THEN				
 				IF (FSMClockCount < 2) THEN				
+					--QueueStatus está funcionando errado. E mesmo depois de eu arrumar, ainda assim ele deve só atualizar depois de um clock com o TrID certo, então vou ter que rever isso
 					IF (QueueStatus /= "01") THEN									--Se fila não vazia faz pull da FIFO
 						QueueModeTemp := "10";
 						FSMClockCount := FSMClockCount + 1;
-						AddrTemp := 0;
 					ELSE																			--Se a FIFO está vazia o processo é finalizado e retorna Commit Succes
 						BuffStatusTemp := "101";
 
@@ -261,37 +264,40 @@ BEGIN
 				ELSE
 					UpdateAddress := QueueReturn;
 					
-					WHILE AddrTemp <= 9 LOOP
-						IF MemBuffer(Addr)(23 DOWNTO 16) = UpdateAddress THEN
-							MemoryAddr <= UpdateAddress;								--Atualiza na Memória Principal
-							MemoryData <= MemBuffer(Addr)(7 DOWNTO 0);
-							--Talvez alguma entrada de comunicação, pra dizer se é Fetch ou Post
-						
-							ReadWriteSet(3) := MemBuffer(Addr)(15 DOWNTO 14);	--Remove/Limpa Buffer depois de atualizado na Memória Principal
-							ReadWriteSet(2) := MemBuffer(Addr)(13 DOWNTO 12);
-							ReadWriteSet(1) := MemBuffer(Addr)(11 DOWNTO 10);
-							ReadWriteSet(0) := MemBuffer(Addr)(9 DOWNTO 8);
-							ReadWriteSet(TransactionIDint) := "00";
-							ProcFlag := '0';
-							FOR P IN 0 TO 3 LOOP
-								ProcFlag := ReadWriteSet(P)(0) OR ReadWriteSet(P)(1) OR ProcFlag;
-							END LOOP;
-							IF (ProcFlag = '0') THEN
-								MemBuffer(Addr)(24) <= '0';
-							END IF;
-							MemBuffer(Addr)(15 DOWNTO 14) <= ReadWriteSet(3);
-							MemBuffer(Addr)(13 DOWNTO 12) <= ReadWriteSet(2);
-							MemBuffer(Addr)(11 DOWNTO 10) <= ReadWriteSet(1);
-							MemBuffer(Addr)(9 DOWNTO 8) <= ReadWriteSet(0);
-							
+					AddrTemp := 0;
+					--WHILE (MemBuffer(AddrTemp)(23 DOWNTO 16) /= UpdateAddress) LOOP \\ AddrTemp := AddrTemp + 1; \\ END LOOP;
+					WHILE (AddrTemp < 10) LOOP
+						IF MemBuffer(AddrTemp)(23 DOWNTO 16) = UpdateAddress THEN
 							EXIT;
 						END IF;
-						
 						AddrTemp := AddrTemp + 1;
 					END LOOP;
-					IF (AddrTemp > 9) THEN
-						FSMClockCount := 0;
+					--Não é pra nunca chegar em 10, mas se chegar, ele deu errado(?)
+					--No caso, não é pra ser possível não achar o endereço dentro do escopo do buffer se ele está na fila 
+					
+					--Só vai atualizar quando Write (?) --Não precisa quando não for, mas não é pra dar problema (read teria abortado se o dado foi modificado)
+					MemoryAddr <= UpdateAddress;								--Atualiza na Memória Principal
+					MemoryData <= MemBuffer(AddrTemp)(7 DOWNTO 0);
+					--Na verdade o melhor seria só adicionar na fila a primeira vez que o processador leu ou escreveu de cada endereço (se ele escreve ou le varias vezes do mesmo endereço, eu to perdendo varios ciclos lendo e salvando a mesma coisa na memória principal)
+				
+					ReadWriteSet(3) := MemBuffer(AddrTemp)(15 DOWNTO 14);	--Remove/Limpa Buffer depois de atualizado na Memória Principal
+					ReadWriteSet(2) := MemBuffer(AddrTemp)(13 DOWNTO 12);
+					ReadWriteSet(1) := MemBuffer(AddrTemp)(11 DOWNTO 10);
+					ReadWriteSet(0) := MemBuffer(AddrTemp)(9 DOWNTO 8);
+					ReadWriteSet(TransactionIDint) := "00";
+					ProcFlag := '0';
+					FOR P IN 0 TO 3 LOOP
+						ProcFlag := ReadWriteSet(P)(0) OR ReadWriteSet(P)(1) OR ProcFlag;
+					END LOOP;
+					IF (ProcFlag = '0') THEN
+						MemBuffer(AddrTemp)(24) <= '0';
 					END IF;
+					MemBuffer(AddrTemp)(15 DOWNTO 14) <= ReadWriteSet(3);
+					MemBuffer(AddrTemp)(13 DOWNTO 12) <= ReadWriteSet(2);
+					MemBuffer(AddrTemp)(11 DOWNTO 10) <= ReadWriteSet(1);
+					MemBuffer(AddrTemp)(9 DOWNTO 8) <= ReadWriteSet(0);
+							
+					FSMClockCount := 0;
 				END IF;
 					
 			END IF;
