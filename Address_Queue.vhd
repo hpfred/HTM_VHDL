@@ -57,8 +57,8 @@ BEGIN
 				Head(TrIDint) := Head(TrIDint) + 1;
 				
 			ELSIF (Mode = "01" AND Status /= "10") THEN							--PUSH
-				MemStorage(TrIDint)(TO_INTEGER(UNSIGNED(Tail(TrIDint)))) <= Addr;
 				Tail(TrIDint) := Tail(TrIDint) + 1;
+				MemStorage(TrIDint)(TO_INTEGER(UNSIGNED(Tail(TrIDint)))) <= Addr;
 				
 			END IF;
 			
