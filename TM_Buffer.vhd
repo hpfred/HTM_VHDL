@@ -254,8 +254,9 @@ BEGIN
 			
 			---------------------------------------------------------------------------------------------------------------
 			ELSIF (CUStatus = "101") THEN										--Se Status é MemUpdate
-				IF (FSMClockCount < 2) THEN
+				IF (FSMClockCount < 3) THEN
 					IF (QueueStatus /= "01") THEN								--Se fila não vazia faz pull da FIFO
+						report "Entrou com FSM 0";
 						QueueModeTemp := "10";
 						FSMClockCount := FSMClockCount + 1;
 					ELSE																--Se a FIFO está vazia o processo é finalizado e retorna Commit Succes
@@ -266,22 +267,23 @@ BEGIN
 					END IF;	
 					
 				ELSE
+					report "Entrou com FSM > 1";
 					--UpdateAddress := QueueReturn;
+					report STD_LOGIC'image(QueueReturn(0));
+					report STD_LOGIC'image(QueueReturn(1));
+					report STD_LOGIC'image(QueueReturn(2));
 					
 					AddrTemp := 0;
 					--WHILE (MemBuffer(AddrTemp)(23 DOWNTO 16) /= UpdateAddress) LOOP \\ AddrTemp := AddrTemp + 1; \\ END LOOP;
 					WHILE (AddrTemp < 10) LOOP
 						--IF MemBuffer(AddrTemp)(23 DOWNTO 16) = UpdateAddress THEN
 						IF MemBuffer(AddrTemp)(23 DOWNTO 16) = QueueReturn THEN
-							report "Igual QueueReturn";
 							EXIT;
 						END IF;
 						AddrTemp := AddrTemp + 1;
 					END LOOP;
 					--Não é pra nunca chegar em 10, mas se chegar, ele deu errado(?)
 					--No caso, não é pra ser possível não achar o endereço dentro do escopo do buffer se ele está na fila 
-					
-					report "Saiu do loop sem matar o funcionamento";
 					
 					--Só vai atualizar quando Write (?) --Não precisa quando não for, mas não é pra dar problema (read teria abortado se o dado foi modificado)
 					--MemoryAddr <= UpdateAddress;								--Atualiza na Memória Principal
