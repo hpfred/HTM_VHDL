@@ -19,7 +19,6 @@ END ENTITY Control_Unit;
 		
 ARCHITECTURE  Controle OF Control_Unit IS
 TYPE STATE_TYPE IS (IdleState, ReadState, WriteState, AbortState, CommitState, MemoryUpdateState);
---SIGNAL CurrStateIs, NextStateIs: STATE_TYPE;
 SIGNAL CurrStateIs: STATE_TYPE;
 
 BEGIN
@@ -37,7 +36,6 @@ BEGIN
 		
 			CASE CurrStateIs IS
 				WHEN IdleState =>
-					--CUStatus := "000";
 					IF (IntAbortStatus = '1') THEN	--AbortCmd
 						NextStateIs := AbortState;
 						Status := "011";
@@ -53,7 +51,6 @@ BEGIN
 					END IF;
 				
 				WHEN ReadState =>
-					--CUStatus := "001";
 					IF (BuffStatus = "001" OR BuffStatus = "010") THEN
 						NextStateIs := IdleState;
 						Status := "000";
@@ -67,14 +64,12 @@ BEGIN
 					END IF;
 				
 				WHEN AbortState =>
-					--CUStatus := "011";
 					IF (IntAbortStatus = '0') THEN
 						NextStateIs := IdleState;
 						Status := "000";
 					END IF;
 				
 				WHEN CommitState =>
-					--CUStatus := "100";
 					IF (BuffStatus = "100") THEN
 						NextStateIs := IdleState;
 						Status := "000";
@@ -84,7 +79,6 @@ BEGIN
 					END IF;
 				
 				WHEN MemoryUpdateState =>
-					--CUStatus := "101";
 					IF (BuffStatus = "101") THEN
 						NextStateIs := IdleState;
 						Status := "000";

@@ -39,20 +39,16 @@ ENTITY TM_Buffer IS
 END ENTITY TM_Buffer;
 
 ARCHITECTURE  SharedData OF TM_Buffer IS
+TYPE RW_SET IS ARRAY (3 DOWNTO 0) OF STD_LOGIC_VECTOR (1 DOWNTO 0);
 TYPE ALL_DATA IS ARRAY (9 DOWNTO 0) OF STD_LOGIC_VECTOR (24 DOWNTO 0);
 SIGNAL MemBuffer: ALL_DATA;
-
-TYPE RW_SET IS ARRAY (3 DOWNTO 0) OF STD_LOGIC_VECTOR (1 DOWNTO 0);
-
---SIGNAL ProcIDint: INTEGER := TO_INTEGER(UNSIGNED(ProcID));
---SIGNAL TransactionIDint: INTEGER := TO_INTEGER(UNSIGNED(TransactionID));
 
 BEGIN
 
 	PROCESS (Reset, Clock)
 		VARIABLE ReadWriteSet: RW_SET;
 		VARIABLE FrstNonValid: INTEGER := 2147483647;
-		VARIABLE CurrAddr: INTEGER := 0;					--STD_LOGIC_VECTOR (3 DOWNTO 0); Se manter integer mudar pra unsigned?
+		VARIABLE CurrAddr: INTEGER := 0;
 		VARIABLE HitFlag, AbortFlag, ProcFlag: STD_LOGIC := '0';
 		VARIABLE UpdateAddress: STD_LOGIC_VECTOR (7 DOWNTO 0);
 		VARIABLE QueueModeTemp: STD_LOGIC_VECTOR (1 DOWNTO 0);
@@ -100,9 +96,7 @@ BEGIN
 					ConfBufTrID <= TransactionID;
 					FSMClockCount := FSMClockCount + 1;
 					
-					--Adiciona na fila mesmo se for zumbi, pra não ter que perder um clock extra pra colocar na fila
-					--Mas pra não facilmente lotar a fila, ainda precisava adicionar o teste de primeira inserção do endereço na fila (um endereço não precisa aparecer mais de uma vez na fila, se eu não me engano)
-					QueueModeTemp := "01";
+					--QueueModeTemp := "01";
 					
 					FOR CurrAddr IN 0 TO 9 LOOP	--'length-1
 						IF (MemBuffer(CurrAddr)(24) = '0' AND FrstNonValid > CurrAddr) THEN
@@ -116,7 +110,7 @@ BEGIN
 						END IF;
 					END LOOP;
 					--TODO: Caso de MISS por Overflow
-					--IF (CurrAddr = 9) THEN OVERFLOW.MISS
+					report "Erro : Overflow Miss" WHEN (CurrAddr = 9 AND HitFlag = '0');
 						
 					ReadWriteSet(3) := MemBuffer(CurrAddr)(15 DOWNTO 14);
 					ReadWriteSet(2) := MemBuffer(CurrAddr)(13 DOWNTO 12);
@@ -143,6 +137,11 @@ BEGIN
 							
 					ELSE																--Buffer Hit
 						BuffStatusTemp := "001";
+						
+						--Se Hit > Testa se aquele processador já usou aquele endereço, e caso não, então dá push na fila --Assim evita de um endereço aparecer mais de uma vez na fila denecessariamente (?)
+						IF (ReadWriteSet(ProcIDint)(0) OR ReadWriteSet(ProcIDint)(1)) = '0' THEN
+							QueueModeTemp := "01";
+						END IF;
 						
 						IF (CUStatus = "001") THEN								--Read
 							FOR i IN 0 TO 3 LOOP
@@ -191,18 +190,12 @@ BEGIN
 				ELSE																	--FSMClockCount > 0
 					IF (ConfBufStatus(0) = '0') THEN							--Verifica com Conflict_Buffer se é transação zumbi, e atualiza os dados somente se não for
 						MemBuffer(CurrAddr) <= TempBuffEntry;
-						--Guarda na fila no write E no READ --precisa guardar o Read pra no commit ele também remover os reads no Buffer
-						--IF (CUStatus = "010") THEN							--Guarda na fila quando Write
-					--	QueueModeTemp := "01";
-						--END IF;
 					END IF;
 				END IF;
 			
 			---------------------------------------------------------------------------------------------------------------	
 			ELSIF (CUStatus = "011") THEN										--Se Status é abort
-				--Só pra ter algo pra debuggar depois vou adicionar esse contador aqui, pelo menos por enquanto
-				FSMClockCount := FSMClockCount + 1;
-				IF (TO_INTEGER(UNSIGNED(CBProcStatus)) /= ProcStatus) THEN	--Porém, se eu inicializar ProcStatus como 0, isso poderia dar problema, não? --Inicializa 111 então
+				IF (TO_INTEGER(UNSIGNED(CBProcStatus)) /= ProcStatus) THEN
 					ProcStatus := TO_INTEGER(UNSIGNED(CBProcStatus));
 					IF (ProcStatus > 3) THEN
 						--nenhum conflito
@@ -230,7 +223,6 @@ BEGIN
 							END IF;
 						END LOOP;
 						ConfBufTrID <= STD_LOGIC_VECTOR(TO_UNSIGNED(ProcStatus, ConfBufTrID'length));
-						--ConfBufTrID <= ProcStatus(1 DOWNTO 0);
 						ConfBufModeTemp := "10";
 					END IF;
 				END IF;
@@ -244,7 +236,9 @@ BEGIN
 				ELSE
 					IF (ConfBufStatus(0) = '1') THEN	
 						--AQUI que acho que deveria ir deassert da flag externa
+						ConfBufModeTemp := "11";
 						--AQUI TBM deveria esvaziar a FIFO do Proc que está em abort
+						QueueModeTemp := "11";	--Se fizer isso assim preciso esperar mais um clock pra não dar conflito...
 						BuffStatusTemp := "100";
 					ELSE
 						BuffStatusTemp := "011";
@@ -256,7 +250,6 @@ BEGIN
 			ELSIF (CUStatus = "101") THEN										--Se Status é MemUpdate
 				IF (FSMClockCount < 3) THEN
 					IF (QueueStatus /= "01") THEN								--Se fila não vazia faz pull da FIFO
-						report "Entrou com FSM 0";
 						QueueModeTemp := "10";
 						FSMClockCount := FSMClockCount + 1;
 					ELSE																--Se a FIFO está vazia o processo é finalizado e retorna Commit Succes
@@ -266,27 +259,17 @@ BEGIN
 						ConfBufModeTemp := "11";
 					END IF;	
 					
-				ELSE
-					report "Entrou com FSM > 1";
-					--UpdateAddress := QueueReturn;
-					report STD_LOGIC'image(QueueReturn(0));
-					report STD_LOGIC'image(QueueReturn(1));
-					report STD_LOGIC'image(QueueReturn(2));
-					
+				ELSE					
 					AddrTemp := 0;
-					--WHILE (MemBuffer(AddrTemp)(23 DOWNTO 16) /= UpdateAddress) LOOP \\ AddrTemp := AddrTemp + 1; \\ END LOOP;
-					WHILE (AddrTemp < 10) LOOP
-						--IF MemBuffer(AddrTemp)(23 DOWNTO 16) = UpdateAddress THEN
+					WHILE (AddrTemp < 10) LOO
 						IF MemBuffer(AddrTemp)(23 DOWNTO 16) = QueueReturn THEN
 							EXIT;
 						END IF;
 						AddrTemp := AddrTemp + 1;
 					END LOOP;
-					--Não é pra nunca chegar em 10, mas se chegar, ele deu errado(?)
-					--No caso, não é pra ser possível não achar o endereço dentro do escopo do buffer se ele está na fila 
+					report "Erro : Não deveria ser possível" WHEN AddrTemp = 10;
 					
 					--Só vai atualizar quando Write (?) --Não precisa quando não for, mas não é pra dar problema (read teria abortado se o dado foi modificado)
-					--MemoryAddr <= UpdateAddress;								--Atualiza na Memória Principal
 					MemoryAddr <= QueueReturn;								--Atualiza na Memória Principal
 					MemoryData <= MemBuffer(AddrTemp)(7 DOWNTO 0);
 					--Na verdade o melhor seria só adicionar na fila a primeira vez que o processador leu ou escreveu de cada endereço (se ele escreve ou le varias vezes do mesmo endereço, eu to perdendo varios ciclos lendo e salvando a mesma coisa na memória principal)

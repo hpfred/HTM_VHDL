@@ -19,14 +19,10 @@ ENTITY Address_Queue IS
 END ENTITY Address_Queue;
 
 ARCHITECTURE  Queue OF Address_Queue IS
+TYPE POINTER IS ARRAY (3 DOWNTO 0) OF STD_LOGIC_VECTOR (3 DOWNTO 0);
 TYPE TRANS_ADDR_MEM IS ARRAY (9 DOWNTO 0) OF STD_LOGIC_VECTOR (7 DOWNTO 0);
 TYPE ALL_DATA IS ARRAY (3 DOWNTO 0) OF TRANS_ADDR_MEM;
 SIGNAL MemStorage: ALL_DATA;
-
-TYPE POINTER IS ARRAY (3 DOWNTO 0) OF STD_LOGIC_VECTOR (3 DOWNTO 0);
---SIGNAL Head, Tail: POINTER;		--Troquei pra VAR pq como Signal espera até o Clock pra atualizar, parecia pedindo pra dar problema
-
---SIGNAL TrIDint: INTEGER := TO_INTEGER(UNSIGNED(TrID));
 
 BEGIN
 	PROCESS (Reset, Clock)
@@ -39,8 +35,6 @@ BEGIN
 			Status := "01";
 			Ret <= (others=>'0');
 			MemStorage <= (others=>(others=>(others=>'0')));
-			--Head := (others=>"0001");
-			--Tail := (others=>"0000");
 			Head := (others=>"0000");
 			Tail := (others=>"1111");
 			
@@ -49,7 +43,6 @@ BEGIN
 			IF (Head(TrIDint) > Tail(TrIDint)) THEN				--Caso fila vazia
 				Status := "01";									--Isso ainda tem problema pra quando a lista der overflow	--Tenho que depois ver de mudar pra um sistema de registrador deslocador + contador, pq isso resolveria o problema
 																		--Agora nem sei se tem caso de overflow na verdade, pq Pull só é feito no commit, então a lista não é ciclica (se der overflow vai estar cheia). E eu quando esvazio total a fila, só zerar os ponteiros de Head e Tail
-			--ELSIF (Tail(TrIDint) = "1111") THEN						--Caso fila cheia
 			ELSIF (Head(TrIDint) = "1111") THEN						--Caso fila cheia
 				Status := "10";									--Esse daqui não é resolvido pelo de cima, mas um contador que checa se é igual ao tamanho máximo
 			ELSE																																		--Na verdade usar nesse sistema atual usar um contador já poderia ajudar, pq posso verificar além do tamanho de cada tbm ver quantas vezes ele já deu a volta na cadeia - if CountHead = CountTail + 1
@@ -63,6 +56,10 @@ BEGIN
 			ELSIF (Mode = "01" AND Status /= "10") THEN							--PUSH
 				Tail(TrIDint) := Tail(TrIDint) + 1;
 				MemStorage(TrIDint)(TO_INTEGER(UNSIGNED(Tail(TrIDint)))) <= Addr;
+				
+			ELSIF (Mode = "11") THEN													--PULL-ALL/EMPTY_FIFO
+				Tail(TrIDint) := "0000";
+				Tail(TrIDint) := "1111";
 				
 			END IF;
 			

@@ -22,8 +22,6 @@ TYPE FlagBuff IS ARRAY (3 DOWNTO 0) OF STD_LOGIC_VECTOR (1 DOWNTO 0);
 SIGNAL ConflictFlag: FlagBuff;
 --Todas minha memórias/buffers são feitas com signal, mas me pergunto se com variable seria má prática
 
---SIGNAL TrIDint: INTEGER := TO_INTEGER(UNSIGNED(TrID));
-
 BEGIN
 	
 	Status <= ConflictFlag(TO_INTEGER(UNSIGNED(TrID)));
@@ -55,7 +53,6 @@ BEGIN
 			WHEN "10" =>
 				ConflictFlag(TrIDint) <= "01";
 				
-			--WHEN "11" =>			--4 out of 81 cases (U, X, etc)
 			WHEN others =>
 				ConflictFlag(TrIDint) <= "00";
 				
