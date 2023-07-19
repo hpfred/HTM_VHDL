@@ -100,6 +100,10 @@ BEGIN
 					ConfBufTrID <= TransactionID;
 					FSMClockCount := FSMClockCount + 1;
 					
+					--Adiciona na fila mesmo se for zumbi, pra não ter que perder um clock extra pra colocar na fila
+					--Mas pra não facilmente lotar a fila, ainda precisava adicionar o teste de primeira inserção do endereço na fila (um endereço não precisa aparecer mais de uma vez na fila, se eu não me engano)
+					QueueModeTemp := "01";
+					
 					FOR CurrAddr IN 0 TO 9 LOOP	--'length-1
 						IF (MemBuffer(CurrAddr)(24) = '0' AND FrstNonValid > CurrAddr) THEN
 							FrstNonValid := CurrAddr;
@@ -166,7 +170,7 @@ BEGIN
 						ELSIF (CUStatus = "010") THEN							--Write
 							FOR i IN 0 TO 3 LOOP
 								IF (ReadWriteSet(i) /= "00" AND ProcID /= i) THEN
-									---ConfBufTrID <= i;
+									ConfBufTrID <= STD_LOGIC_VECTOR(TO_UNSIGNED(i , ConfBufTrID'length));
 									ConfBufModeTemp := "01";
 								END IF;
 							END LOOP;
@@ -189,7 +193,7 @@ BEGIN
 						MemBuffer(CurrAddr) <= TempBuffEntry;
 						--Guarda na fila no write E no READ --precisa guardar o Read pra no commit ele também remover os reads no Buffer
 						--IF (CUStatus = "010") THEN							--Guarda na fila quando Write
-						QueueModeTemp := "01";
+					--	QueueModeTemp := "01";
 						--END IF;
 					END IF;
 				END IF;
@@ -238,7 +242,9 @@ BEGIN
 				IF (FSMClockCount < 2) THEN
 					FSMClockCount := FSMClockCount + 1;
 				ELSE
-					IF (ConfBufStatus(0) = '1') THEN					--AQUI que acho que deveria ir deassert da flag externa
+					IF (ConfBufStatus(0) = '1') THEN	
+						--AQUI que acho que deveria ir deassert da flag externa
+						--AQUI TBM deveria esvaziar a FIFO do Proc que está em abort
 						BuffStatusTemp := "100";
 					ELSE
 						BuffStatusTemp := "011";
@@ -260,12 +266,14 @@ BEGIN
 					END IF;	
 					
 				ELSE
-					UpdateAddress := QueueReturn;
+					--UpdateAddress := QueueReturn;
 					
 					AddrTemp := 0;
 					--WHILE (MemBuffer(AddrTemp)(23 DOWNTO 16) /= UpdateAddress) LOOP \\ AddrTemp := AddrTemp + 1; \\ END LOOP;
 					WHILE (AddrTemp < 10) LOOP
-						IF MemBuffer(AddrTemp)(23 DOWNTO 16) = UpdateAddress THEN
+						--IF MemBuffer(AddrTemp)(23 DOWNTO 16) = UpdateAddress THEN
+						IF MemBuffer(AddrTemp)(23 DOWNTO 16) = QueueReturn THEN
+							report "Igual QueueReturn";
 							EXIT;
 						END IF;
 						AddrTemp := AddrTemp + 1;
@@ -273,8 +281,11 @@ BEGIN
 					--Não é pra nunca chegar em 10, mas se chegar, ele deu errado(?)
 					--No caso, não é pra ser possível não achar o endereço dentro do escopo do buffer se ele está na fila 
 					
+					report "Saiu do loop sem matar o funcionamento";
+					
 					--Só vai atualizar quando Write (?) --Não precisa quando não for, mas não é pra dar problema (read teria abortado se o dado foi modificado)
-					MemoryAddr <= UpdateAddress;								--Atualiza na Memória Principal
+					--MemoryAddr <= UpdateAddress;								--Atualiza na Memória Principal
+					MemoryAddr <= QueueReturn;								--Atualiza na Memória Principal
 					MemoryData <= MemBuffer(AddrTemp)(7 DOWNTO 0);
 					--Na verdade o melhor seria só adicionar na fila a primeira vez que o processador leu ou escreveu de cada endereço (se ele escreve ou le varias vezes do mesmo endereço, eu to perdendo varios ciclos lendo e salvando a mesma coisa na memória principal)
 				
