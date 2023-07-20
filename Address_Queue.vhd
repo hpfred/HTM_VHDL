@@ -58,7 +58,7 @@ BEGIN
 				MemStorage(TrIDint)(TO_INTEGER(UNSIGNED(Tail(TrIDint)))) <= Addr;
 				
 			ELSIF (Mode = "11") THEN													--PULL-ALL/EMPTY_FIFO
-				Tail(TrIDint) := "0000";
+				Head(TrIDint) := "0000";
 				Tail(TrIDint) := "1111";
 				
 			END IF;

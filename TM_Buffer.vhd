@@ -110,7 +110,8 @@ BEGIN
 						END IF;
 					END LOOP;
 					--TODO: Caso de MISS por Overflow
-					report "Erro : Overflow Miss" WHEN (CurrAddr = 9 AND HitFlag = '0');
+					--report "Erro : Overflow Miss" WHEN (CurrAddr = 9 AND HitFlag = '0');
+					ASSERT NOT(CurrAddr = 9 AND HitFlag = '0') REPORT "Erro : Overflow Miss";
 						
 					ReadWriteSet(3) := MemBuffer(CurrAddr)(15 DOWNTO 14);
 					ReadWriteSet(2) := MemBuffer(CurrAddr)(13 DOWNTO 12);
@@ -120,6 +121,7 @@ BEGIN
 					
 					IF (HitFlag = '0') THEN										--Buffer Miss
 						BuffStatusTemp := "010";
+						QueueModeTemp := "01";
 						
 						TempBuffEntry(24) := '1';
 						TempBuffEntry(23 DOWNTO 16) := MemAddress;
@@ -233,17 +235,18 @@ BEGIN
 				
 				IF (FSMClockCount < 2) THEN
 					FSMClockCount := FSMClockCount + 1;
-				ELSE
+				ELSIF (FSMClockCount = 2) THEN
 					IF (ConfBufStatus(0) = '1') THEN	
-						--AQUI que acho que deveria ir deassert da flag externa
 						ConfBufModeTemp := "11";
-						--AQUI TBM deveria esvaziar a FIFO do Proc que está em abort
-						QueueModeTemp := "11";	--Se fizer isso assim preciso esperar mais um clock pra não dar conflito...
-						BuffStatusTemp := "100";
+						QueueModeTemp := "11";
+						--BuffStatusTemp := "100";
+						FSMClockCount := FSMClockCount + 1;
 					ELSE
 						BuffStatusTemp := "011";
 						FSMClockCount := 0;
 					END IF;
+				ELSE
+					BuffStatusTemp := "100";
 				END IF;
 			
 			---------------------------------------------------------------------------------------------------------------
@@ -261,18 +264,18 @@ BEGIN
 					
 				ELSE					
 					AddrTemp := 0;
-					WHILE (AddrTemp < 10) LOO
+					WHILE (AddrTemp < 10) LOOP
 						IF MemBuffer(AddrTemp)(23 DOWNTO 16) = QueueReturn THEN
 							EXIT;
 						END IF;
 						AddrTemp := AddrTemp + 1;
 					END LOOP;
-					report "Erro : Não deveria ser possível" WHEN AddrTemp = 10;
+					--report "Erro : Não deveria ser possível" WHEN AddrTemp = 10;
+					ASSERT AddrTemp /= 10 REPORT "Erro : Não deveria ser possível";
 					
-					--Só vai atualizar quando Write (?) --Não precisa quando não for, mas não é pra dar problema (read teria abortado se o dado foi modificado)
+					--Atualizar no Read é desnecessário, mas não salva tempo nenhum, então ao menos por enquanto vou deixar assim
 					MemoryAddr <= QueueReturn;								--Atualiza na Memória Principal
 					MemoryData <= MemBuffer(AddrTemp)(7 DOWNTO 0);
-					--Na verdade o melhor seria só adicionar na fila a primeira vez que o processador leu ou escreveu de cada endereço (se ele escreve ou le varias vezes do mesmo endereço, eu to perdendo varios ciclos lendo e salvando a mesma coisa na memória principal)
 				
 					ReadWriteSet(3) := MemBuffer(AddrTemp)(15 DOWNTO 14);	--Remove/Limpa Buffer depois de atualizado na Memória Principal
 					ReadWriteSet(2) := MemBuffer(AddrTemp)(13 DOWNTO 12);
