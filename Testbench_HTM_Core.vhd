@@ -33,6 +33,7 @@ BEGIN
 	Clock <= NOT Clock AFTER 5 ns;
 	PROCESS
 	BEGIN
+		--INIT
 		Reset <= '1';
 		Action <= "00";
 		MemAddress <= "00000000";
@@ -42,93 +43,441 @@ BEGIN
 		Reset <= '0';
 		
 		--READ
-		ID: 10 - Action: 01 - Addr: 01100010
-		--READ
-		ID: 10 - Action: 01 - Addr: 11011111
-		--WRITE
-		ID: 01 - Action: 10 - Data: 000000001 - Addr: 11101001
-		--READ
-		ID: 10 - Action: 01 - Addr: 10100011
-		--READ
-		ID: 00 - Action: 01 - Addr: 11011111
-		--READ
-		ID: 00 - Action: 01 - Addr: 10100011
-		--WRITE
-		ID: 00 - Action: 10 - Data: 10010001 - Addr: 11101110
-		--COMMIT-FAIL
-		--READ
-		ID: 10 - Action: 01 - Addr: 10110101
-		--READ
-		ID: 11 - Action: 01 - Addr: 11101110
-		--ABORT
-		--WRITE
-		ID: 10 - Action: 10 - Data: 11111101 - Addr: 10110101
-		--WRITE
-		ID: 10 - Action: 10 - Data: 11101010 - Addr: 10110101
-		--COMMIT-FAIL
-		--READ
-		ID: 01 - Action: 01 - Addr: 01100010
-		--READ
-		ID: 11 - Action: 01 - Addr: 10110101
-		--WRITE
-		ID: 01 - Action: 10 - Data: 10000000 - Addr: 10100011
-		--ABORT
-		--ABORT
-		--READ
-		ID: 01 - Action: 01 - Addr: 01100010
-		--READ
-		ID: 11 - Action: 01 - Addr: 11011111
-		--READ
-		ID: 11 - Action: 01 - Addr: 01100010
-		--COMMIT-FAIL
-		--READ
-		ID: 01 - Action: 01 - Addr: 10100011
-		--COMMIT-SUCCESS
-		
-		--Tenta de novo todos do Proc 1, todos do 3 e todos do 4 (fazendo em ordem?)
-		--Em ordem seria garantido, mas 1 e 3 só morreram por conflito com o 2 que já completou, então dessa vez só 4 teria abort, e depois de concluir o 1 e 3, 4 não teria mais conflito
+		--ID: 10 - Action: 01 - Addr: 01100010
+		Action <= "01";
+		MemAddress <= "01100010";
+		ID <= "10";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
 		--READ
-		ID: 10 - Action: 01 - Addr: 01100010
-		--READ
-		ID: 10 - Action: 01 - Addr: 11011111
-		--READ
-		ID: 10 - Action: 01 - Addr: 10100011
-		--READ
-		ID: 00 - Action: 01 - Addr: 11011111
-		--READ
-		ID: 00 - Action: 01 - Addr: 10100011
+		--ID: 10 - Action: 01 - Addr: 11011111
+		Action <= "01";
+		MemAddress <= "11011111";
+		ID <= "10";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
 		--WRITE
-		ID: 00 - Action: 10 - Data: 10010001 - Addr: 11101110
-		--COMMIT-SUCCESS
+		--ID: 01 - Action: 10 - Data: 000000001 - Addr: 11101001
+		Action <= "10";
+		MemAddress <= "11101001";
+		Data <= "00000001";
+		ID <= "01";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
 		--READ
-		ID: 10 - Action: 01 - Addr: 10110101
+		--ID: 10 - Action: 01 - Addr: 10100011
+		Action <= "01";
+		MemAddress <= "10100011";
+		ID <= "10";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
 		--READ
-		ID: 11 - Action: 01 - Addr: 11101110
-		--ABORT
+		--ID: 00 - Action: 01 - Addr: 11011111
+		Action <= "01";
+		MemAddress <= "11011111";
+		ID <= "00";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--READ
+		--ID: 00 - Action: 01 - Addr: 10100011
+		Action <= "01";
+		MemAddress <= "10100011";
+		ID <= "00";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
 		--WRITE
-		ID: 10 - Action: 10 - Data: 11111101 - Addr: 10110101
-		--WRITE
-		ID: 10 - Action: 10 - Data: 11101010 - Addr: 10110101
-		--COMMIT-SUCCESS
-		--READ
-		ID: 11 - Action: 01 - Addr: 10110101
-		--READ
-		ID: 11 - Action: 01 - Addr: 11011111
-		--READ
-		ID: 11 - Action: 01 - Addr: 01100010
+		--ID: 00 - Action: 10 - Data: 10010001 - Addr: 11101110
+		Action <= "10";
+		MemAddress <= "11101110";
+		Data <= "10010001";
+		ID <= "00";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
 		--COMMIT-FAIL
+		Action <= "11";
+		ID <= "00";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
 		--READ
-		ID: 11 - Action: 01 - Addr: 11101110
+		--ID: 10 - Action: 01 - Addr: 10110101
+		Action <= "01";
+		MemAddress <= "10110101";
+		ID <= "10";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
 		--READ
-		ID: 11 - Action: 01 - Addr: 10110101
+		--ID: 11 - Action: 01 - Addr: 11101110
+		Action <= "01";
+		MemAddress <= "11101110";
+		ID <= "11";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--ABORT
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--WRITE
+		--ID: 10 - Action: 10 - Data: 11111101 - Addr: 10110101
+		Action <= "10";
+		MemAddress <= "10110101";
+		Data <= "11111101";
+		ID <= "10";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--WRITE
+		--ID: 10 - Action: 10 - Data: 11101010 - Addr: 10110101
+		Action <= "10";
+		MemAddress <= "10110101";
+		Data <= "11101010";
+		ID <= "10";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--COMMIT-FAIL
+		Action <= "11";
+		ID <= "10";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
 		--READ
-		ID: 11 - Action: 01 - Addr: 11011111
+		--ID: 01 - Action: 01 - Addr: 01100010
+		Action <= "01";
+		MemAddress <= "01100010";
+		ID <= "01";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
 		--READ
-		ID: 11 - Action: 01 - Addr: 01100010
+		--ID: 11 - Action: 01 - Addr: 10110101
+		Action <= "01";
+		MemAddress <= "10110101";
+		ID <= "11";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--WRITE
+		--ID: 01 - Action: 10 - Data: 10000000 - Addr: 10100011
+		Action <= "10";
+		MemAddress <= "10100011";
+		Data <= "10000000";
+		ID <= "01";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--ABORT
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--ABORT
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--READ
+		--ID: 01 - Action: 01 - Addr: 01100010
+		Action <= "01";
+		MemAddress <= "01100010";
+		ID <= "01";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--READ
+		--ID: 11 - Action: 01 - Addr: 11011111
+		Action <= "01";
+		MemAddress <= "11011111";
+		ID <= "11";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--READ
+		--ID: 11 - Action: 01 - Addr: 01100010
+		Action <= "01";
+		MemAddress <= "01100010";
+		ID <= "11";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--COMMIT-FAIL
+		Action <= "11";
+		ID <= "11";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--READ
+		--ID: 01 - Action: 01 - Addr: 10100011
+		Action <= "01";
+		MemAddress <= "10100011";
+		ID <= "01";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
 		--COMMIT-SUCCESS
+		Action <= "11";
+		ID <= "01";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
+--
+--Tenta de novo Procs 1, 3 e 4
+--
+		
+		--READ
+		--ID: 10 - Action: 01 - Addr: 01100010
+		Action <= "01";
+		MemAddress <= "01100010";
+		ID <= "10";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--READ
+		--ID: 10 - Action: 01 - Addr: 11011111
+		Action <= "01";
+		MemAddress <= "11011111";
+		ID <= "10";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--READ
+		--ID: 10 - Action: 01 - Addr: 10100011
+		Action <= "01";
+		MemAddress <= "10100011";
+		ID <= "10";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--READ
+		--ID: 00 - Action: 01 - Addr: 11011111
+		Action <= "01";
+		MemAddress <= "11011111";
+		ID <= "00";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--READ
+		--ID: 00 - Action: 01 - Addr: 10100011
+		Action <= "01";
+		MemAddress <= "10100011";
+		ID <= "00";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--WRITE
+		--ID: 00 - Action: 10 - Data: 10010001 - Addr: 11101110
+		Action <= "10";
+		MemAddress <= "11101110";
+		Data <= "10010001";
+		ID <= "00";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--COMMIT-SUCCESS
+		Action <= "11";
+		ID <= "00";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--READ
+		--ID: 10 - Action: 01 - Addr: 10110101
+		Action <= "01";
+		MemAddress <= "10110101";
+		ID <= "10";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--READ
+		--ID: 11 - Action: 01 - Addr: 11101110
+		Action <= "01";
+		MemAddress <= "11101110";
+		ID <= "11";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--ABORT
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--WRITE
+		--ID: 10 - Action: 10 - Data: 11111101 - Addr: 10110101
+		Action <= "10";
+		MemAddress <= "10110101";
+		Data <= "11111101";
+		ID <= "10";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--WRITE
+		--ID: 10 - Action: 10 - Data: 11101010 - Addr: 10110101
+		Action <= "10";
+		MemAddress <= "10110101";
+		Data <= "11101010";
+		ID <= "10";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--COMMIT-SUCCESS
+		Action <= "11";
+		ID <= "10";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--READ
+		--ID: 11 - Action: 01 - Addr: 10110101
+		Action <= "01";
+		MemAddress <= "10110101";
+		ID <= "11";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--READ
+		--ID: 11 - Action: 01 - Addr: 11011111
+		Action <= "01";
+		MemAddress <= "11011111";
+		ID <= "11";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--READ
+		--ID: 11 - Action: 01 - Addr: 01100010
+		Action <= "01";
+		MemAddress <= "01100010";
+		ID <= "11";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--COMMIT-FAIL
+		Action <= "11";
+		ID <= "11";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+--
+--Tenta de novo só Proc 4
+--
+		
+		--READ
+		--ID: 11 - Action: 01 - Addr: 11101110
+		Action <= "01";
+		MemAddress <= "11101110";
+		ID <= "11";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--READ
+		--ID: 11 - Action: 01 - Addr: 10110101
+		Action <= "01";
+		MemAddress <= "10110101";
+		ID <= "11";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--READ
+		--ID: 11 - Action: 01 - Addr: 11011111
+		Action <= "01";
+		MemAddress <= "11011111";
+		ID <= "11";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--READ
+		--ID: 11 - Action: 01 - Addr: 01100010
+		Action <= "01";
+		MemAddress <= "01100010";
+		ID <= "11";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--COMMIT-SUCCESS
+		Action <= "11";
+		ID <= "11";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--END
 		Action <= "00";
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;

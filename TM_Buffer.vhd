@@ -274,8 +274,7 @@ BEGIN
 						END IF;
 						AddrTemp := AddrTemp + 1;
 					END LOOP;
-					--ASSERT AddrTemp /= 10 REPORT "Erro : Não deveria ser possível";
-					ASSERT AddrTemp < 10 REPORT "Erro : Não deveria ser possível";
+					ASSERT AddrTemp < 10 REPORT "Erro : Nao deveria ser possivel";
 					
 					--Atualizar no Read é desnecessário, mas não salva tempo nenhum, então ao menos por enquanto vou deixar assim
 					MemoryAddr <= QueueReturn;								--Atualiza na Memória Principal
