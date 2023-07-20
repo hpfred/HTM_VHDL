@@ -128,6 +128,7 @@ BEGIN
 						
 						TempBuffEntry(24) := '1';
 						TempBuffEntry(23 DOWNTO 16) := MemAddress;
+						--Se for Read e Miss, data deve passar zerado
 						TempBuffEntry(7 DOWNTO 0) := Data;
 						
 						IF (CUStatus = "001") THEN
@@ -279,15 +280,18 @@ BEGIN
 					END LOOP;
 					ASSERT AddrTemp < 10 REPORT "Erro : Nao deveria ser possivel";
 					
-					--Atualizar no Read é desnecessário, mas não salva tempo nenhum, então ao menos por enquanto vou deixar assim
-					MemoryAddr <= QueueReturn;								--Atualiza na Memória Principal
-					MemoryData <= MemBuffer(AddrTemp)(7 DOWNTO 0);
-				
-					ReadWriteSet(3) := MemBuffer(AddrTemp)(15 DOWNTO 14);	--Remove/Limpa Buffer depois de atualizado na Memória Principal
+					ReadWriteSet(3) := MemBuffer(AddrTemp)(15 DOWNTO 14);
 					ReadWriteSet(2) := MemBuffer(AddrTemp)(13 DOWNTO 12);
 					ReadWriteSet(1) := MemBuffer(AddrTemp)(11 DOWNTO 10);
 					ReadWriteSet(0) := MemBuffer(AddrTemp)(9 DOWNTO 8);
-					ReadWriteSet(TransactionIDint) := "00";
+					
+					--Atualizar no Read NÃO é desnecessário, pq atualizar no read faz poder mudar o valor na memória principal quando não deveria (como eu não zero tudo no abort, acontece esse problema)
+					IF (ReadWriteSet(ProcIDint)(1) = '1') THEN			--Se for Write atualiza na Memória Principal
+						MemoryAddr <= QueueReturn;
+						MemoryData <= MemBuffer(AddrTemp)(7 DOWNTO 0);
+					END IF;
+					
+					ReadWriteSet(TransactionIDint) := "00";				--Remove/Limpa Buffer depois de atualizado na Memória Principal
 					ProcFlag := '0';
 					FOR P IN 0 TO 3 LOOP
 						ProcFlag := ReadWriteSet(P)(0) OR ReadWriteSet(P)(1) OR ProcFlag;
