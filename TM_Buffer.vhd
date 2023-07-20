@@ -95,23 +95,27 @@ BEGIN
 				IF (FSMClockCount = 0) THEN
 					ConfBufTrID <= TransactionID;
 					FSMClockCount := FSMClockCount + 1;
+					FrstNonValid := 2147483647;
 					
 					--QueueModeTemp := "01";
 					
 					FOR CurrAddr IN 0 TO 9 LOOP	--'length-1
 						IF (MemBuffer(CurrAddr)(24) = '0' AND FrstNonValid > CurrAddr) THEN
 							FrstNonValid := CurrAddr;
-							HitFlag := '0';
 						END IF;
 						
-						IF MemBuffer(CurrAddr)(23 DOWNTO 16) = MemAddress THEN
+						IF (MemBuffer(CurrAddr)(23 DOWNTO 16) = MemAddress AND (MemBuffer(CurrAddr)(24) = '1')) THEN
 							HitFlag := '1';
 							EXIT;
-						END IF;
+						ELSIF (CurrAddr = 9) THEN
+							CurrAddr := FrstNonValid;
+							HitFlag := '0';
+							EXIT;
+						END IF;						
 					END LOOP;
 					--TODO: Caso de MISS por Overflow
-					--ASSERT NOT(CurrAddr = 9 AND HitFlag = '0') REPORT "Erro : Overflow Miss";
-					ASSERT (CurrAddr < 9 OR HitFlag = '1') REPORT "Erro : Overflow Miss";
+					--ASSERT (CurrAddr < 9 OR HitFlag = '1') REPORT "Erro : Overflow Miss";
+					ASSERT (CurrAddr > 9) REPORT "Erro : Overflow Miss";
 						
 					ReadWriteSet(3) := MemBuffer(CurrAddr)(15 DOWNTO 14);
 					ReadWriteSet(2) := MemBuffer(CurrAddr)(13 DOWNTO 12);

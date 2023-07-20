@@ -107,9 +107,12 @@ BEGIN
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
-		--COMMIT-FAIL
+		--COMMIT-SUCCESS
 		Action <= "11";
 		ID <= "00";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
@@ -201,11 +204,6 @@ BEGIN
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
-		--ABORT
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		
 		--READ
 		--ID: 01 - Action: 01 - Addr: 01100010
 		Action <= "01";
@@ -264,7 +262,7 @@ BEGIN
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
 --
---Tenta de novo Procs 1, 3 e 4
+--Tenta de novo Procs 3 e 4
 --
 		
 		--READ
@@ -290,46 +288,6 @@ BEGIN
 		Action <= "01";
 		MemAddress <= "10100011";
 		ID <= "10";
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		
-		--READ
-		--ID: 00 - Action: 01 - Addr: 11011111
-		Action <= "01";
-		MemAddress <= "11011111";
-		ID <= "00";
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		
-		--READ
-		--ID: 00 - Action: 01 - Addr: 10100011
-		Action <= "01";
-		MemAddress <= "10100011";
-		ID <= "00";
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		
-		--WRITE
-		--ID: 00 - Action: 10 - Data: 10010001 - Addr: 11101110
-		Action <= "10";
-		MemAddress <= "11101110";
-		Data <= "10010001";
-		ID <= "00";
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		
-		--COMMIT-SUCCESS
-		Action <= "11";
-		ID <= "00";
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
