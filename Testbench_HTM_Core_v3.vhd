@@ -12,7 +12,7 @@ SIGNAL Clock: STD_LOGIC := '0';
 SIGNAL Reset: STD_LOGIC := '1';
 
 SIGNAL Action, ProcID, TransactionID, ID: STD_LOGIC_VECTOR (1 DOWNTO 0);
-SIGNAL TransactionStatus, HTMCUStatus: STD_LOGIC_VECTOR (2 DOWNTO 0);
+SIGNAL TransactionStatus: STD_LOGIC_VECTOR (2 DOWNTO 0);
 SIGNAL MemAddress, Data: STD_LOGIC_VECTOR (7 DOWNTO 0);
 
 COMPONENT HTM_Core IS
@@ -24,7 +24,6 @@ COMPONENT HTM_Core IS
 		ProcID:					IN STD_LOGIC_VECTOR (1 DOWNTO 0);				--4 Processadores
 		TransactionID:			IN STD_LOGIC_VECTOR (1 DOWNTO 0);				--4 Transações
 		TransactionStatus:	OUT STD_LOGIC_VECTOR (2 DOWNTO 0);				--000: Undefined, 001: Hit, 010: Miss, 011: NotAbort, 100: CommitFail, 101: CommitSuccess
-		HTMCUStatus:			OUT STD_LOGIC_VECTOR (2 DOWNTO 0);				--
 		Reset:					IN STD_LOGIC;
 		Clock:					IN STD_LOGIC
 	);
@@ -48,25 +47,18 @@ BEGIN
 		Action <= "01";
 		MemAddress <= "01100010";
 		ID <= "10";
-		WAIT UNTIL (TransactionStatus = "001" OR TransactionStatus = "010");
-		WAIT UNTIL Clock'EVENT AND Clock = '1';
-		IF (HTMCUStatus = "011") THEN
-			WAIT UNTIL TransactionStatus'EVENT AND TransactionStatus = "110";
-			WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		END IF;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
 		--READ
 		--ID: 10 - Action: 01 - Addr: 11011111
 		Action <= "01";
 		MemAddress <= "11011111";
 		ID <= "10";
-		WAIT UNTIL HTMCUStatus /= "000";
-		IF (HTMCUStatus = "011") THEN
-			WAIT UNTIL TransactionStatus'EVENT AND TransactionStatus = "110";
-			WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		END IF;
-		WAIT UNTIL (TransactionStatus = "001" OR TransactionStatus = "010");
-		WAIT UNTIL Clock'EVENT AND Clock = '1';
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
 		--WRITE
 		--ID: 01 - Action: 10 - Data: 000000001 - Addr: 11101001
@@ -74,52 +66,36 @@ BEGIN
 		MemAddress <= "11101001";
 		Data <= "00000001";
 		ID <= "01";
-		WAIT UNTIL HTMCUStatus /= "000";
-		IF (HTMCUStatus = "011") THEN
-			WAIT UNTIL TransactionStatus'EVENT AND TransactionStatus = "110";
-			WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		END IF;
-		WAIT UNTIL (TransactionStatus = "001" OR TransactionStatus = "010");
-		WAIT UNTIL Clock'EVENT AND Clock = '1';
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
 		--READ
 		--ID: 10 - Action: 01 - Addr: 10100011
 		Action <= "01";
 		MemAddress <= "10100011";
 		ID <= "10";
-		WAIT UNTIL HTMCUStatus /= "000";
-		IF (HTMCUStatus = "011") THEN
-			WAIT UNTIL TransactionStatus'EVENT AND TransactionStatus = "110";
-			WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		END IF;
-		WAIT UNTIL (TransactionStatus = "001" OR TransactionStatus = "010");
-		WAIT UNTIL Clock'EVENT AND Clock = '1';
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
 		--READ
 		--ID: 00 - Action: 01 - Addr: 11011111
 		Action <= "01";
 		MemAddress <= "11011111";
 		ID <= "00";
-		WAIT UNTIL HTMCUStatus /= "000";
-		IF (HTMCUStatus = "011") THEN
-			WAIT UNTIL TransactionStatus'EVENT AND TransactionStatus = "110";
-			WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		END IF;
-		WAIT UNTIL (TransactionStatus = "001" OR TransactionStatus = "010");
-		WAIT UNTIL Clock'EVENT AND Clock = '1';
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
 		--READ
 		--ID: 00 - Action: 01 - Addr: 10100011
 		Action <= "01";
 		MemAddress <= "10100011";
 		ID <= "00";
-		WAIT UNTIL HTMCUStatus /= "000";
-		IF (HTMCUStatus = "011") THEN
-			WAIT UNTIL TransactionStatus'EVENT AND TransactionStatus = "110";
-			WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		END IF;
-		WAIT UNTIL (TransactionStatus = "001" OR TransactionStatus = "010");
-		WAIT UNTIL Clock'EVENT AND Clock = '1';
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
 		--WRITE
 		--ID: 00 - Action: 10 - Data: 10010001 - Addr: 11101110
@@ -127,47 +103,48 @@ BEGIN
 		MemAddress <= "11101110";
 		Data <= "10010001";
 		ID <= "00";
-		WAIT UNTIL HTMCUStatus /= "000";
-		IF (HTMCUStatus = "011") THEN
-			WAIT UNTIL TransactionStatus'EVENT AND TransactionStatus = "110";
-			WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		END IF;
-		WAIT UNTIL (TransactionStatus = "001" OR TransactionStatus = "010");
-		WAIT UNTIL Clock'EVENT AND Clock = '1';
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
 		--COMMIT-SUCCESS
 		Action <= "11";
 		ID <= "00";
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		--Action <= "00";
-		--WAIT UNTIL TransactionStatus'EVENT AND (TransactionStatus = "100" OR TransactionStatus = "101");
-		WAIT UNTIL HTMCUStatus = "000";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
 		--READ
 		--ID: 10 - Action: 01 - Addr: 10110101
 		Action <= "01";
 		MemAddress <= "10110101";
 		ID <= "10";
-		WAIT UNTIL HTMCUStatus /= "000";
-		IF (HTMCUStatus = "011") THEN
-			WAIT UNTIL TransactionStatus'EVENT AND TransactionStatus = "110";
-			WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		END IF;
-		WAIT UNTIL (TransactionStatus = "001" OR TransactionStatus = "010");
-		WAIT UNTIL Clock'EVENT AND Clock = '1';
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
 		--READ
 		--ID: 11 - Action: 01 - Addr: 11101110
 		Action <= "01";
 		MemAddress <= "11101110";
 		ID <= "11";
-		WAIT UNTIL HTMCUStatus /= "000";
-		IF (HTMCUStatus = "011") THEN
-			WAIT UNTIL TransactionStatus'EVENT AND TransactionStatus = "110";
-			WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		END IF;
-		WAIT UNTIL (TransactionStatus = "001" OR TransactionStatus = "010");
-		WAIT UNTIL Clock'EVENT AND Clock = '1';
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
 		--WRITE
 		--ID: 10 - Action: 10 - Data: 11111101 - Addr: 10110101
@@ -175,13 +152,9 @@ BEGIN
 		MemAddress <= "10110101";
 		Data <= "11111101";
 		ID <= "10";
-		WAIT UNTIL HTMCUStatus /= "000";
-		IF (HTMCUStatus = "011") THEN
-			WAIT UNTIL TransactionStatus'EVENT AND TransactionStatus = "110";
-			WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		END IF;
-		WAIT UNTIL (TransactionStatus = "001" OR TransactionStatus = "010");
-		WAIT UNTIL Clock'EVENT AND Clock = '1';
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
 		--WRITE
 		--ID: 10 - Action: 10 - Data: 11101010 - Addr: 10110101
@@ -189,47 +162,52 @@ BEGIN
 		MemAddress <= "10110101";
 		Data <= "11101010";
 		ID <= "10";
-		WAIT UNTIL HTMCUStatus /= "000";
-		IF (HTMCUStatus = "011") THEN
-			WAIT UNTIL TransactionStatus'EVENT AND TransactionStatus = "110";
-			WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		END IF;
-		WAIT UNTIL (TransactionStatus = "001" OR TransactionStatus = "010");
-		WAIT UNTIL Clock'EVENT AND Clock = '1';
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
 		--COMMIT-SUCCESS
 		Action <= "11";
 		ID <= "10";
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		--Action <= "00";
-		--WAIT UNTIL TransactionStatus'EVENT AND (TransactionStatus = "100" OR TransactionStatus = "101");
-		WAIT UNTIL HTMCUStatus = "000";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
 		--READ
 		--ID: 01 - Action: 01 - Addr: 01100010
 		Action <= "01";
 		MemAddress <= "01100010";
 		ID <= "01";
-		WAIT UNTIL HTMCUStatus /= "000";
-		IF (HTMCUStatus = "011") THEN
-			WAIT UNTIL TransactionStatus'EVENT AND TransactionStatus = "110";
-			WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		END IF;
-		WAIT UNTIL (TransactionStatus = "001" OR TransactionStatus = "010");
-		WAIT UNTIL Clock'EVENT AND Clock = '1';
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
 		--READ
 		--ID: 11 - Action: 01 - Addr: 10110101
 		Action <= "01";
 		MemAddress <= "10110101";
 		ID <= "11";
-		WAIT UNTIL HTMCUStatus /= "000";
-		IF (HTMCUStatus = "011") THEN
-			WAIT UNTIL TransactionStatus'EVENT AND TransactionStatus = "110";
-			WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		END IF;
-		WAIT UNTIL (TransactionStatus = "001" OR TransactionStatus = "010");
-		WAIT UNTIL Clock'EVENT AND Clock = '1';
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
 		--WRITE
 		--ID: 01 - Action: 10 - Data: 10000000 - Addr: 10100011
@@ -237,81 +215,95 @@ BEGIN
 		MemAddress <= "10100011";
 		Data <= "10000000";
 		ID <= "01";
-		WAIT UNTIL HTMCUStatus /= "000";
-		IF (HTMCUStatus = "011") THEN
-			WAIT UNTIL TransactionStatus'EVENT AND TransactionStatus = "110";
-			WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		END IF;
-		WAIT UNTIL (TransactionStatus = "001" OR TransactionStatus = "010");
-		WAIT UNTIL Clock'EVENT AND Clock = '1';
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
 		--READ
 		--ID: 01 - Action: 01 - Addr: 01100010
 		Action <= "01";
 		MemAddress <= "01100010";
 		ID <= "01";
-		WAIT UNTIL HTMCUStatus /= "000";
-		IF (HTMCUStatus = "011") THEN
-			WAIT UNTIL TransactionStatus'EVENT AND TransactionStatus = "110";
-			WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		END IF;
-		WAIT UNTIL (TransactionStatus = "001" OR TransactionStatus = "010");
-		WAIT UNTIL Clock'EVENT AND Clock = '1';
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
 		--READ
 		--ID: 11 - Action: 01 - Addr: 11011111
 		Action <= "01";
 		MemAddress <= "11011111";
 		ID <= "11";
-		WAIT UNTIL HTMCUStatus /= "000";
-		IF (HTMCUStatus = "011") THEN
-			WAIT UNTIL TransactionStatus'EVENT AND TransactionStatus = "110";
-			WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		END IF;
-		WAIT UNTIL (TransactionStatus = "001" OR TransactionStatus = "010");
-		WAIT UNTIL Clock'EVENT AND Clock = '1';
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
 		--READ
 		--ID: 11 - Action: 01 - Addr: 01100010
 		Action <= "01";
 		MemAddress <= "01100010";
 		ID <= "11";
-		WAIT UNTIL HTMCUStatus /= "000";
-		IF (HTMCUStatus = "011") THEN
-			WAIT UNTIL TransactionStatus'EVENT AND TransactionStatus = "110";
-			WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		END IF;
-		WAIT UNTIL (TransactionStatus = "001" OR TransactionStatus = "010");
-		WAIT UNTIL Clock'EVENT AND Clock = '1';
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
 		--COMMIT-SUCCESS
 		Action <= "11";
 		ID <= "11";
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		--Action <= "00";
-		--WAIT UNTIL TransactionStatus'EVENT AND (TransactionStatus = "100" OR TransactionStatus = "101");
-		WAIT UNTIL HTMCUStatus = "000";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
 		--READ
 		--ID: 01 - Action: 01 - Addr: 10100011
 		Action <= "01";
 		MemAddress <= "10100011";
 		ID <= "01";
-		WAIT UNTIL HTMCUStatus /= "000";
-		IF (HTMCUStatus = "011") THEN
-			WAIT UNTIL TransactionStatus'EVENT AND TransactionStatus = "110";
-			WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		END IF;
-		WAIT UNTIL (TransactionStatus = "001" OR TransactionStatus = "010");
-		WAIT UNTIL Clock'EVENT AND Clock = '1';
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
 		--COMMIT-SUCCESS
 		Action <= "11";
 		ID <= "01";
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		--Action <= "00";
-		--WAIT UNTIL TransactionStatus'EVENT AND (TransactionStatus = "100" OR TransactionStatus = "101");
-		WAIT UNTIL HTMCUStatus = "000";
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
 		--END
 		Action <= "00";
@@ -330,7 +322,7 @@ BEGIN
 	
 	ProcID <= ID;
 	TransactionID <= ID;
-	Core: HTM_Core PORT MAP (Action,MemAddress,Data,ProcID,TransactionID,TransactionStatus,HTMCUStatus,Reset,Clock);
+	Core: HTM_Core PORT MAP (Action,MemAddress,Data,ProcID,TransactionID,TransactionStatus,Reset,Clock);
 	
 END TEST;
 

@@ -12,6 +12,7 @@ ENTITY HTM_Core IS
 		TransactionID:	IN STD_LOGIC_VECTOR (1 DOWNTO 0);				--Limite de 4 transações (1 por processador)
 		
 		TransactionStatus:	OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--6 status do HTM_Core que informam o processador - 000: Undefined, 001: Hit, 010: Miss, 011: NotAbort, 100: CommitFail, 101: CommitSuccess
+		HTMCUStatus:			OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
 		
 		Reset:	IN STD_LOGIC;
 		Clock:	IN STD_LOGIC
@@ -99,6 +100,7 @@ SIGNAL CBProcStatus: STD_LOGIC_VECTOR (2 DOWNTO 0);
 BEGIN
 
 		TransactionStatus <= BuffStatus;
+		HTMCUStatus <= CUStatus;
 		
 		CU: Control_Unit PORT MAP (
 									Action=>Action,

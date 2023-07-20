@@ -30,4 +30,5 @@ view signals
 view variables
 
 #run 290 ns
-run 910 ns
+#run 910 ns
+run 1200 ns
