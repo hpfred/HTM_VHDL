@@ -110,8 +110,8 @@ BEGIN
 						END IF;
 					END LOOP;
 					--TODO: Caso de MISS por Overflow
-					--report "Erro : Overflow Miss" WHEN (CurrAddr = 9 AND HitFlag = '0');
-					ASSERT NOT(CurrAddr = 9 AND HitFlag = '0') REPORT "Erro : Overflow Miss";
+					--ASSERT NOT(CurrAddr = 9 AND HitFlag = '0') REPORT "Erro : Overflow Miss";
+					ASSERT (CurrAddr < 9 OR HitFlag = '1') REPORT "Erro : Overflow Miss";
 						
 					ReadWriteSet(3) := MemBuffer(CurrAddr)(15 DOWNTO 14);
 					ReadWriteSet(2) := MemBuffer(CurrAddr)(13 DOWNTO 12);
@@ -247,6 +247,7 @@ BEGIN
 					END IF;
 				ELSE
 					BuffStatusTemp := "100";
+					FSMClockCount := 0;
 				END IF;
 			
 			---------------------------------------------------------------------------------------------------------------
@@ -256,7 +257,10 @@ BEGIN
 						QueueModeTemp := "10";
 						FSMClockCount := FSMClockCount + 1;
 					ELSE																--Se a FIFO está vazia o processo é finalizado e retorna Commit Succes
-						BuffStatusTemp := "101";
+						IF FSMClockCount = 0 THEN
+							BuffStatusTemp := "101";
+						END IF;
+						FSMClockCount := FSMClockCount + 1;
 						
 						ConfBufTrID <= TransactionID;
 						ConfBufModeTemp := "11";
@@ -270,8 +274,8 @@ BEGIN
 						END IF;
 						AddrTemp := AddrTemp + 1;
 					END LOOP;
-					--report "Erro : Não deveria ser possível" WHEN AddrTemp = 10;
-					ASSERT AddrTemp /= 10 REPORT "Erro : Não deveria ser possível";
+					--ASSERT AddrTemp /= 10 REPORT "Erro : Não deveria ser possível";
+					ASSERT AddrTemp < 10 REPORT "Erro : Não deveria ser possível";
 					
 					--Atualizar no Read é desnecessário, mas não salva tempo nenhum, então ao menos por enquanto vou deixar assim
 					MemoryAddr <= QueueReturn;								--Atualiza na Memória Principal

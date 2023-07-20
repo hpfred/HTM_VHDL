@@ -12,11 +12,12 @@ vcom -93 -work work {C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Espe
 vcom -93 -work work {C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Conflict_Buffer.vhd}
 vcom -93 -work work {C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Address_Queue.vhd}
 
+#vcom -93 -work work {C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Testbench_HTM_Core_v1.vhd}
+#vcom -93 -work work {C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Testbench_HTM_Core_v2.vhd}
 vcom -93 -work work {C:/Users/frepa/OneDrive/Documents/UFPel/Mestrado/Aluno-Especial_1/PTSD/Atividades/Projeto/VHDL/Testbench_HTM_Core.vhd}
 
 #vsim -t 1ps -L altera -L lpm -L sgate -L altera_mf -L altera_lnsim -L cycloneii -L rtl_work -L work -voptargs="+acc"  Testbench_HTM_Core
 vsim -t 100ps -L altera -L lpm -L sgate -L altera_mf -L altera_lnsim -L cycloneii -L rtl_work -L work -voptargs="+acc"  Testbench_HTM_Core
-#vsim -t 1ns -L altera -L lpm -L sgate -L altera_mf -L altera_lnsim -L cycloneii -L rtl_work -L work -voptargs="+acc"  Testbench_HTM_Core
 
 #add wave * 
 add wave -position insertpoint sim:/testbench_htm_core/Core/*         

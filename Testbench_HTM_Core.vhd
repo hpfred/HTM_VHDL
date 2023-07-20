@@ -33,49 +33,101 @@ BEGIN
 	Clock <= NOT Clock AFTER 5 ns;
 	PROCESS
 	BEGIN
+		Reset <= '1';
+		Action <= "00";
+		MemAddress <= "00000000";
+		Data <= "00000000";
+		ID <= "00";
 		WAIT UNTIL Clock'EVENT AND Clock = '0' ;
 		Reset <= '0';
 		
-		Action <= "01";
-		--Action <= "10";
-		MemAddress <= "00000001";
-		Data <= "00000001";
-		ID <= "01";
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		--Wait Until TransactionStatus is Hit or Miss (?)
+		--READ
+		ID: 10 - Action: 01 - Addr: 01100010
+		--READ
+		ID: 10 - Action: 01 - Addr: 11011111
+		--WRITE
+		ID: 01 - Action: 10 - Data: 000000001 - Addr: 11101001
+		--READ
+		ID: 10 - Action: 01 - Addr: 10100011
+		--READ
+		ID: 00 - Action: 01 - Addr: 11011111
+		--READ
+		ID: 00 - Action: 01 - Addr: 10100011
+		--WRITE
+		ID: 00 - Action: 10 - Data: 10010001 - Addr: 11101110
+		--COMMIT-FAIL
+		--READ
+		ID: 10 - Action: 01 - Addr: 10110101
+		--READ
+		ID: 11 - Action: 01 - Addr: 11101110
+		--ABORT
+		--WRITE
+		ID: 10 - Action: 10 - Data: 11111101 - Addr: 10110101
+		--WRITE
+		ID: 10 - Action: 10 - Data: 11101010 - Addr: 10110101
+		--COMMIT-FAIL
+		--READ
+		ID: 01 - Action: 01 - Addr: 01100010
+		--READ
+		ID: 11 - Action: 01 - Addr: 10110101
+		--WRITE
+		ID: 01 - Action: 10 - Data: 10000000 - Addr: 10100011
+		--ABORT
+		--ABORT
+		--READ
+		ID: 01 - Action: 01 - Addr: 01100010
+		--READ
+		ID: 11 - Action: 01 - Addr: 11011111
+		--READ
+		ID: 11 - Action: 01 - Addr: 01100010
+		--COMMIT-FAIL
+		--READ
+		ID: 01 - Action: 01 - Addr: 10100011
+		--COMMIT-SUCCESS
 		
-		Action <= "10";
-		MemAddress <= "00000001";
-		Data <= "11111111";
-		ID <= "10";
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--Tenta de novo todos do Proc 1, todos do 3 e todos do 4 (fazendo em ordem?)
+		--Em ordem seria garantido, mas 1 e 3 só morreram por conflito com o 2 que já completou, então dessa vez só 4 teria abort, e depois de concluir o 1 e 3, 4 não teria mais conflito
 		
-		Action <= "11";
-		MemAddress <= "00000001";--
-		Data <= "00000001";--
-		ID <= "01";
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--READ
+		ID: 10 - Action: 01 - Addr: 01100010
+		--READ
+		ID: 10 - Action: 01 - Addr: 11011111
+		--READ
+		ID: 10 - Action: 01 - Addr: 10100011
+		--READ
+		ID: 00 - Action: 01 - Addr: 11011111
+		--READ
+		ID: 00 - Action: 01 - Addr: 10100011
+		--WRITE
+		ID: 00 - Action: 10 - Data: 10010001 - Addr: 11101110
+		--COMMIT-SUCCESS
+		--READ
+		ID: 10 - Action: 01 - Addr: 10110101
+		--READ
+		ID: 11 - Action: 01 - Addr: 11101110
+		--ABORT
+		--WRITE
+		ID: 10 - Action: 10 - Data: 11111101 - Addr: 10110101
+		--WRITE
+		ID: 10 - Action: 10 - Data: 11101010 - Addr: 10110101
+		--COMMIT-SUCCESS
+		--READ
+		ID: 11 - Action: 01 - Addr: 10110101
+		--READ
+		ID: 11 - Action: 01 - Addr: 11011111
+		--READ
+		ID: 11 - Action: 01 - Addr: 01100010
+		--COMMIT-FAIL
 		
-		Action <= "11";
-		MemAddress <= "00000001";--
-		Data <= "00000001";--
-		ID <= "10";
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--READ
+		ID: 11 - Action: 01 - Addr: 11101110
+		--READ
+		ID: 11 - Action: 01 - Addr: 10110101
+		--READ
+		ID: 11 - Action: 01 - Addr: 11011111
+		--READ
+		ID: 11 - Action: 01 - Addr: 01100010
+		--COMMIT-SUCCESS
 		
 		Action <= "00";
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
@@ -97,13 +149,76 @@ BEGIN
 	
 END TEST;
 
+
 --WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 --Action <= "XX";
 --MemAddress <= "XXXXXXXX";
 --Data <= "XXXXXXXX";
 --ProcID <= "XX";
 --TransactionID <= "XX";
----OUT TransactionStatus;
+---->> OUT TransactionStatus
+
+
+---------------------------------------------
+-----------------------------------------INIT
+--Reset <= '1';
+--Action <= "00";
+--MemAddress <= "00000000";
+--Data <= "00000000";
+--ID <= "00";
+--WAIT UNTIL Clock'EVENT AND Clock = '0' ;
+--Reset <= '0';
+---------------------------------------------
+-----------------------------------------READ
+--Action <= "01";
+--MemAddress <= "YYYYYYYY";
+--ID <= "XX";
+--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+----------------------------------------------
+-----------------------------------------WRITE
+--Action <= "10";
+--MemAddress <= "YYYYYYYY";
+--Data <= "ZZZZZZZZ";
+--ID <= "XX";
+--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+----------------------------------------------
+-----------------------------------------ABORT
+--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+-----------------------------------------------
+-----------------------------------------COMMIT
+--Action <= "11";
+--ID <= "XX";
+--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+--------------------------------------------5 FAIL : 8 SUCCESS
+--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+----------------------------------------------------
+-----------------------------------------LAST-ACTION
+--Action <= "00";
+--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+--WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+-----------------------------------------------------
+-----------------------------------------------------
+
 
 --Numero de Clocks necessarios para cada ação:
 --Read	> 2 ou 3?
@@ -114,6 +229,9 @@ END TEST;
 --			> wait until TStat = ...
 --Commit > Depende ainda mais de diversos fatores
 --			> wait until TStat = ...
+
+
+--Wait Until TransactionStatus is Hit or Miss (?)
 
 
 --Pra fazer o Testbench era uma boa ideia ter uma forma padronizada de como os valores vão ser enviados

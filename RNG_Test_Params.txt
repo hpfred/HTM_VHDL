@@ -1,0 +1,106 @@
+Number Actions Proc1: 3
+Number Actions Proc2: 5
+Number Actions Proc3: 6
+Number Actions Proc4: 4
+
+Number Different Addresses: 6
+Addresses:  98  238  163  223  233  181
+	    01100010 
+	    11101110
+	    10100011
+	    11011111
+	    11101001
+	    10110101
+
+Proc1: | R - 160 - 223 | R - 50 - 163 | W - 145 - 238 |
+Proc2: | W - 1 - 233 | R - 76 - 98 | W - 128 - 163 | R - 68 - 98 | R - 216 - 163 |
+Proc3: | R - 216 - 98 | R - 187 - 223 | R - 142 - 163 | R - 190 - 181 | W - 253 - 181 | W - 234 - 181 |
+Proc4: | R - 58 - 238 | R - 193 - 181 | R - 22 - 223 | R - 13 - 98 |
+
+_ORDER_
+*No Repetition:
+3 > 3 > 2 > 3 > 1 > 1 > 1 > 3 > 4 > 3 > 3 > 2 > 4 > 2 > 2 > 4 > 4 > 2
+
+*One Repetition:
+4 > 4 > 3 > 2 > 4 > 1 > 3 > 4 > 1 > 2 > 3 > 4 > 4 > 2 > 3 > 3 > 1 > 2 >>
+>> 2 > 1 > 3 > 1 > 4 > 2 > 4 > 2 > 3 > 3 > 2 > 1 > 2 > 2 > 3 > 3 > 3 > 3
+
+-------------------------------------------------------------------------
+-------------------------------------------------------------------------
+A)
+ID: 10 - Action: 01 - Addr: 01100010
+    3		 R	    98
+ID: 10 - Action: 01 - Addr: 11011111
+    3		 R	    223
+ID: 01 - Action: 10 - Data: 000000001 - Addr: 11101001
+    2		 W	    1		      233
+ID: 10 - Action: 01 - Addr: 10100011
+    3		 R	    163
+ID: 00 - Action: 01 - Addr: 11011111
+    1		 R	    223
+ID: 00 - Action: 01 - Addr: 10100011
+    1		 R	    163
+ID: 00 - Action: 10 - Data: 10010001 - Addr: 11101110
+    1		 W	    245		     238
+ID: 10 - Action: 01 - Addr: 10110101
+    3		 R	    181
+ID: 11 - Action: 01 - Addr: 11101110
+    4		 R	    238
+ID: 10 - Action: 10 - Data: 11111101 - Addr: 10110101
+    3		 W	    253		     181
+ID: 10 - Action: 10 - Data: 11101010 - Addr: 10110101
+    3		 W	    234		     181
+ID: 01 - Action: 01 - Addr: 01100010
+    2		 R	    98
+ID: 11 - Action: 01 - Addr: 10110101
+    4		 R	    181
+ID: 01 - Action: 10 - Data: 10000000 - Addr: 10100011
+    2		 W	    128		     163
+ID: 01 - Action: 01 - Addr: 01100010
+    2		 R	    98
+ID: 11 - Action: 01 - Addr: 11011111
+    4		 R	    223
+ID: 11 - Action: 01 - Addr: 01100010
+    4		 R	    98
+ID: 01 - Action: 01 - Addr: 10100011
+    2		 R	    163
+
+-------------------------------------------------------------------------
+-------------------------------------------------------------------------
+B)
+ID: 11 - Action: 01 - Addr: 11101110
+ID: 11 - Action: 01 - Addr: 10110101
+ID: 10 - Action: 01 - Addr: 01100010
+ID: 01 - Action: 10 - Data: 00000001 - Addr: 11101001
+ID: 11 - Action: 01 - Addr: 11011111
+ID: 00 - Action: 01 - Addr: 11011111
+ID: 10 - Action: 01 - Addr: 11011111
+ID: 11 - Action: 01 - Addr: 01100010
+ID: 00 - Action: 01 - Addr: 10100011
+ID: 01 - Action: 01 - Addr: 01100010
+ID: 10 - Action: 01 - Addr: 10100011
+ID: 11 - Action: 01 - Addr: 11101110 
+ID: 11 - Action: 01 - Addr: 10110101
+ID: 01 - Action: 10 - Data: 10000000 - Addr: 10100011
+ID: 10 - Action: 01 - Addr: 10110101
+ID: 10 - Action: 10 - Data: 11111101 - Addr: 10110101
+ID: 00 - Action: 10 - Data: 10010001 - Addr: 11101110
+ID: 01 - Action: 01 - Addr: 01100010
+ID: 01 - Action: 01 - Addr: 10100011
+ID: 00 - Action: 01 - Addr: 11011111
+ID: 10 - Action: 10 - Data: 11101010 - Addr: 10110101
+ID: 00 - Action: 01 - Addr: 10100011
+ID: 11 - Action: 01 - Addr: 11011111
+ID: 01 - Action: 10 - Data: 00000001 - Addr: 11101001
+ID: 11 - Action: 01 - Addr: 11101110
+ID: 01 - Action: 01 - Addr: 01100010
+ID: 10 - Action: 01 - Addr: 01100010
+ID: 10 - Action: 01 - Addr: 11011111
+ID: 01 - Action: 10 - Data: 10000000 - Addr: 10100011
+ID: 00 - Action: 10 - Data: 10010001 - Addr: 11101110
+ID: 01 - Action: 01 - Addr: 01100010
+ID: 01 - Action: 01 - Addr: 10100011
+ID: 10 - Action: 01 - Addr: 10100011
+ID: 10 - Action: 01 - Addr: 10110101
+ID: 10 - Action: 10 - Data: 11111101 - Addr: 10110101
+ID: 10 - Action: 10 - Data: 11101010 - Addr: 10110101
