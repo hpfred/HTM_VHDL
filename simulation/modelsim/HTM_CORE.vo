@@ -16,7 +16,7 @@
 // PROGRAM "Quartus II 64-Bit"
 // VERSION "Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition"
 
-// DATE "07/20/2023 03:58:13"
+// DATE "07/20/2023 18:36:43"
 
 // 
 // Device: Altera EP2C35F672C6 Package FBGA672
@@ -1884,14 +1884,6 @@ wire \CU|CUStatus[0]~feeder_combout ;
 wire \Buff|BuffStatusTemp~2_combout ;
 wire \Buff|BuffStatusTemp~3_combout ;
 wire \Buff|BuffStatusTemp~4_combout ;
-wire [7:0] \Commit|Ret ;
-wire [1:0] \Commit|FIFOStatus ;
-wire [1:0] \TransactionID~combout ;
-wire [1:0] \ProcID~combout ;
-wire [7:0] \MemAddress~combout ;
-wire [1:0] \Action~combout ;
-wire [2:0] \CU|Status ;
-wire [2:0] \CU|CUStatus ;
 wire [24:0] \Buff|TempBuffEntry ;
 wire [1:0] \Buff|QueueMode ;
 wire [31:0] \Buff|ProcStatus ;
@@ -1900,6 +1892,14 @@ wire [31:0] \Buff|CurrAddr ;
 wire [1:0] \Buff|ConfBufTrID ;
 wire [1:0] \Buff|ConfBufMode ;
 wire [2:0] \Buff|BuffStatus ;
+wire [7:0] \Commit|Ret ;
+wire [1:0] \Commit|FIFOStatus ;
+wire [1:0] \TransactionID~combout ;
+wire [1:0] \ProcID~combout ;
+wire [7:0] \MemAddress~combout ;
+wire [1:0] \Action~combout ;
+wire [2:0] \CU|Status ;
+wire [2:0] \CU|CUStatus ;
 
 
 // Location: LCCOMB_X28_Y30_N2

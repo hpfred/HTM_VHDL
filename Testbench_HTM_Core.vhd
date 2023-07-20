@@ -23,7 +23,7 @@ COMPONENT HTM_Core IS
 		Data:						IN STD_LOGIC_VECTOR (7 DOWNTO 0);				--Dado (8 bits)
 		ProcID:					IN STD_LOGIC_VECTOR (1 DOWNTO 0);				--4 Processadores
 		TransactionID:			IN STD_LOGIC_VECTOR (1 DOWNTO 0);				--4 Transações
-		TransactionStatus:	OUT STD_LOGIC_VECTOR (2 DOWNTO 0);				--000: Undefined, 001: Hit, 010: Miss, 011: NotAbort, 100: CommitFail, 101: CommitSuccess
+		TransactionStatus:	OUT STD_LOGIC_VECTOR (2 DOWNTO 0);				--000: Undefined, 001: Hit, 010: Miss, 011: NotAbort, 100: CommitFail, 101: CommitSuccess, 110: NoInternalAborts
 		HTMCUStatus:			OUT STD_LOGIC_VECTOR (2 DOWNTO 0);				--
 		Reset:					IN STD_LOGIC;
 		Clock:					IN STD_LOGIC
@@ -40,7 +40,7 @@ BEGIN
 		MemAddress <= "00000000";
 		Data <= "00000000";
 		ID <= "00";
-		WAIT UNTIL Clock'EVENT AND Clock = '0' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		Reset <= '0';
 		
 		--READ
@@ -403,20 +403,6 @@ END TEST;
 --WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 -----------------------------------------------------
 -----------------------------------------------------
-
-
---Numero de Clocks necessarios para cada ação:
---Read	> 2 ou 3?
---			> wait until TStat = ...
---Write	> 2 ou 3?
---			> wait until TStat = ...
---Abort	> Depende quantos aborts (e se eu mudar o buffer)
---			> wait until TStat = ...
---Commit > Depende ainda mais de diversos fatores
---			> wait until TStat = ...
-
-
---Wait Until TransactionStatus is Hit or Miss (?)
 
 
 --Pra fazer o Testbench era uma boa ideia ter uma forma padronizada de como os valores vão ser enviados

@@ -32,7 +32,7 @@ ENTITY TM_Buffer IS
 		MemoryAddr:		OUT STD_LOGIC_VECTOR (7 DOWNTO 0);
 		MemoryData:		OUT STD_LOGIC_VECTOR (7 DOWNTO 0);
 		
-		BuffStatus:		OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: Undefined, 001: Hit, 010: Miss, 011: NotAbort, 100: CommitFail, 101: CommitSuccess,.. 110: NoInternalAborts	--Talvez reordenar a numeração, mas vejo isso depois (pouco importante)
+		BuffStatus:		OUT STD_LOGIC_VECTOR (2 DOWNTO 0);		--000: Undefined, 001: Hit, 010: Miss, 011: NotAbort, 100: CommitFail, 101: CommitSuccess, 110: NoInternalAborts
 		Reset:			IN STD_LOGIC;
 		Clock:			IN STD_LOGIC
 	);
@@ -97,8 +97,6 @@ BEGIN
 					FSMClockCount := FSMClockCount + 1;
 					FrstNonValid := 2147483647;
 					
-					--QueueModeTemp := "01";
-					
 					FOR CurrAddr IN 0 TO 9 LOOP	--'length-1
 						IF (MemBuffer(CurrAddr)(24) = '0' AND FrstNonValid > CurrAddr) THEN
 							FrstNonValid := CurrAddr;
@@ -113,7 +111,6 @@ BEGIN
 					END LOOP;
 					CurrAddr := FrstNonValid;
 					--TODO: Caso de MISS por Overflow
-					--ASSERT (CurrAddr < 9 OR HitFlag = '1') REPORT "Erro : Overflow Miss";
 					ASSERT (CurrAddr < 10) REPORT "Erro : Overflow Miss";
 						
 					ReadWriteSet(3) := MemBuffer(CurrAddr)(15 DOWNTO 14);
@@ -128,8 +125,11 @@ BEGIN
 						
 						TempBuffEntry(24) := '1';
 						TempBuffEntry(23 DOWNTO 16) := MemAddress;
-						--Se for Read e Miss, data deve passar zerado
-						TempBuffEntry(7 DOWNTO 0) := Data;
+						IF (CUStatus = "010") THEN								--Dado é passado zerado se Read-Miss, pra evitar manter sujeira na memória
+							TempBuffEntry(7 DOWNTO 0) := Data;
+						ELSE
+							TempBuffEntry(7 DOWNTO 0) := (others => '0');
+						END IF;
 						
 						IF (CUStatus = "001") THEN
 							ReadWriteSet(ProcIDint)(0) := '1';
@@ -144,8 +144,7 @@ BEGIN
 					ELSE																--Buffer Hit
 						BuffStatusTemp := "001";
 						
-						--Se Hit > Testa se aquele processador já usou aquele endereço, e caso não, então dá push na fila --Assim evita de um endereço aparecer mais de uma vez na fila denecessariamente (?)
-						IF (ReadWriteSet(ProcIDint)(0) OR ReadWriteSet(ProcIDint)(1)) = '0' THEN
+						IF (ReadWriteSet(ProcIDint)(0) OR ReadWriteSet(ProcIDint)(1)) = '0' THEN			--Só adiciona na fila quando Hit, se essa transação não tiver o endereço na fila ainda
 							QueueModeTemp := "01";
 						END IF;
 						
@@ -217,7 +216,7 @@ BEGIN
 								ReadWriteSet(ProcStatus) := "00";
 								ProcFlag := '0';
 								FOR P IN 0 TO 3 LOOP
-									ProcFlag := ReadWriteSet(P)(0) OR ReadWriteSet(P)(1) OR ProcFlag;		--Verifica se endereço é usado por outro processador
+									ProcFlag := ReadWriteSet(P)(0) OR ReadWriteSet(P)(1) OR ProcFlag;							--Verifica se endereço é usado por outro processador
 								END LOOP;
 								IF (ProcFlag = '0') THEN
 									MemBuffer(Addr)(24) <= '0';
@@ -225,7 +224,8 @@ BEGIN
 								MemBuffer(Addr)(15 DOWNTO 14) <= ReadWriteSet(3);
 								MemBuffer(Addr)(13 DOWNTO 12) <= ReadWriteSet(2);
 								MemBuffer(Addr)(11 DOWNTO 10) <= ReadWriteSet(1);
-								MemBuffer(Addr)(9 DOWNTO 8) <= ReadWriteSet(0);			--Se for atualizar varios endereços em um clock isso provavelmente daria problema, então mudar pra var ou sei lá
+								MemBuffer(Addr)(9 DOWNTO 8) <= ReadWriteSet(0);	
+								--Se for atualizar varios endereços em um clock isso provavelmente daria problema, então mudar pra var ou sei lá
 							END IF;
 						END LOOP;
 						ConfBufTrID <= STD_LOGIC_VECTOR(TO_UNSIGNED(ProcStatus, ConfBufTrID'length));
@@ -243,7 +243,6 @@ BEGIN
 					IF (ConfBufStatus(0) = '1') THEN	
 						ConfBufModeTemp := "11";
 						QueueModeTemp := "11";
-						--BuffStatusTemp := "100";
 						FSMClockCount := FSMClockCount + 1;
 					ELSE
 						BuffStatusTemp := "011";
