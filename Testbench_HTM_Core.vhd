@@ -115,6 +115,15 @@ BEGIN
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
@@ -133,11 +142,6 @@ BEGIN
 		Action <= "01";
 		MemAddress <= "11101110";
 		ID <= "11";
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
-		
-		--ABORT
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
@@ -162,11 +166,27 @@ BEGIN
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		
-		--COMMIT-FAIL
+		--COMMIT-SUCCESS
 		Action <= "11";
 		ID <= "10";
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
@@ -188,6 +208,11 @@ BEGIN
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		
+		--ABORT
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;	--Esse abort não aconteceria se ele essa leitura viesse uma depois da escrita abaixo, pq ela causa abort no Proc 3, que é onde tem a escrita em 181 que tá abortando esse (Proc 4)
 		
 		--WRITE
 		--ID: 01 - Action: 10 - Data: 10000000 - Addr: 10100011
@@ -257,6 +282,19 @@ BEGIN
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
@@ -343,6 +381,19 @@ BEGIN
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
@@ -431,6 +482,19 @@ BEGIN
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
+		--
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 		WAIT UNTIL Clock'EVENT AND Clock = '1' ;
@@ -506,7 +570,7 @@ END TEST;
 --WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 --WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 --WAIT UNTIL Clock'EVENT AND Clock = '1' ;
---------------------------------------------5 FAIL : 8 SUCCESS
+--------------------------------------------5 COMMIT : + 3 por atualização na memória
 --WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 --WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 --WAIT UNTIL Clock'EVENT AND Clock = '1' ;
