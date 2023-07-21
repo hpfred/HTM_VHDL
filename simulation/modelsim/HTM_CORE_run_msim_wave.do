@@ -89,5 +89,6 @@ WaveRestoreZoom {0 ns} {380 ns}
 #view signals
 #view variables
 
-run 1235 ns
+#run 1235 ns
+run 1350 ns
 

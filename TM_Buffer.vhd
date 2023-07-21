@@ -255,19 +255,23 @@ BEGIN
 			
 			---------------------------------------------------------------------------------------------------------------
 			ELSIF (CUStatus = "101") THEN										--Se Status é MemUpdate
-				IF (FSMClockCount < 3) THEN
+				IF (FSMClockCount = 0) THEN
 					IF (QueueStatus /= "01") THEN								--Se fila não vazia faz pull da FIFO
 						QueueModeTemp := "10";
 						FSMClockCount := FSMClockCount + 1;
 					ELSE																--Se a FIFO está vazia o processo é finalizado e retorna Commit Succes
 						IF FSMClockCount = 0 THEN
 							BuffStatusTemp := "101";
+							QueueModeTemp := "11";
 						END IF;
 						FSMClockCount := FSMClockCount + 1;
 						
 						ConfBufTrID <= TransactionID;
 						ConfBufModeTemp := "11";
 					END IF;	
+					
+				ELSIF (FSMClockCount < 2) THEN								--Só um clock de pull, se não ele vai puxar vários sem poder	--Também não tenho bem certeza porque esperava 3 clocks ao invés de 2 antes
+					FSMClockCount := FSMClockCount + 1;
 					
 				ELSE					
 					AddrTemp := 0;

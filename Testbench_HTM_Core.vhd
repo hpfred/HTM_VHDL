@@ -19,10 +19,10 @@ COMPONENT HTM_Core IS
  PORT
 	(
 		Action:					IN STD_LOGIC_VECTOR (1 DOWNTO 0);				--00: Undefined, 01: Read, 10: Write, 11: Commit
-		MemAddress:				IN STD_LOGIC_VECTOR (7 DOWNTO 0);				--Endereço (8 bits)
+		MemAddress:				IN STD_LOGIC_VECTOR (7 DOWNTO 0);				--EndereÃ§o (8 bits)
 		Data:						IN STD_LOGIC_VECTOR (7 DOWNTO 0);				--Dado (8 bits)
 		ProcID:					IN STD_LOGIC_VECTOR (1 DOWNTO 0);				--4 Processadores
-		TransactionID:			IN STD_LOGIC_VECTOR (1 DOWNTO 0);				--4 Transações
+		TransactionID:			IN STD_LOGIC_VECTOR (1 DOWNTO 0);				--4 TransaÃ§Ãµes
 		TransactionStatus:	OUT STD_LOGIC_VECTOR (2 DOWNTO 0);				--000: Undefined, 001: Hit, 010: Miss, 011: NotAbort, 100: CommitFail, 101: CommitSuccess, 110: NoInternalAborts
 		HTMCUStatus:			OUT STD_LOGIC_VECTOR (2 DOWNTO 0);				--
 		Reset:					IN STD_LOGIC;
@@ -384,7 +384,7 @@ END TEST;
 --WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 --WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 --WAIT UNTIL Clock'EVENT AND Clock = '1' ;
---------------------------------------------5 COMMIT : + 3 por atualização na memória
+--------------------------------------------5 COMMIT : + 3 por atualizaÃ§Ã£o na memÃ³ria
 --WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 --WAIT UNTIL Clock'EVENT AND Clock = '1' ;
 --WAIT UNTIL Clock'EVENT AND Clock = '1' ;
@@ -405,8 +405,8 @@ END TEST;
 -----------------------------------------------------
 
 
---Pra fazer o Testbench era uma boa ideia ter uma forma padronizada de como os valores vão ser enviados
---Uma primeira coisa que seria boa é fazer um código falso/teórico de C, e quais as instruções que o compilador geraria e enviaria pro HTM_Core
---Junto com isso também separar essas instruções de cada processador, pra eu poder saber quais vão estar vindo concorrentemente e "fora de ordem"
---E idealmente eu fazer algum código pra automatizar isso pra gerar os vários testes
---Bonus/Ideal também é eu fazer esse código automatizado gerar as saídas de Status que se espera pra fazer o teste e comparação
+--Pra fazer o Testbench era uma boa ideia ter uma forma padronizada de como os valores vÃ£o ser enviados
+--Uma primeira coisa que seria boa Ã© fazer um cÃ³digo falso/teÃ³rico de C, e quais as instruÃ§Ãµes que o compilador geraria e enviaria pro HTM_Core
+--Junto com isso tambÃ©m separar essas instruÃ§Ãµes de cada processador, pra eu poder saber quais vÃ£o estar vindo concorrentemente e "fora de ordem"
+--E idealmente eu fazer algum cÃ³digo pra automatizar isso pra gerar os vÃ¡rios testes
+--Bonus/Ideal tambÃ©m Ã© eu fazer esse cÃ³digo automatizado gerar as saÃ­das de Status que se espera pra fazer o teste e comparaÃ§Ã£o
